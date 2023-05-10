@@ -1,4 +1,4 @@
-# Blazor WASM Extension for the MVVM CommunityToolkit
+﻿# Blazor WASM Extension for the MVVM CommunityToolkit
 
 This is an expansion of the [blazor-mvvm](https://github.com/IntelliTect-Samples/blazor-mvvm) repo by [Kelly Adams](https://github.com/adamskt) that implements full MVVM support via the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/).
 
@@ -17,7 +17,7 @@ builder.Services.AddMvvmNavigation();
 3. Create a `ViewModel` inheriting the `ViewModelBase` class
 
 ```csharp
-ublic partial class FetchDataViewModel : ViewModelBase
+public partial class FetchDataViewModel : ViewModelBase
 {
     [ObservableProperty]
     private ObservableCollection<WeatherForecast> _weatherForecasts = new();
@@ -38,7 +38,8 @@ ublic partial class FetchDataViewModel : ViewModelBase
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)]
             })
             .ToArray();
-}```
+}
+```
 
 4. Register the `ViewModel` in your `Program.cs` file
 
@@ -175,4 +176,4 @@ The `MvvmNavLink` component is based on the balzor `Navlink` component and has a
 
 ## Support
 
-If you find this library useful, then please consider buying me a coffee.
+If you find this library useful, then please consider [buying me a coffee ☕](https://bmc.link/gragra33).
