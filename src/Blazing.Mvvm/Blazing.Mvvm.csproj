@@ -4,7 +4,25 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>Blazing.Mvvm</PackageId>
+    <Title>MVVM for Blazor using CommunityToolkit.Mvvm</Title>
+    <Description>MVVM for Blazor using CommunityToolkit.Mvvm</Description>
+    <PackageProjectUrl>https://github.com/gragra33/Blazing.Mvvm</PackageProjectUrl>
+    <Copyright>MIT Licence</Copyright>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/gragra33/Blazing.Mvvm</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>Blazor,Wasm,Web Assembly,Mvvm,CommunityToolkit</PackageTags>
+    <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 
   <ItemGroup>

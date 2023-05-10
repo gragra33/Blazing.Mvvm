@@ -6,7 +6,7 @@ The library packages the support into a resuable library and includes a new `Mvv
 
 ## Getting Started
 
-1. Add the Nuget package to your project
+1. Add the [Nuget package](https://www.nuget.org/packages/Blazing.Mvvm/1.0.0) to your project
 
 2. Enable MvvmNavigation support in your `Program.cs` file
 
