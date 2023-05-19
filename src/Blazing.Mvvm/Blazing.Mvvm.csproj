@@ -15,6 +15,8 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>Blazor,Wasm,Web Assembly,Mvvm,CommunityToolkit</PackageTags>
     <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
