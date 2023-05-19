@@ -4,8 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 
 namespace Blazing.Mvvm.ComponentModel;
 
-public abstract partial class RecipientViewModelBase<TMessage> : ObservableRecipient, IViewModelBase, IRecipient<TMessage> 
-    where TMessage : class
+public abstract partial class RecipientViewModelBase : ObservableRecipient, IViewModelBase
 {
     public virtual async Task OnInitializedAsync()
     {
@@ -17,6 +16,10 @@ public abstract partial class RecipientViewModelBase<TMessage> : ObservableRecip
     [RelayCommand]
     public virtual async Task Loaded()
         => await Task.CompletedTask.ConfigureAwait(false);
+}
 
+public abstract partial class RecipientViewModelBase<TMessage> : RecipientViewModelBase, IRecipient<TMessage> 
+    where TMessage : class
+{
     public abstract void Receive(TMessage message);
 }
