@@ -4,6 +4,8 @@ This is an expansion of the [blazor-mvvm](https://github.com/IntelliTect-Samples
 
 The library packages the support into a resuable library and includes a new `MvvmNavigationManager` class and the `MvvmNavLink` component.
 
+There is a new [Blazor MVVM Sample](https://github.com/gragra33/MvvmSampleBlazor) that takes Micrsoft's [Xamarin Sample](https://github.com/CommunityToolkit/MVVM-Samples) project for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/) and is converted to Blazor. Minimal changes were nade.
+
 ## Getting Started
 
 1. Add the [Nuget package](https://www.nuget.org/packages/Blazing.Mvvm/1.0.0) to your project
