@@ -148,6 +148,9 @@ public class MvvmNavigationManager : IMvvmNavigationManager
     {
         Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Starting generation of a new Reference Cache");
+
         foreach (Assembly assembly in assemblies)
         {
             List<(Type Type, Type? Argument)> items;
@@ -186,6 +189,9 @@ public class MvvmNavigationManager : IMvvmNavigationManager
                     _logger.LogDebug($"Caching navigation reference '{item.Argument!}' with uri '{uri}' for '{item.Type.FullName}'");
             }
         }
+
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Completed generating the Reference Cache");
     }
 
     private static (Type Type, Type? Argument) GetViewArgumentType(Type type)
