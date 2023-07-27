@@ -11,7 +11,7 @@ public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TView
     protected override void OnInitialized()
     {
         // Cause changes to the ViewModel to make Blazor re-render
-        ViewModel!.PropertyChanged += (_, _) => StateHasChanged();
+        ViewModel!.PropertyChanged += (_, _) => InvokeAsync(StateHasChanged);
         base.OnInitialized();
     }
 
