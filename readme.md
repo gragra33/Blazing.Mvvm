@@ -1,14 +1,14 @@
 ﻿# Blazor WASM Extension for the MVVM CommunityToolkit
 
-This is an expansion of the [blazor-mvvm](https://github.com/IntelliTect-Samples/blazor-mvvm) repo by [Kelly Adams](https://github.com/adamskt) that implements full MVVM support via the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/).
+This is an expansion of the [blazor-mvvm](https://github.com/IntelliTect-Samples/blazor-mvvm) repo by [Kelly Adams](https://github.com/adamskt) that implements full MVVM support via the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/). Minor changes were made to prevent cross-thread exceptions, added extra base class types, Mvvm-style navigation, and converted into a usable library.
 
-The library packages the support into a resuable library and includes a new `MvvmNavigationManager` class and the `MvvmNavLink` component.
+The library packages the support into a resuable library and includes a new `MvvmNavigationManager` class and the `MvvmNavLink` component for Mvvm-style navigation, no more hard-coded paths.
 
 There is a new [Blazor MVVM Sample](https://github.com/gragra33/MvvmSampleBlazor) that takes Micrsoft's [Xamarin Sample](https://github.com/CommunityToolkit/MVVM-Samples) project for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/) and is converted to Blazor. Minimal changes were nade.
 
 ## Getting Started
 
-1. Add the [Nuget package](https://www.nuget.org/packages/Blazing.Mvvm/1.0.0) to your project
+1. Add the [Nuget package](https://www.nuget.org/packages/Blazing.Mvvm) to your project
 
 2. Enable MvvmNavigation support in your `Program.cs` file
 
@@ -174,7 +174,7 @@ When the  `MvvmNavigationManager` is initialized by the IOC container as a Singl
 
 **Note:** The `MvvmNavigationManager` class is not a total replacement for the Blazor `NavigationManager` class, only support for MVVM is implemented.
 
-The `MvvmNavLink` component is based on the balzor `Navlink` component and has an extra `TViewModel` and `RelativeUri` properties. Internally, uses the `MvvmNavigationManager` to do the navigation.
+The `MvvmNavLink` component is based on the blazor `Navlink` component and has an extra `TViewModel` and `RelativeUri` properties. Internally, uses the `MvvmNavigationManager` to do the navigation.
 
 ## Support
 
