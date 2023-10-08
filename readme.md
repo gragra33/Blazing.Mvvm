@@ -176,6 +176,30 @@ When the  `MvvmNavigationManager` is initialized by the IOC container as a Singl
 
 The `MvvmNavLink` component is based on the blazor `Navlink` component and has an extra `TViewModel` and `RelativeUri` properties. Internally, uses the `MvvmNavigationManager` to do the navigation.
 
+## Updates
+
+### v1.0.0 10 May, 2023
+
+* Initial release.
+
+### v1.0.1 19 May, 2023
+
+* Added non-generic `RecipientViewModelBase`
+* Added `ValidatorViewModelBase`
+
+### v1.0.2 25 July, 2023
+
+* Added Added logging at start and end of `MvvmNavigationManager` cache generation for improved debugging experience
+
+### v1.0.2 27 July, 2023
+
+* Fixed rare crossthread issue in MvvmComponentBase 
+
+### v1.1.0 9 October, 2023
+
+* Added `MvvmLayoutComponentBase` to support MVVM in the MainLayout.razor
+* Updated sample project with example of `MvvmLayoutComponentBase` usage
+
 ## Support
 
 If you find this library useful, then please consider [buying me a coffee ☕](https://bmc.link/gragra33).

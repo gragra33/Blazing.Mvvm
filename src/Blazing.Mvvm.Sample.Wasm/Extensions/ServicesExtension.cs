@@ -6,6 +6,8 @@ public static class ServicesExtension
 {
     public static IServiceCollection AddViewModels(this IServiceCollection services)
     {
+        services.AddTransient<MainLayoutViewModel>();
+
         services.AddTransient<FetchDataViewModel>();
         services.AddTransient<HexEntryViewModel>();
         services.AddTransient<TextEntryViewModel>();
