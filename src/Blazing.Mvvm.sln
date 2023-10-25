@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazing.Mvvm.Sample.Wasm", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazing.Mvvm.Tests", "Blazing.Mvvm.Tests\Blazing.Mvvm.Tests.csproj", "{9B328C0C-904A-4CEA-BF5E-4F31F93F66BA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazing.Mvvm.Sample.Server", "Blazing.Mvvm.Sample.Server\Blazing.Mvvm.Sample.Server.csproj", "{9E0D02BA-7509-4577-B266-0F1AE125774D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{9B328C0C-904A-4CEA-BF5E-4F31F93F66BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B328C0C-904A-4CEA-BF5E-4F31F93F66BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B328C0C-904A-4CEA-BF5E-4F31F93F66BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E0D02BA-7509-4577-B266-0F1AE125774D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E0D02BA-7509-4577-B266-0F1AE125774D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E0D02BA-7509-4577-B266-0F1AE125774D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E0D02BA-7509-4577-B266-0F1AE125774D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

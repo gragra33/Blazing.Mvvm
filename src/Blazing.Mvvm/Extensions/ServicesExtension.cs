@@ -7,7 +7,7 @@ public static class ServicesExtension
 {
     public static IServiceCollection AddMvvmNavigation(this IServiceCollection services)
     {
-        services.AddSingleton<IMvvmNavigationManager, MvvmNavigationManager>();
+        services.AddScoped<IMvvmNavigationManager, MvvmNavigationManager>();
         return services;
     }
 }
