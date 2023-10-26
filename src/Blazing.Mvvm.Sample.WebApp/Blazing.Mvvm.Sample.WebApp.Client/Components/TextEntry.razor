@@ -1,0 +1,9 @@
+﻿@inherits MvvmComponentBase<TextEntryViewModel>
+
+<div class="form-floating">
+    <textarea @bind="ViewModel.AsciiText" class="form-control" placeholder="Type some ASCII text here" id="floatingTextarea" style="height: 20rem;"></textarea>
+    <label for="floatingTextarea">ASCII Text</label>
+</div>
+
+
+<button type="button" class="btn btn-primary" @onclick="() => ViewModel.SendToHexConverterCommand.Execute(null)">Send To Hex Display</button>
