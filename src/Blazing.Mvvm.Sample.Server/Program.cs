@@ -1,4 +1,5 @@
 using Blazing.Mvvm;
+using Blazing.Mvvm.Infrastructure;
 using Blazing.Mvvm.Sample.Server;
 using Blazing.Mvvm.Sample.Server.Data;
 using Microsoft.AspNetCore.Components;
@@ -15,7 +16,11 @@ builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddViewModels();
 
 // enable MvvmNavigationManager
-builder.Services.AddMvvmNavigation();
+builder.Services.AddMvvmNavigation(options =>
+{ 
+    options.HostingModel = BlazorHostingModel.Server;
+
+});
 
 #if DEBUG
 builder.Logging.SetMinimumLevel(LogLevel.Debug);
