@@ -2,10 +2,8 @@ using Blazing.Mvvm;
 using Blazing.Mvvm.Infrastructure;
 using Blazing.Mvvm.Sample.Server;
 using Blazing.Mvvm.Sample.Server.Data;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -15,18 +13,17 @@ builder.Services.AddSingleton<WeatherForecastService>();
 // register ViewModels
 builder.Services.AddViewModels();
 
-// enable MvvmNavigationManager
+// enable MvvmNavigationManager for server
 builder.Services.AddMvvmNavigation(options =>
 { 
     options.HostingModel = BlazorHostingModel.Server;
-
 });
 
 #if DEBUG
 builder.Logging.SetMinimumLevel(LogLevel.Debug);
 #endif
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
