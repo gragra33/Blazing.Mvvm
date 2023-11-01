@@ -1,16 +1,43 @@
-﻿# Blazor WASM Extension for the MVVM CommunityToolkit
+﻿# Blazor Extension for the MVVM CommunityToolkit
+
+## Pre-release Information
+
+The current official release  supports .Net 7.0 Blazor Web Assembly (WASM) project and Blazor Server App types.
+
+However, I have added two (2) new branches that are currently in testing:
+* [DotNet8RC2](https://github.com/gragra33/Blazing.Mvvm/tree/DotNet8RC2) - This is my test branch for .Net 8.0 RC2. Has multi-version targeting for .Net 7.0 & 8.0 RC2 and a sample app for the new `(Auto) Blazor WebApp` to test out Server/Web Assembly switching. Once .Net 8.0 goes live, I will push a new official release.
+
+Feedback is welcome.
+
+## Introduction
 
 This is an expansion of the [blazor-mvvm](https://github.com/IntelliTect-Samples/blazor-mvvm) repo by [Kelly Adams](https://github.com/adamskt) that implements full MVVM support via the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/). Minor changes were made to prevent cross-thread exceptions, added extra base class types, Mvvm-style navigation, and converted into a usable library.
 
 The library packages the support into a resuable library and includes a new `MvvmNavigationManager` class and the `MvvmNavLink` component for Mvvm-style navigation, no more hard-coded paths.
 
-There is a new [Blazor MVVM Sample](https://github.com/gragra33/MvvmSampleBlazor) that takes Micrsoft's [Xamarin Sample](https://github.com/CommunityToolkit/MVVM-Samples) project for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/) and is converted to Blazor. Minimal changes were nade.
+There is a new [Blazor MVVM Sample](https://github.com/gragra33/MvvmSampleBlazor) that takes Micrsoft's [Xamarin Sample](https://github.com/CommunityToolkit/MVVM-Samples) project for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/) and is converted to Blazor. Minimal changes were made.
+
+Library supports the following hosting models:
+* Blazor Server App
+* Blazor WebAssembly App (WASM)
+* Blazor Hybrid - Wpf, WinForms, MAUI, and Avalonia (Windows only)
 
 ## Getting Started
 
 1. Add the [Nuget package](https://www.nuget.org/packages/Blazing.Mvvm) to your project
 
 2. Enable MvvmNavigation support in your `Program.cs` file
+
+2-1. Blazor Server App:
+
+```csharp
+builder.Services.AddMvvmNavigation(options =>
+{ 
+    options.HostingModel = BlazorHostingModel.Server;
+});
+```
+
+2-2. Blazor WebAssembly App:
 
 ```csharp
 builder.Services.AddMvvmNavigation();
@@ -199,6 +226,16 @@ The `MvvmNavLink` component is based on the blazor `Navlink` component and has a
 
 * Added `MvvmLayoutComponentBase` to support MVVM in the MainLayout.razor
 * Updated sample project with example of `MvvmLayoutComponentBase` usage
+
+### 26 October, 2023
+
+* pre-release of .Net 7.0+ `Blazor Server App` support
+* pre-release of .Net 8.0 RC2 `(Auto) Blazor WebApp` support
+
+### 1 November, 2023
+
+* added .Net 7.0+ `Blazor Server App` support
+* new hosting model configuration support added. Special thanks to [@bbunderson](https://github.com/bbunderson) for implementation.
 
 ## Support
 
