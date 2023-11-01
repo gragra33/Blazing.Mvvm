@@ -2,7 +2,7 @@
 
 ## Pre-release Information
 
-The current official release only supports .Net 7.0 Blazor Web Assembly (WASM) project type.
+The current official release  supports .Net 7.0 Blazor Web Assembly (WASM) project and Blazor Server App types.
 
 However, I have added two (2) new branches that are currently in testing:
 * [DotNet8RC2](https://github.com/gragra33/Blazing.Mvvm/tree/DotNet8RC2) - This is my test branch for .Net 8.0 RC2. Has multi-version targeting for .Net 7.0 & 8.0 RC2 and a sample app for the new `(Auto) Blazor WebApp` to test out Server/Web Assembly switching. Once .Net 8.0 goes live, I will push a new official release.
