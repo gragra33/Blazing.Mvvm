@@ -2,7 +2,11 @@
 
 public class LibraryConfiguration
 {
-    public BlazorHostingModel HostingModel { get; set; } = BlazorHostingModel.NotSpecified;
+    #region Constructor
 
     public LibraryConfiguration() { /* skip */ }
+
+    #endregion
+
+    public BlazorHostingModel HostingModel { get; set; } = BlazorHostingModel.NotSpecified;
 }
