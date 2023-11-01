@@ -235,7 +235,7 @@ The `MvvmNavLink` component is based on the blazor `Navlink` component and has a
 ### 1 November, 2023
 
 * added .Net 7.0+ `Blazor Server App` support
-* new hosting model configuration support added. Special thanks to @bbunderson for implementation.
+* new hosting model configuration support added. Special thanks to [@bbunderson](https://github.com/bbunderson) for implementation.
 
 ## Support
 
