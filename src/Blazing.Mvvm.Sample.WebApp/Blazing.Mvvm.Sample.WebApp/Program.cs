@@ -1,4 +1,5 @@
 using Blazing.Mvvm;
+using Blazing.Mvvm.Infrastructure;
 using Blazing.Mvvm.Sample.WebApp.Client;
 using Blazing.Mvvm.Sample.WebApp.Client.Pages;
 using Blazing.Mvvm.Sample.WebApp.Components;
@@ -14,7 +15,10 @@ builder.Services.AddRazorComponents()
 builder.Services.AddViewModels();
 
 // enable MvvmNavigationManager
-builder.Services.AddMvvmNavigation();
+builder.Services.AddMvvmNavigation(options =>
+{ 
+    options.HostingModel = BlazorHostingModel.WebApp;
+});
 
 var app = builder.Build();
 

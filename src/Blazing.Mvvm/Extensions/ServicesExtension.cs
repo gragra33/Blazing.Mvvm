@@ -18,6 +18,7 @@ public static class ServicesExtension
                     services.AddSingleton<IMvvmNavigationManager, MvvmNavigationManager>();
                     break;
                 case BlazorHostingModel.Server:
+                case BlazorHostingModel.WebApp:
                     services.AddScoped<IMvvmNavigationManager, MvvmNavigationManager>();
                     break;
             }

@@ -23,5 +23,10 @@ public enum BlazorHostingModel
     /// <summary>
     /// Blazor Hybrid
     /// </summary>
-    Hybrid
+    Hybrid,
+
+    /// <summary>
+    /// Interactive WebApp
+    /// </summary>
+    WebApp
 }

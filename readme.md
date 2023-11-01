@@ -21,6 +21,7 @@ Library supports the following hosting models:
 * Blazor Server App
 * Blazor WebAssembly App (WASM)
 * Blazor Hybrid - Wpf, WinForms, MAUI, and Avalonia (Windows only)
+* Blazor Web App (.net 8.0)
 
 ## Getting Started
 
@@ -41,6 +42,15 @@ builder.Services.AddMvvmNavigation(options =>
 
 ```csharp
 builder.Services.AddMvvmNavigation();
+```
+
+2-3. Blazor WebApp:
+
+```csharp
+builder.Services.AddMvvmNavigation(options =>
+{ 
+    options.HostingModel = BlazorHostingModel.WebApp;
+});
 ```
 
 3. Create a `ViewModel` inheriting the `ViewModelBase` class
@@ -232,10 +242,14 @@ The `MvvmNavLink` component is based on the blazor `Navlink` component and has a
 * pre-release of .Net 7.0+ `Blazor Server App` support
 * pre-release of .Net 8.0 RC2 `(Auto) Blazor WebApp` support
 
-### 1 November, 2023
+### v1.2.1 1 November, 2023
 
 * added .Net 7.0+ `Blazor Server App` support
 * new hosting model configuration support added. Special thanks to [@bbunderson](https://github.com/bbunderson) for implementation.
+
+### v1.3.0 (beta) 1 November, 2023
+
+* pre-release of .Net 8.0 RC2 `(Auto) Blazor WebApp` with new hosting model configuration support
 
 ## Support
 
