@@ -1,14 +1,5 @@
 ﻿# Blazor Extension for the MVVM CommunityToolkit
 
-## Pre-release Information
-
-The current official release  supports .Net 7.0 Blazor Web Assembly (WASM) project and Blazor Server App types.
-
-However, I have added two (2) new branches that are currently in testing:
-* [DotNet8RC2](https://github.com/gragra33/Blazing.Mvvm/tree/DotNet8RC2) - This is my test branch for .Net 8.0 RC2. Has multi-version targeting for .Net 7.0 & 8.0 RC2 and a sample app for the new `(Auto) Blazor WebApp` to test out Server/Web Assembly switching. Once .Net 8.0 goes live, I will push a new official release.
-
-Feedback is welcome.
-
 ## Introduction
 
 This is an expansion of the [blazor-mvvm](https://github.com/IntelliTect-Samples/blazor-mvvm) repo by [Kelly Adams](https://github.com/adamskt) that implements full MVVM support via the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/). Minor changes were made to prevent cross-thread exceptions, added extra base class types, Mvvm-style navigation, and converted into a usable library.
@@ -250,6 +241,10 @@ The `MvvmNavLink` component is based on the blazor `Navlink` component and has a
 ### v1.3.0 (beta) 1 November, 2023
 
 * pre-release of .Net 8.0 RC2 `(Auto) Blazor WebApp` with new hosting model configuration support
+
+### v1.4.0 21 November, 2023
+
+* Now officially supports .Net 8.0 & .Net 7.0
 
 ## Support
 
