@@ -6,13 +6,15 @@ This is an expansion of the [blazor-mvvm](https://github.com/IntelliTect-Samples
 
 The library packages the support into a resuable library and includes a new `MvvmNavigationManager` class and the `MvvmNavLink` component for Mvvm-style navigation, no more hard-coded paths.
 
-There is a new [Blazor MVVM Sample](https://github.com/gragra33/MvvmSampleBlazor) that takes Micrsoft's [Xamarin Sample](https://github.com/CommunityToolkit/MVVM-Samples) project for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/) and is converted to Blazor. Minimal changes were made.
-
 Library supports the following hosting models:
 * Blazor Server App
 * Blazor WebAssembly App (WASM)
 * Blazor Hybrid - Wpf, WinForms, MAUI, and Avalonia (Windows only)
 * Blazor Web App (.net 8.0)
+
+There are two additional sample projects in seperate GitHub repositories:
+1. [Blazor MVVM Sample](https://github.com/gragra33/MvvmSampleBlazor) - takes Micrsoft's [Xamarin Sample](https://github.com/CommunityToolkit/MVVM-Samples) project for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/) and is converted to: Blazor Wasm & Blazor Hybrid for Wpf & Avalonia. Minimal changes were made.
+2. [Dynamic Parent and Child](https://github.com/gragra33/Blazing.Mvvm.ParentChildSample) - demonstrates loose coupling of a parent component/page and an unknown number of child components using [Messager](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger) for interactivity.
 
 ## Getting Started
 
