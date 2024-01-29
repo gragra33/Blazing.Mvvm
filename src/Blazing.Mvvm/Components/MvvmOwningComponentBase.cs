@@ -15,7 +15,8 @@ namespace Blazing.Mvvm.Components;
 /// requires disposal such as a repository or database abstraction. Using <see cref="T:Blazing.Mvvm.Components.MvvmOwningComponentBase" />
 /// as a base class ensures that the ViewModel and service and relates services that share its scope are disposed with the component.
 /// </remarks>
-public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase, IView<TViewModel>, IAsyncDisposable where TViewModel : IViewModelBase
+public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase, IView<TViewModel>, IAsyncDisposable, IDisposable
+    where TViewModel : IViewModelBase
 {
     private bool _disposed;
 
@@ -35,11 +36,13 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     protected override Task OnInitializedAsync()
         => ViewModel!.OnInitializedAsync();
 
-    protected override void Dispose(bool disposing)
+    #region Dispose
+
+    protected virtual void Dispose(bool disposing)
     {
         if (_disposed)
             return;
-        
+
         if (disposing)
             ViewModel!.PropertyChanged -= OnPropertyChanged;
 
@@ -51,22 +54,30 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
 
     public void Dispose()
     {
+        if (_disposed)
+            return;
+
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        if (_disposed)
+            return;
+
         TViewModel? viewModel = ViewModel;
 
-        if(viewModel is IAsyncDisposable asyncDisposable)
+        if (viewModel is IAsyncDisposable asyncDisposable)
             await asyncDisposable.DisposeAsync();
 
-        if(viewModel is IDisposable disposable)
+        if (viewModel is IDisposable disposable)
             disposable.Dispose();
-        
+
         Dispose();
     }
+
+    #endregion
 }
 
 /// <summary>
@@ -80,7 +91,7 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
 /// requires disposal such as a repository or database abstraction. Using <see cref="T:Blazing.Mvvm.Components.MvvmOwningComponentBase`1" />
 /// as a base class ensures that the ViewModel and service and relates services that share its scope are disposed with the component.
 /// </remarks>
-public abstract class MvvmOwningComponentBase<TViewModel, TService> : OwningComponentBase<TService>, IView<TViewModel>, IAsyncDisposable
+public abstract class MvvmOwningComponentBase<TViewModel, TService> : OwningComponentBase<TService>, IView<TViewModel>, IAsyncDisposable, IDisposable
     where TViewModel : IViewModelBase
     where TService : notnull
 {
@@ -102,11 +113,13 @@ public abstract class MvvmOwningComponentBase<TViewModel, TService> : OwningComp
     protected override Task OnInitializedAsync()
         => ViewModel!.OnInitializedAsync();
 
-    protected override void Dispose(bool disposing)
+    #region Dispose
+
+    protected virtual void Dispose(bool disposing)
     {
         if (_disposed)
             return;
-        
+
         if (disposing)
             ViewModel!.PropertyChanged -= OnPropertyChanged;
 
@@ -118,20 +131,28 @@ public abstract class MvvmOwningComponentBase<TViewModel, TService> : OwningComp
 
     public void Dispose()
     {
+        if (_disposed)
+            return;
+
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        if (_disposed)
+            return;
+
         TViewModel? viewModel = ViewModel;
 
-        if(viewModel is IAsyncDisposable asyncDisposable)
+        if (viewModel is IAsyncDisposable asyncDisposable)
             await asyncDisposable.DisposeAsync();
 
-        if(viewModel is IDisposable disposable)
+        if (viewModel is IDisposable disposable)
             disposable.Dispose();
-        
+
         Dispose();
     }
+
+    #endregion
 }

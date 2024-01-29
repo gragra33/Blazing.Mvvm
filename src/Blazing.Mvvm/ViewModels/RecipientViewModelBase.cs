@@ -6,6 +6,8 @@ namespace Blazing.Mvvm.ComponentModel;
 
 public abstract partial class RecipientViewModelBase : ObservableRecipient, IViewModelBase
 {
+    private bool _disposed;
+
     public virtual async Task OnInitializedAsync()
     {
         await Loaded().ConfigureAwait(true);
@@ -17,13 +19,38 @@ public abstract partial class RecipientViewModelBase : ObservableRecipient, IVie
     public virtual async Task Loaded()
         => await Task.CompletedTask.ConfigureAwait(false);
 
-    public virtual ValueTask DisposeAsync()
+    #region Dispose
+
+    protected virtual void Dispose(bool disposing)
     {
+        if (_disposed)
+            return;
+
 #if DEBUG
         Console.WriteLine($"..Disposing: {GetType().FullName}");
-        return ValueTask.CompletedTask;
 #endif
+        _disposed = true;
     }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    public virtual ValueTask DisposeAsync()
+    {
+        if (_disposed)
+            return ValueTask.CompletedTask;
+
+        Dispose();
+        return ValueTask.CompletedTask;
+    }
+
+    #endregion
 }
 
 public abstract partial class RecipientViewModelBase<TMessage> : RecipientViewModelBase, IRecipient<TMessage> 

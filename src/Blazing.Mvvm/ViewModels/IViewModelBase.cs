@@ -2,7 +2,7 @@
 
 namespace Blazing.Mvvm.ComponentModel;
 
-public interface IViewModelBase : INotifyPropertyChanged, IAsyncDisposable
+public interface IViewModelBase : INotifyPropertyChanged, IAsyncDisposable, IDisposable
 {
     Task OnInitializedAsync();
 

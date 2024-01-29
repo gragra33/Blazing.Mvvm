@@ -14,7 +14,7 @@ namespace Blazing.Mvvm.Components;
 /// requires disposal. Using <see cref="T:Blazing.Mvvm.Components.MvvmComponentBase" />
 /// as a base class ensures that the ViewModel is disposed with the component.
 /// </remarks>
-public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IAsyncDisposable, IView<TViewModel> where TViewModel : IViewModelBase
+public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IAsyncDisposable, IDisposable, IView<TViewModel> where TViewModel : IViewModelBase
 {
     private bool _disposed;
 
@@ -34,6 +34,8 @@ public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IAsyncDispo
     protected override Task OnInitializedAsync()
         => ViewModel!.OnInitializedAsync();
 
+    #region Dispose
+
     protected virtual void Dispose(bool disposing)
     {
         if (_disposed)
@@ -50,20 +52,28 @@ public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IAsyncDispo
 
     public void Dispose()
     {
+        if (_disposed)
+            return;
+
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        if (_disposed)
+            return;
+
         TViewModel? viewModel = ViewModel;
 
-        if(viewModel is IAsyncDisposable asyncDisposable)
+        if (viewModel is IAsyncDisposable asyncDisposable)
             await asyncDisposable.DisposeAsync();
 
-        if(viewModel is IDisposable disposable)
+        if (viewModel is IDisposable disposable)
             disposable.Dispose();
-        
+
         Dispose();
     }
+
+    #endregion
 }
