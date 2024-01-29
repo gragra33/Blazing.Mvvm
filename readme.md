@@ -2,6 +2,20 @@
 
 This is an expansion of the [blazor-mvvm](https://github.com/IntelliTect-Samples/blazor-mvvm) repo by [Kelly Adams](https://github.com/adamskt) that implements full MVVM support via the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/). Minor changes were made to prevent cross-thread exceptions, added extra base class types, Mvvm-style navigation, and converted into a usable library.
 
+## Table of Contents
+
+<!-- TOC -->
+* [Blazor Extension for the MVVM CommunityToolkit](#blazor-extension-for-the-mvvm-communitytoolkit)
+  * [Overview](#overview)
+  * [Give a Star! :star:](#give-a-star-star)
+  * [Getting Started](#getting-started)
+  * [How MVVM Works](#how-mvvm-works)
+  * [How the MVVM Navigation Works](#how-the-mvvm-navigation-works)
+  * [History](#history)
+<!-- TOC -->
+
+## Overview
+
 The Library supports the following hosting models:
 * Blazor Server App
 * Blazor WebAssembly App (WASM)
@@ -17,17 +31,6 @@ The library package includes:
 There are two additional sample projects in seperate GitHub repositories:
 1. [Blazor MVVM Sample](https://github.com/gragra33/MvvmSampleBlazor) - takes Micrsoft's [Xamarin Sample](https://github.com/CommunityToolkit/MVVM-Samples) project for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/) and is converted to: Blazor Wasm & Blazor Hybrid for Wpf & Avalonia. Minimal changes were made.
 2. [Dynamic Parent and Child](https://github.com/gragra33/Blazing.Mvvm.ParentChildSample) - demonstrates loose coupling of a parent component/page and an unknown number of child components using [Messager](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger) for interactivity.
-
-## Table of Contents
-
-<!-- TOC -->
-* [Blazor Extension for the MVVM CommunityToolkit](#blazor-extension-for-the-mvvm-communitytoolkit)
-    * [Give a Star! :star:](#give-a-star-star)
-    * [Getting Started](#getting-started)
-    * [How MVVM Works](#how-mvvm-works)
-    * [How the MVVM Navigation Works](#how-the-mvvm-navigation-works)
-    * [History](#history)
-<!-- TOC -->
 
 ## Give a Star! :star:
 
