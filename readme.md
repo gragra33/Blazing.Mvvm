@@ -37,7 +37,7 @@ builder.Services.AddMvvmNavigation(options =>
 builder.Services.AddMvvmNavigation();
 ```
 
-2-3. Blazor WebApp:
+2-3. Blazor WebApp (.net 8.0+):
 
 ```csharp
 builder.Services.AddMvvmNavigation(options =>
