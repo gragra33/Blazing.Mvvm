@@ -6,6 +6,7 @@
 * All `ComponentBase` classes now support `IAsyncDisposable` & `IDisposable`
 * All `ViewModelBase` classes now support `IAsyncDisposable` & `IDisposable`
 * Updated documentation
+* **BREAKING CHANGE:** renamed `BlazorHostingModel` to `BlazorHostingModelType` to avoid confusion
 
 ### v1.4.0 21 November, 2023
 
