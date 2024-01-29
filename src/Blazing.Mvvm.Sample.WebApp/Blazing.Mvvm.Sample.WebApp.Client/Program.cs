@@ -11,7 +11,7 @@ builder.Services.AddViewModels();
 // enable MvvmNavigationManager
 builder.Services.AddMvvmNavigation(options =>
 { 
-    options.HostingModel = BlazorHostingModel.WebApp;
+    options.HostingModelType = BlazorHostingModelType.WebApp;
 });
 
 

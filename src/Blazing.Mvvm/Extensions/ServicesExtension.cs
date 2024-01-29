@@ -10,15 +10,15 @@ public static class ServicesExtension
     {
         if (configuration is not null)
         {
-            switch (configuration.HostingModel)
+            switch (configuration.HostingModelType)
             {
-                case BlazorHostingModel.WebAssembly:
-                case BlazorHostingModel.Hybrid:
-                case BlazorHostingModel.NotSpecified:
+                case BlazorHostingModelType.WebAssembly:
+                case BlazorHostingModelType.Hybrid:
+                case BlazorHostingModelType.NotSpecified:
                     services.AddSingleton<IMvvmNavigationManager, MvvmNavigationManager>();
                     break;
-                case BlazorHostingModel.Server:
-                case BlazorHostingModel.WebApp:
+                case BlazorHostingModelType.Server:
+                case BlazorHostingModelType.WebApp:
                     services.AddScoped<IMvvmNavigationManager, MvvmNavigationManager>();
                     break;
             }

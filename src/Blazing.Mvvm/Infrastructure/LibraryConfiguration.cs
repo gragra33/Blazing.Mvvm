@@ -8,5 +8,5 @@ public class LibraryConfiguration
 
     #endregion
 
-    public BlazorHostingModel HostingModel { get; set; } = BlazorHostingModel.NotSpecified;
+    public BlazorHostingModelType HostingModelType { get; set; } = BlazorHostingModelType.NotSpecified;
 }

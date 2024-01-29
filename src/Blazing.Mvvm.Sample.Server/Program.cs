@@ -16,7 +16,7 @@ builder.Services.AddViewModels();
 // enable MvvmNavigationManager for server
 builder.Services.AddMvvmNavigation(options =>
 { 
-    options.HostingModel = BlazorHostingModel.Server;
+    options.HostingModelType = BlazorHostingModelType.Server;
 });
 
 #if DEBUG

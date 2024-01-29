@@ -3,7 +3,7 @@
 /// <summary>
 /// The ASP.NET Core Blazor hosing models
 /// </summary>
-public enum BlazorHostingModel
+public enum BlazorHostingModelType
 {
     /// <summary>
     /// No hosting model is specified
