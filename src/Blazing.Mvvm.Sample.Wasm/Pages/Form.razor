@@ -23,12 +23,12 @@
 
     <div class="row">
         <button class="btn btn-primary btn-lg col"
-                type="submit" @onclick="() => ViewModel.SaveCommand.Execute(null)"
+                type="submit" @onclick="ViewModel.SaveCommand.Execute"
                 disabled="@(ViewModel.Contact.HasErrors)">
             Save
         </button>
         <button class="btn btn-secondary btn-lg col"
-                type="button" @onclick="() => ViewModel.ClearFormCommand.Execute(null)">
+                type="button" @onclick="ViewModel.ClearFormCommand.Execute">
             Clear Form
         </button>
     </div>

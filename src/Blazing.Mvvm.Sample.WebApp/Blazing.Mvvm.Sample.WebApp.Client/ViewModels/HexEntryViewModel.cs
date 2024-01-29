@@ -30,7 +30,7 @@ public partial class HexEntryViewModel : RecipientViewModelBase<ConvertAsciiToHe
     }
 
     [RelayCommand]
-    public virtual void SendToAsciiConverter()
+    private void SendToAsciiConverter()
     {
         Messenger.Send(new ConvertHexToAsciiMessage(HexText ?? string.Empty));
     }
