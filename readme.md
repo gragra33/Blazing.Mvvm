@@ -49,7 +49,7 @@ Also, if you find this library useful, and you're feeling really generous, then 
 ```csharp
 builder.Services.AddMvvmNavigation(options =>
 { 
-    options.HostingModel = BlazorHostingModel.Server;
+    options.HostingModelType = BlazorHostingModelType.Server;
 });
 ```
 
@@ -64,7 +64,7 @@ builder.Services.AddMvvmNavigation();
 ```csharp
 builder.Services.AddMvvmNavigation(options =>
 { 
-    options.HostingModel = BlazorHostingModel.WebApp;
+    options.HostingModelType = BlazorHostingModelType.WebApp;
 });
 ```
 
