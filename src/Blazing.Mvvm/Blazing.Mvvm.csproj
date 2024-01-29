@@ -7,14 +7,16 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>Blazing.Mvvm</PackageId>
     <Title>MVVM for Blazor using CommunityToolkit.Mvvm</Title>
-    <Description>MVVM for Blazor using CommunityToolkit.Mvvm</Description>
+	<Authors>Graeme Grant (@gragra33)</Authors>
+	<Description>A simple, and easy-to-use implementation of Mvvm for Blazor wrapping the CommunityToolkit.Mvvm</Description>
+	<Description>MVVM for Blazor using CommunityToolkit.Mvvm</Description>
     <PackageProjectUrl>https://github.com/gragra33/Blazing.Mvvm</PackageProjectUrl>
     <Copyright>MIT Licence</Copyright>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/gragra33/Blazing.Mvvm</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>Blazor,Wasm,Web Assembly,Server,Mvvm,CommunityToolkit</PackageTags>
-    <PackageReleaseNotes>Support for Blazor Server, Blazor WebAssembly, Blazor Hybrid</PackageReleaseNotes>
+    <PackageTags>Blazor,Wasm,Web Assembly,Blazor Server,Blazor Web App,Mvvm,CommunityToolkit</PackageTags>
+    <PackageReleaseNotes>Support for Blazor Web App, Blazor Server, Blazor WebAssembly, Blazor Hybrid</PackageReleaseNotes>
     <AssemblyVersion>1.4.0.0</AssemblyVersion>
     <FileVersion>1.4.0.0</FileVersion>
     <Version>1.4.0</Version>

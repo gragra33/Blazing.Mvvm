@@ -7,6 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazing.Mvvm", "Blazing.Mvv
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{225ACB45-5BBE-48D0-A1FB-802E767F6D21}"
 	ProjectSection(SolutionItems) = preProject
+		..\CODE_OF_CONDUCT.md = ..\CODE_OF_CONDUCT.md
+		..\CONTRIBUTING.md = ..\CONTRIBUTING.md
+		..\HISTORY.md = ..\HISTORY.md
 		..\LICENSE = ..\LICENSE
 		..\readme.md = ..\readme.md
 	EndProjectSection
@@ -56,6 +59,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DC40D027-F26A-4BF3-B714-E19FBEB2A356} = {FEBE74EB-CC2E-485F-AA6D-7E21F7191E95}
+		{9E0D02BA-7509-4577-B266-0F1AE125774D} = {FEBE74EB-CC2E-485F-AA6D-7E21F7191E95}
+		{B7D47F91-B819-4769-AD63-D2F62AE4322C} = {FEBE74EB-CC2E-485F-AA6D-7E21F7191E95}
+		{639DD59E-6DEE-4100-A677-6DFF15B96F31} = {FEBE74EB-CC2E-485F-AA6D-7E21F7191E95}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2D6F818A-4305-467B-BB8E-E1AB2BEAC979}

@@ -1,20 +1,39 @@
 ﻿# Blazor Extension for the MVVM CommunityToolkit
 
-## Introduction
-
 This is an expansion of the [blazor-mvvm](https://github.com/IntelliTect-Samples/blazor-mvvm) repo by [Kelly Adams](https://github.com/adamskt) that implements full MVVM support via the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/). Minor changes were made to prevent cross-thread exceptions, added extra base class types, Mvvm-style navigation, and converted into a usable library.
 
-The library packages the support into a resuable library and includes a new `MvvmNavigationManager` class and the `MvvmNavLink` component for Mvvm-style navigation, no more hard-coded paths.
-
-Library supports the following hosting models:
+The Library supports the following hosting models:
 * Blazor Server App
 * Blazor WebAssembly App (WASM)
 * Blazor Hybrid - Wpf, WinForms, MAUI, and Avalonia (Windows only)
-* Blazor Web App (.net 8.0)
+* Blazor Web App (.net 8.0+)
+
+The library package includes:
+* `MvvmComponentBase`, `MvvmOwningComponentBase` (Scoped service support), &amp; `MvvmLayoutComponentBase` for quick and easy wiring up ViewModels
+* `ViewModelBase`,  `RecipientViewModelBase`, &amp; `ValidatorViewModelBase` wrappers for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/) with `IAsyncDisposable` &amp; `IDisposable` supported
+* `MvvmNavigationManager` class and `MvvmNavLink` component for Mvvm-style navigation, no more hard-coded paths.
+* Sample applications for getting started quickly with all hosting models
 
 There are two additional sample projects in seperate GitHub repositories:
 1. [Blazor MVVM Sample](https://github.com/gragra33/MvvmSampleBlazor) - takes Micrsoft's [Xamarin Sample](https://github.com/CommunityToolkit/MVVM-Samples) project for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/) and is converted to: Blazor Wasm & Blazor Hybrid for Wpf & Avalonia. Minimal changes were made.
 2. [Dynamic Parent and Child](https://github.com/gragra33/Blazing.Mvvm.ParentChildSample) - demonstrates loose coupling of a parent component/page and an unknown number of child components using [Messager](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger) for interactivity.
+
+## Table of Contents
+
+<!-- TOC -->
+* [Blazor Extension for the MVVM CommunityToolkit](#blazor-extension-for-the-mvvm-communitytoolkit)
+    * [Give a Star! :star:](#give-a-star-star)
+    * [Getting Started](#getting-started)
+    * [How MVVM Works](#how-mvvm-works)
+    * [How the MVVM Navigation Works](#how-the-mvvm-navigation-works)
+    * [History](#history)
+<!-- TOC -->
+
+## Give a Star! :star:
+
+If you like or are using this project to learn or start your solution, please give it a star. Thanks!
+
+Also, if you find this library useful, and you're feeling really generous, then please consider [buying me a coffee ☕](https://bmc.link/gragra33).
 
 ## Getting Started
 
@@ -79,7 +98,7 @@ public partial class FetchDataViewModel : ViewModelBase
 builder.Services.AddTransient<FetchDataViewModel>();
 ```
 
-5. Create your Page inheriting the `MvvmComponentBase<TViewModel>` component
+5. Create your Page inheriting the `MvvmComponentBase<TViewModel>` component (***NOTE:*** If working with repositories, database services, etc, that require a scope, then use `MvvmOwningComponentBase<TViewModel>` or `MvvmOwningComponentBase<TViewModel, TService>`)
 
 ```xml
 @page "/fetchdata"
@@ -206,48 +225,8 @@ When the  `MvvmNavigationManager` is initialized by the IOC container as a Singl
 
 The `MvvmNavLink` component is based on the blazor `Navlink` component and has an extra `TViewModel` and `RelativeUri` properties. Internally, uses the `MvvmNavigationManager` to do the navigation.
 
-## Updates
+## History
 
-### v1.0.0 10 May, 2023
+The main branch is now using .NET 8.0+ & .Net 7.0+.
 
-* Initial release.
-
-### v1.0.1 19 May, 2023
-
-* Added non-generic `RecipientViewModelBase`
-* Added `ValidatorViewModelBase`
-
-### v1.0.2 25 July, 2023
-
-* Added Added logging at start and end of `MvvmNavigationManager` cache generation for improved debugging experience
-
-### v1.0.2 27 July, 2023
-
-* Fixed rare crossthread issue in MvvmComponentBase 
-
-### v1.1.0 9 October, 2023
-
-* Added `MvvmLayoutComponentBase` to support MVVM in the MainLayout.razor
-* Updated sample project with example of `MvvmLayoutComponentBase` usage
-
-### 26 October, 2023
-
-* pre-release of .Net 7.0+ `Blazor Server App` support
-* pre-release of .Net 8.0 RC2 `(Auto) Blazor WebApp` support
-
-### v1.2.1 1 November, 2023
-
-* added .Net 7.0+ `Blazor Server App` support
-* new hosting model configuration support added. Special thanks to [@bbunderson](https://github.com/bbunderson) for implementation.
-
-### v1.3.0 (beta) 1 November, 2023
-
-* pre-release of .Net 8.0 RC2 `(Auto) Blazor WebApp` with new hosting model configuration support
-
-### v1.4.0 21 November, 2023
-
-* Now officially supports .Net 8.0 & .Net 7.0
-
-## Support
-
-If you find this library useful, then please consider [buying me a coffee ☕](https://bmc.link/gragra33).
+The full history can be found in the  [Version Tracking](https://github.com/gragra33/Blazing.Mvvm/HISTORY.md) documentation.
