@@ -13,4 +13,11 @@ public abstract partial class ValidatorViewModelBase : ObservableValidator, IVie
     [RelayCommand]
     public virtual async Task Loaded()
         => await Task.CompletedTask.ConfigureAwait(false);
+    public virtual ValueTask DisposeAsync()
+    {
+#if DEBUG
+        Console.WriteLine($"..Disposing: {GetType().FullName}");
+        return ValueTask.CompletedTask;
+#endif
+    }
 }

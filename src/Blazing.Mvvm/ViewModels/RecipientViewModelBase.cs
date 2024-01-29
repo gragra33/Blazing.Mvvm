@@ -16,6 +16,14 @@ public abstract partial class RecipientViewModelBase : ObservableRecipient, IVie
     [RelayCommand]
     public virtual async Task Loaded()
         => await Task.CompletedTask.ConfigureAwait(false);
+
+    public virtual ValueTask DisposeAsync()
+    {
+#if DEBUG
+        Console.WriteLine($"..Disposing: {GetType().FullName}");
+        return ValueTask.CompletedTask;
+#endif
+    }
 }
 
 public abstract partial class RecipientViewModelBase<TMessage> : RecipientViewModelBase, IRecipient<TMessage> 
