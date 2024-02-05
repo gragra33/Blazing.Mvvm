@@ -9,11 +9,8 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-// register ViewModels
-builder.Services.AddViewModels();
-
-// enable MvvmNavigationManager
-builder.Services.AddMvvmNavigation();
+// Add Blazing.Mvvm
+builder.Services.AddMvvm(opt => opt.RegisterViewModelsFromAssemblyContaining<Program>());
 
 #if DEBUG
 builder.Logging.SetMinimumLevel(LogLevel.Debug);

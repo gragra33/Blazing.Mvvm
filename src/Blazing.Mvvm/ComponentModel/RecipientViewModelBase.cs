@@ -1,14 +1,17 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace Blazing.Mvvm.ComponentModel;
 
-public abstract partial class ValidatorViewModelBase : ObservableValidator, IViewModelBase
+public abstract partial class RecipientViewModelBase : ObservableRecipient, IViewModelBase
 {
     private bool _disposed;
 
     public virtual async Task OnInitializedAsync()
-        => await Loaded().ConfigureAwait(true);
+    {
+        await Loaded().ConfigureAwait(true);
+    }
 
     protected virtual void NotifyStateChanged() => OnPropertyChanged((string?)null);
 
@@ -47,5 +50,11 @@ public abstract partial class ValidatorViewModelBase : ObservableValidator, IVie
         return ValueTask.CompletedTask;
     }
 
-    #endregion
+    #endregion Dispose
+}
+
+public abstract partial class RecipientViewModelBase<TMessage> : RecipientViewModelBase, IRecipient<TMessage>
+    where TMessage : class
+{
+    public abstract void Receive(TMessage message);
 }

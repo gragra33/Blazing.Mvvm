@@ -5,11 +5,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <LangVersion>12</LangVersion>
     <PackageId>Blazing.Mvvm</PackageId>
     <Title>MVVM for Blazor using CommunityToolkit.Mvvm</Title>
-	<Authors>Graeme Grant (@gragra33)</Authors>
-	<Description>A simple, and easy-to-use implementation of Mvvm for Blazor wrapping the CommunityToolkit.Mvvm</Description>
-	<Description>MVVM for Blazor using CommunityToolkit.Mvvm</Description>
+    <Authors>Graeme Grant (@gragra33)</Authors>
+    <Description>A simple, and easy-to-use implementation of Mvvm for Blazor wrapping the CommunityToolkit.Mvvm</Description>
+    <Description>MVVM for Blazor using CommunityToolkit.Mvvm</Description>
     <PackageProjectUrl>https://github.com/gragra33/Blazing.Mvvm</PackageProjectUrl>
     <Copyright>MIT Licence</Copyright>
     <PackageReadmeFile>readme.md</PackageReadmeFile>

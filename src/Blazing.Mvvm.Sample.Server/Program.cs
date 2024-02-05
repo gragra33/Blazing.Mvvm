@@ -1,6 +1,5 @@
 using Blazing.Mvvm;
 using Blazing.Mvvm.Infrastructure;
-using Blazing.Mvvm.Sample.Server;
 using Blazing.Mvvm.Sample.Server.Data;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -10,13 +9,11 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 
-// register ViewModels
-builder.Services.AddViewModels();
-
-// enable MvvmNavigationManager for server
-builder.Services.AddMvvmNavigation(options =>
-{ 
+// Add Blazing.Mvvm
+builder.Services.AddMvvm(options =>
+{
     options.HostingModelType = BlazorHostingModelType.Server;
+    options.RegisterViewModelsFromAssemblyContaining<Program>();
 });
 
 #if DEBUG

@@ -47,5 +47,5 @@ public abstract partial class ViewModelBase : ObservableObject, IViewModelBase
         return ValueTask.CompletedTask;
     }
 
-    #endregion
+    #endregion Dispose
 }
