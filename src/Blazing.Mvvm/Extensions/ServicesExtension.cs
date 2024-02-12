@@ -39,13 +39,13 @@ public static class ServicesExtension
 
     private static void RegisterDependencies(IServiceCollection services, LibraryConfiguration configuration)
     {
-        AddNavigationManager(services, configuration);
-        AddViewModels(services, configuration.ViewModelAssemblies);
+        AddMvvmNavigationManager(services, configuration);
+        AddViewModels(services, configuration.GetScanAssemblies());
     }
 
-    public static void AddNavigationManager(this IServiceCollection services, LibraryConfiguration configuration)
+    public static void AddMvvmNavigationManager(this IServiceCollection services, LibraryConfiguration configuration)
     {
-        if (!configuration.EnableNavigationManager)
+        if (!configuration.EnableMvvmNavigationManager)
         {
             return;
         }

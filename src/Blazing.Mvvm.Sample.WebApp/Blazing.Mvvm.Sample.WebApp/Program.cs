@@ -14,8 +14,10 @@ builder.Services.AddRazorComponents()
 builder.Services.AddMvvm(options =>
 {
     options.HostingModelType = BlazorHostingModelType.WebApp;
-    options.RegisterViewModelsFromAssemblyContaining<Program>();
-    options.RegisterViewModelsFromAssemblyContaining<Counter>();
+
+    // Auto discovery is the default behaviour.
+    // However, you can specify the assemblies to scan for view models, which is useful when you want to scan only specific assemblies and also helps to reduce the startup time.
+    //options.RegisterViewModelsFromAssemblyContaining<Counter>();
 });
 
 var app = builder.Build();

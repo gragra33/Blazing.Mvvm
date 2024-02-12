@@ -7,17 +7,17 @@ namespace Blazing.Mvvm.Infrastructure;
 /// </summary>
 public class LibraryConfiguration
 {
+    private readonly HashSet<Assembly> viewModelAssemblies = [];
+
     /// <summary>
     /// The hosting model of the Blazor application.
     /// </summary>
     public BlazorHostingModelType HostingModelType { get; set; } = BlazorHostingModelType.NotSpecified;
 
     /// <summary>
-    /// A flag to enable the navigation manager
+    /// A flag to enable the Mvvm navigation manager
     /// </summary>
-    public bool EnableNavigationManager { get; set; } = true;
-
-    internal readonly HashSet<Assembly> ViewModelAssemblies = [];
+    public bool EnableMvvmNavigationManager { get; set; } = true;
 
     /// <summary>
     /// Register the view models from the assembly containing the specified type.
@@ -25,7 +25,7 @@ public class LibraryConfiguration
     /// <typeparam name="T">The type whose assembly contains the view models.</typeparam>
     public void RegisterViewModelsFromAssemblyContaining<T>()
     {
-        ViewModelAssemblies.Add(typeof(T).Assembly);
+        viewModelAssemblies.Add(typeof(T).Assembly);
     }
 
     /// <summary>
@@ -33,17 +33,29 @@ public class LibraryConfiguration
     /// </summary>
     /// <param name="assemblies">The assemblies containing the view models.</param>
     public void RegisterViewModelsFromAssembly(params Assembly[] assemblies)
-        => RegisterViewModelsFromAssembly(assemblies);
+        => RegisterViewModelsFromAssemblies(assemblies);
 
     /// <summary>
     /// Register the view models from the specified assemblies.
     /// </summary>
     /// <param name="assemblies">The assemblies containing the view models.</param>
-    public void RegisterViewModelsFromAssembly(IEnumerable<Assembly> assemblies)
+    public void RegisterViewModelsFromAssemblies(IEnumerable<Assembly> assemblies)
     {
         foreach (var assembly in assemblies)
         {
-            ViewModelAssemblies.Add(assembly);
+            viewModelAssemblies.Add(assembly);
         }
+    }
+
+    /// <summary>
+    /// Gets the assemblies to scan for view models.
+    /// If no assemblies are specified, the current domain assemblies are returned.
+    /// </summary>
+    /// <returns>The assemblies to scan.</returns>
+    internal IEnumerable<Assembly> GetScanAssemblies()
+    {
+        return viewModelAssemblies.Count > 0
+            ? viewModelAssemblies
+            : AppDomain.CurrentDomain.GetAssemblies();
     }
 }
