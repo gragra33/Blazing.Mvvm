@@ -1,12 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-namespace Blazing.Mvvm.ComponentModel;
+﻿namespace Blazing.Mvvm.ComponentModel;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-public sealed class ViewModelDefinitionAttribute<TViewModel> : Attribute, IViewModelDefinition
+public sealed class ViewModelDefinitionAttribute<TViewModel> : ViewModelDefinitionAttributeBase, IViewModelDefinition
     where TViewModel : IViewModelBase
 {
-    public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Transient;
+    public Type ViewModelType => typeof(TViewModel);
 
 #if NET8_0_OR_GREATER
     public string? Key { get; set; }

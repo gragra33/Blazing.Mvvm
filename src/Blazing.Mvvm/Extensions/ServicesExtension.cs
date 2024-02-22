@@ -62,51 +62,51 @@ public static class ServicesExtension
 
     private static void AddViewModels(IServiceCollection services, IEnumerable<Assembly> assemblies)
     {
-        var vmBaseType = typeof(IViewModelBase);
-        var customAttributeGenericType = typeof(ViewModelDefinitionAttribute<>);
-
-        foreach (var vmImplementationType in assemblies.SelectMany(a => a.GetTypes().Where(t => !t.IsAbstract && t.IsAssignableTo(vmBaseType))))
+        foreach (var vmImplementationType in assemblies.SelectMany(a => a.GetTypes().Where(t => !t.IsAbstract && t.IsAssignableTo(typeof(IViewModelBase)))))
         {
-            var vmDefinitionAttribute = vmImplementationType.GetCustomAttribute<ViewModelDefinitionAttribute>();
-            var vmDefinitionAttributeGeneric = vmImplementationType.GetCustomAttribute(customAttributeGenericType);
+            var vmDefinitionAttributes = vmImplementationType.GetCustomAttributes<ViewModelDefinitionAttributeBase>();
+            var vmAttributeCount = vmDefinitionAttributes.Count();
 
-            if (vmDefinitionAttribute is null && vmDefinitionAttributeGeneric is null)
+            if (vmAttributeCount == 0)
             {
                 services.TryAddTransient(vmImplementationType);
                 continue;
             }
 
-            if (vmDefinitionAttribute is not null && vmDefinitionAttributeGeneric is not null)
+            if (vmAttributeCount > 1)
             {
                 // TODO: Create a custom exception type
-                throw new InvalidOperationException($"ViewModel {vmImplementationType.FullName} cannot have both {typeof(ViewModelDefinitionAttribute).FullName} and {customAttributeGenericType.FullName} attributes.");
+                throw new InvalidOperationException($"ViewModel {vmImplementationType.FullName} cannot have more than one {nameof(ViewModelDefinitionAttribute)} defined.");
             }
 
+            var vmAttribute = vmDefinitionAttributes.First();
             ServiceDescriptor serviceDescriptor;
 
-            if (vmDefinitionAttribute is not null)
+            if (vmAttribute is ViewModelDefinitionAttribute vmDefinitionAttribute)
             {
                 serviceDescriptor = ServiceDescriptor.Describe(vmImplementationType, vmImplementationType, vmDefinitionAttribute.Lifetime);
                 services.TryAdd(serviceDescriptor);
                 continue;
             }
 
-            var viewModelType = vmDefinitionAttributeGeneric!.GetType().GetGenericArguments()[0];
-
-            if (!viewModelType.IsAssignableFrom(vmImplementationType))
+            if (vmAttribute is not IViewModelDefinition vmDefinitionAttributeGeneric)
             {
                 // TODO: Create a custom exception type
-                throw new InvalidOperationException($"ViewModel {vmImplementationType.FullName} does not implement {viewModelType.FullName}.");
+                throw new InvalidOperationException($"ViewModel {vmImplementationType.FullName} does not implement {nameof(IViewModelDefinition)}.");
             }
 
-            var vmDefintion = (IViewModelDefinition)vmDefinitionAttributeGeneric;
+            if (!vmDefinitionAttributeGeneric.ViewModelType.IsAssignableFrom(vmImplementationType))
+            {
+                // TODO: Create a custom exception type
+                throw new InvalidOperationException($"ViewModel {vmImplementationType.FullName} does not implement {vmDefinitionAttributeGeneric.ViewModelType.FullName}.");
+            }
 
 #if NET8_0_OR_GREATER
-            serviceDescriptor = string.IsNullOrWhiteSpace(vmDefintion.Key)
-               ? ServiceDescriptor.Describe(viewModelType, vmImplementationType, vmDefintion.Lifetime)
-               : ServiceDescriptor.DescribeKeyed(viewModelType, vmDefintion.Key, vmImplementationType, vmDefintion.Lifetime);
+            serviceDescriptor = string.IsNullOrWhiteSpace(vmDefinitionAttributeGeneric.Key)
+               ? ServiceDescriptor.Describe(vmDefinitionAttributeGeneric.ViewModelType, vmImplementationType, vmDefinitionAttributeGeneric.Lifetime)
+               : ServiceDescriptor.DescribeKeyed(vmDefinitionAttributeGeneric.ViewModelType, vmDefinitionAttributeGeneric.Key, vmImplementationType, vmDefinitionAttributeGeneric.Lifetime);
 #else
-            serviceDescriptor = ServiceDescriptor.Describe(viewModelType, vmImplementationType, vmDefintion.Lifetime);
+            serviceDescriptor = ServiceDescriptor.Describe(vmDefinitionAttributeGeneric.ViewModelType, vmImplementationType, vmDefinitionAttributeGeneric.Lifetime);
 #endif
             services.TryAdd(serviceDescriptor);
         }

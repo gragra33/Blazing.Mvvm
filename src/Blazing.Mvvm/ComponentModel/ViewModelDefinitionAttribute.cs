@@ -1,9 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-namespace Blazing.Mvvm.ComponentModel;
+﻿namespace Blazing.Mvvm.ComponentModel;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-public sealed class ViewModelDefinitionAttribute : Attribute
+public sealed class ViewModelDefinitionAttribute : ViewModelDefinitionAttributeBase
 {
-    public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Transient;
 }
