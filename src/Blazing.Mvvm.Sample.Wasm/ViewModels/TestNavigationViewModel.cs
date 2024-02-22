@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.Routing;
 
 namespace Blazing.Mvvm.Sample.Wasm.ViewModels;
 
+[ViewModelDefinition<ITestNavigationViewModel>]
 public partial class TestNavigationViewModel : ViewModelBase, ITestNavigationViewModel, IDisposable
 {
     public TestNavigationViewModel(IMvvmNavigationManager mvvmNavigationManager, NavigationManager navigationManager)
@@ -43,9 +44,9 @@ public partial class TestNavigationViewModel : ViewModelBase, ITestNavigationVie
 #pragma warning restore CS0649
 
     public string? Echo { get; set; } = "";
-    
+
     public RelayCommand HexTranslateNavigateCommand
-        => _hexTranslateNavigateCommand ?? new RelayCommand( () => Navigate<HexTranslateViewModel>());
+        => _hexTranslateNavigateCommand ?? new RelayCommand(() => Navigate<HexTranslateViewModel>());
 
     public RelayCommand<string> TestNavigateCommand
         => _testNavigateCommand ?? new RelayCommand<string>(Navigate<ITestNavigationViewModel>);

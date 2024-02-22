@@ -1,6 +1,5 @@
 using Blazing.Mvvm;
 using Blazing.Mvvm.Infrastructure;
-using Blazing.Mvvm.Sample.WebApp.Client;
 using Blazing.Mvvm.Sample.WebApp.Client.Pages;
 using Blazing.Mvvm.Sample.WebApp.Components;
 
@@ -11,13 +10,14 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
-// register ViewModels
-builder.Services.AddViewModels();
-
-// enable MvvmNavigationManager
-builder.Services.AddMvvmNavigation(options =>
-{ 
+// Add Blazing.Mvvm
+builder.Services.AddMvvm(options =>
+{
     options.HostingModelType = BlazorHostingModelType.WebApp;
+
+    // Auto discovery is the default behaviour.
+    // However, you can specify the assemblies to scan for view models, which is useful when you want to scan only specific assemblies and also helps to reduce the startup time.
+    //options.RegisterViewModelsFromAssemblyContaining<Counter>();
 });
 
 var app = builder.Build();

@@ -9,11 +9,12 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-// register ViewModels
-builder.Services.AddViewModels();
+// Add Blazing.Mvvm
+builder.Services.AddMvvm();
 
-// enable MvvmNavigationManager
-builder.Services.AddMvvmNavigation();
+// Auto discovery is the default behaviour.
+// However, you can specify the assemblies to scan for view models, which is useful when you want to scan only specific assemblies and also helps to reduce the startup time.
+//builder.Services.AddMvvm(opt => opt.RegisterViewModelsFromAssemblyContaining<Program>());
 
 #if DEBUG
 builder.Logging.SetMinimumLevel(LogLevel.Debug);
