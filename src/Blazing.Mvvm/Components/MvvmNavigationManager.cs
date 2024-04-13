@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using Blazing.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
+using Blazing.Mvvm.ComponentModel;
 
 namespace Blazing.Mvvm.Components;
 
@@ -20,7 +20,7 @@ public class MvvmNavigationManager : IMvvmNavigationManager
     {
         _navigationManager = navigationManager;
         _logger = logger;
-             
+
         GenerateReferenceCache();
     }
 
@@ -48,7 +48,7 @@ public class MvvmNavigationManager : IMvvmNavigationManager
     /// </summary>
     /// <typeparam name="TViewModel">The type <see cref="IViewModelBase"/> to use to determine the URI to navigate to.</typeparam>
     /// <param name="options">Provides additional <see cref="NavigationOptions"/>.</param>
-    public void NavigateTo<TViewModel>(NavigationOptions options)
+    public void NavigateTo<TViewModel>(BrowserNavigationOptions options)
         where TViewModel : IViewModelBase
     {
         if (!_references.TryGetValue(typeof(TViewModel), out string? uri))
@@ -57,7 +57,7 @@ public class MvvmNavigationManager : IMvvmNavigationManager
         if (_logger.IsEnabled(LogLevel.Debug))
             _logger.LogDebug($"Navigating '{typeof(TViewModel).FullName}' to uri '{uri}'");
 
-        _navigationManager.NavigateTo(uri, options);
+        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public class MvvmNavigationManager : IMvvmNavigationManager
             throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
 
         //string navUri = relativeUri is null ? uri : uri + relativeUri;
-        
+
         uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
 
         if (_logger.IsEnabled(LogLevel.Debug))
@@ -89,7 +89,7 @@ public class MvvmNavigationManager : IMvvmNavigationManager
     /// <typeparam name="TViewModel">The type <see cref="IViewModelBase"/> to use to determine the URI to navigate to.</typeparam>
     /// <param name="relativeUri">relative URI &/or QueryString appended to the navigation Uri.</param>
     /// <param name="options">Provides additional <see cref="NavigationOptions"/>.</param>
-    public void NavigateTo<TViewModel>(string relativeUri, NavigationOptions options)
+    public void NavigateTo<TViewModel>(string relativeUri, BrowserNavigationOptions options)
         where TViewModel : IViewModelBase
     {
         if (!_references.TryGetValue(typeof(TViewModel), out string? uri))
@@ -100,7 +100,7 @@ public class MvvmNavigationManager : IMvvmNavigationManager
         if (_logger.IsEnabled(LogLevel.Debug))
             _logger.LogDebug($"Navigating '{typeof(TViewModel).FullName}' to uri '{uri}'");
 
-        _navigationManager.NavigateTo(uri, options);
+        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
     }
 
     /// <summary>
@@ -119,7 +119,17 @@ public class MvvmNavigationManager : IMvvmNavigationManager
     }
 
     #region Internals
-    
+
+    private NavigationOptions CloneNavigationOptions(BrowserNavigationOptions options)
+    {
+        return new NavigationOptions()
+        {
+            ForceLoad = options.ForceLoad,
+            HistoryEntryState = options.HistoryEntryState,
+            ReplaceHistoryEntry = options.ReplaceHistoryEntry
+        };
+    }
+
     private static string BuildUri(string uri, string? relativeUri)
     {
         if (string.IsNullOrWhiteSpace(relativeUri))

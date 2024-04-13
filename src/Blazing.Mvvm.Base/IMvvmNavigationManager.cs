@@ -1,7 +1,4 @@
 ﻿using Blazing.Mvvm.ComponentModel;
-using Microsoft.AspNetCore.Components;
-
-namespace Blazing.Mvvm.Components;
 
 /// <summary>
 /// Provides an abstraction for querying and managing navigation via ViewModel (class/interface).
@@ -21,8 +18,8 @@ public interface IMvvmNavigationManager
     /// Navigates to the specified associated URI.
     /// </summary>
     /// <typeparam name="TViewModel">The type <see cref="IViewModelBase"/> to use to determine the URI to navigate to.</typeparam>
-    /// <param name="options">Provides additional <see cref="NavigationOptions"/>.</param>
-    void NavigateTo<TViewModel>(NavigationOptions options)
+    /// <param name="options">Provides additional <see cref="BrowserNavigationOptions"/>.</param>
+    void NavigateTo<TViewModel>(BrowserNavigationOptions options)
         where TViewModel : IViewModelBase;
 
     /// <summary>
@@ -40,8 +37,8 @@ public interface IMvvmNavigationManager
     /// </summary>
     /// <typeparam name="TViewModel">The type <see cref="IViewModelBase"/> to use to determine the URI to navigate to.</typeparam>
     /// <param name="relativeUri">relative URI &/or QueryString appended to the navigation Uri.</param>
-    /// <param name="options">Provides additional <see cref="NavigationOptions"/>.</param>
-    void NavigateTo<TViewModel>(string relativeUri, NavigationOptions options)
+    /// <param name="options">Provides additional <see cref="BrowserNavigationOptions"/>.</param>
+    void NavigateTo<TViewModel>(string relativeUri, BrowserNavigationOptions options)
         where TViewModel : IViewModelBase;
 
     /// <summary>

@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net8.0;net7.0</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageId>Blazing.Mvvm.Base</PackageId>
+		<Title>MVVM for Blazor using CommunityToolkit.Mvvm - Base classes</Title>
+		<Description>Base classes for MVVM for Blazor using CommunityToolkit.Mvvm</Description>
+		<PackageProjectUrl>https://github.com/gragra33/Blazing.Mvvm</PackageProjectUrl>
+		<Copyright>MIT Licence</Copyright>
+		<RepositoryUrl>https://github.com/gragra33/Blazing.Mvvm</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>Blazor,Wasm,Web Assembly,Server,Mvvm,CommunityToolkit</PackageTags>
+		<PackageReleaseNotes>Support for Blazor Server, Blazor WebAssembly, Blazor Hybrid</PackageReleaseNotes>
+		<AssemblyVersion>1.4.0.0</AssemblyVersion>
+		<FileVersion>1.4.0.0</FileVersion>
+		<Version>1.4.0</Version>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+	</ItemGroup>
+
+</Project>

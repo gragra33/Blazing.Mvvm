@@ -26,6 +26,11 @@ public enum BlazorHostingModel
     Hybrid,
 
     /// <summary>
+    /// Blazor Hybrid with .NET MAUI
+    /// </summary>
+    HybridMaui,
+
+    /// <summary>
     /// Interactive WebApp
     /// </summary>
     WebApp
