@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Rendering;
-using Microsoft.AspNetCore.Components.Routing;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
 using Blazing.Mvvm.ComponentModel;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.AspNetCore.Components.Routing;
 
 namespace Blazing.Mvvm.Components.Routing;
 
@@ -11,7 +11,7 @@ namespace Blazing.Mvvm.Components.Routing;
 /// A component that renders an anchor tag, automatically toggling its 'active'
 /// class based on whether its 'href' matches the current URI. Navigation is based on ViewModel (class/interface).
 /// </summary>
-public class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where TViewModel : IViewModelBase
+public sealed class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where TViewModel : IViewModelBase
 {
     private const string DefaultActiveClass = "active";
 
@@ -79,8 +79,11 @@ public class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where TViewMod
         _isActive = ShouldMatch(NavigationManager.Uri);
 
         _class = null;
+
         if (AdditionalAttributes != null && AdditionalAttributes.TryGetValue("class", out object? obj))
+        {
             _class = Convert.ToString(obj, CultureInfo.InvariantCulture);
+        }
 
         UpdateCssClass();
     }
@@ -95,23 +98,27 @@ public class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where TViewMod
     private static string BuildUri(string uri, string? relativeUri)
     {
         if (string.IsNullOrWhiteSpace(relativeUri))
+        {
             return uri;
+        }
 
         UriBuilder builder = new(uri);
 
         if (relativeUri.StartsWith('?'))
+        {
             builder.Query = relativeUri.TrimStart('?');
-        
+        }
         else if (relativeUri.Contains('?'))
         {
             string[] parts = relativeUri.Split('?');
-                
+
             builder.Path = builder.Path.TrimEnd('/') + "/" + parts[0].TrimStart('/');
-            builder.Query =  parts[1];
+            builder.Query = parts[1];
         }
-        
         else
+        {
             builder.Path = builder.Path.TrimEnd('/') + "/" + relativeUri.TrimStart('/');
+        }
 
         return builder.ToString();
     }
@@ -124,6 +131,7 @@ public class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where TViewMod
         // We could just re-render always, but for this component we know the
         // only relevant state change is to the _isActive property.
         bool shouldBeActiveNow = ShouldMatch(args.Location);
+
         if (shouldBeActiveNow != _isActive)
         {
             _isActive = shouldBeActiveNow;
@@ -135,10 +143,14 @@ public class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where TViewMod
     private bool ShouldMatch(string currentUriAbsolute)
     {
         if (_hrefAbsolute == null)
+        {
             return false;
+        }
 
         if (EqualsHrefExactlyOrIfTrailingSlashAdded(currentUriAbsolute))
+        {
             return true;
+        }
 
         return Match == NavLinkMatch.Prefix
                && IsStrictlyPrefixWithSeparator(currentUriAbsolute, _hrefAbsolute);
@@ -149,7 +161,9 @@ public class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where TViewMod
         Debug.Assert(_hrefAbsolute != null);
 
         if (string.Equals(currentUriAbsolute, _hrefAbsolute, StringComparison.OrdinalIgnoreCase))
+        {
             return true;
+        }
 
         if (currentUriAbsolute.Length == _hrefAbsolute.Length - 1)
         {
@@ -163,7 +177,9 @@ public class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where TViewMod
             // good to display a blank page in that case.
             if (_hrefAbsolute[^1] == '/'
                 && _hrefAbsolute.StartsWith(currentUriAbsolute, StringComparison.OrdinalIgnoreCase))
+            {
                 return true;
+            }
         }
 
         return false;

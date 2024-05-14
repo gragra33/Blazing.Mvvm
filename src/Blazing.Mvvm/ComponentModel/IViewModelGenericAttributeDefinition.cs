@@ -2,7 +2,7 @@
 
 namespace Blazing.Mvvm.ComponentModel;
 
-public interface IViewModelDefinition
+internal interface IViewModelGenericAttributeDefinition
 {
     ServiceLifetime Lifetime { get; set; }
 

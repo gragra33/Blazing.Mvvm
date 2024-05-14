@@ -1,29 +1,44 @@
-﻿using Blazing.Mvvm.Sample.Wasm.Models;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.Net.Http.Json;
 using Blazing.Mvvm.ComponentModel;
+using Blazing.Mvvm.Sample.Wasm.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Blazing.Mvvm.Sample.Wasm.ViewModels;
 
-public partial class FetchDataViewModel : ViewModelBase
+[ViewModelDefinition(Lifetime = ServiceLifetime.Scoped)]
+public sealed partial class FetchDataViewModel : ViewModelBase, IDisposable
 {
+    private readonly HttpClient _httpClient;
+    private readonly ILogger<FetchDataViewModel> _logger;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+
     [ObservableProperty]
     private ObservableCollection<WeatherForecast> _weatherForecasts = new();
 
-    public override async Task Loaded()
-        => WeatherForecasts = new ObservableCollection<WeatherForecast>(Get());
-
-    private static readonly string[] Summaries =
+    public FetchDataViewModel(HttpClient httpClient, ILogger<FetchDataViewModel> logger)
     {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
+        _httpClient = httpClient;
+        _logger = logger;
+    }
 
-    public IEnumerable<WeatherForecast> Get()
-        => Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+    public override async Task Loaded()
+    {
+        await Task.Delay(1000, _cancellationTokenSource.Token);
+        var weatherForecasts = await _httpClient.GetFromJsonAsync<ObservableCollection<WeatherForecast>>("sample-data/weather.json", _cancellationTokenSource.Token);
+
+        if (weatherForecasts is null)
+        {
+            return;
+        }
+
+        WeatherForecasts = weatherForecasts;
+    }
+
+    public void Dispose()
+    {
+        _logger.LogInformation("Disposing FetchDataViewModel");
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+    }
 }

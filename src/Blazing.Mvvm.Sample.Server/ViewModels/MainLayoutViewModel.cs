@@ -5,8 +5,14 @@ using Microsoft.AspNetCore.Components.Routing;
 
 namespace Blazing.Mvvm.Sample.Server.ViewModels;
 
-public partial class MainLayoutViewModel : ViewModelBase, IDisposable
+[ViewModelDefinition(Lifetime = ServiceLifetime.Scoped)]
+public sealed partial class MainLayoutViewModel : ViewModelBase, IDisposable
 {
+    private readonly NavigationManager _navigationManager;
+
+    [ObservableProperty]
+    private int _counter;
+
     public MainLayoutViewModel(NavigationManager navigationManager)
     {
         _navigationManager = navigationManager;
@@ -17,11 +23,6 @@ public partial class MainLayoutViewModel : ViewModelBase, IDisposable
     {
         Counter++;
     }
-
-    private readonly NavigationManager _navigationManager;
-
-    [ObservableProperty]
-    private int _counter;
 
     public void Dispose()
         => _navigationManager.LocationChanged -= OnLocationChanged;

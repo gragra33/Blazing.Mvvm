@@ -11,3 +11,10 @@
         </div>
     </div>
 </div>
+
+@code {
+#if NET8_0_OR_GREATER
+    [Inject(Key = nameof(HexTranslateViewModel))]
+    protected override HexTranslateViewModel ViewModel { get; set; } = default!;
+#endif
+}

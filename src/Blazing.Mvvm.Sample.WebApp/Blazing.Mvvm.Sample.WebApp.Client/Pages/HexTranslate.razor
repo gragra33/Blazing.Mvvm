@@ -11,3 +11,9 @@
         </div>
     </div>
 </div>
+
+@code {
+
+    [Inject(Key = nameof(HexTranslateViewModel))]
+    protected override HexTranslateViewModel ViewModel { get; set; } = default!;
+}

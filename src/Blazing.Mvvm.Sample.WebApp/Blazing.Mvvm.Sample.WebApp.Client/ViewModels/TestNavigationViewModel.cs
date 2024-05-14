@@ -8,8 +8,20 @@ using Microsoft.AspNetCore.Components.Routing;
 namespace Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
 
 [ViewModelDefinition<ITestNavigationViewModel>]
-public partial class TestNavigationViewModel : ViewModelBase, ITestNavigationViewModel, IDisposable
+public sealed partial class TestNavigationViewModel : ViewModelBase, ITestNavigationViewModel
 {
+    private readonly IMvvmNavigationManager _mvvmNavigationManager;
+    private readonly NavigationManager _navigationManager;
+
+    private RelayCommand? _hexTranslateNavigateCommand;
+    private RelayCommand<string>? _testNavigateCommand;
+
+    [ObservableProperty]
+    private string? _queryString;
+
+    [ObservableProperty]
+    private string? _test;
+
     public TestNavigationViewModel(IMvvmNavigationManager mvvmNavigationManager, NavigationManager navigationManager)
     {
         _mvvmNavigationManager = mvvmNavigationManager;
@@ -20,36 +32,22 @@ public partial class TestNavigationViewModel : ViewModelBase, ITestNavigationVie
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
         => ProcessQueryString();
 
-    private readonly IMvvmNavigationManager _mvvmNavigationManager;
-    private readonly NavigationManager _navigationManager;
-
-    [ObservableProperty]
-    private string? _queryString;
-
-    [ObservableProperty]
-    private string? _test;
-
     public override Task Loaded()
     {
         ProcessQueryString();
         return base.Loaded();
     }
 
-#pragma warning disable CS0649
-    private RelayCommand? _hexTranslateNavigateCommand;
-#pragma warning restore CS0649
-
-#pragma warning disable CS0649
-    private RelayCommand<string>? _testNavigateCommand;
-#pragma warning restore CS0649
-
     public string? Echo { get; set; } = "";
 
     public RelayCommand HexTranslateNavigateCommand
-        => _hexTranslateNavigateCommand ?? new RelayCommand(() => Navigate<HexTranslateViewModel>());
+        => _hexTranslateNavigateCommand ??= new RelayCommand(() => Navigate<HexTranslateViewModel>());
 
     public RelayCommand<string> TestNavigateCommand
-        => _testNavigateCommand ?? new RelayCommand<string>(Navigate<ITestNavigationViewModel>);
+        => _testNavigateCommand ??= new RelayCommand<string>(Navigate<ITestNavigationViewModel>);
+
+    public void Dispose()
+        => _navigationManager.LocationChanged -= OnLocationChanged;
 
     private void Navigate<T>(string? @params = null) where T : IViewModelBase
         => _mvvmNavigationManager.NavigateTo<T>(@params);
@@ -60,7 +58,4 @@ public partial class TestNavigationViewModel : ViewModelBase, ITestNavigationVie
         _navigationManager.TryGetQueryString("test", out string temp);
         Test = temp;
     }
-
-    public void Dispose()
-        => _navigationManager.LocationChanged -= OnLocationChanged;
 }

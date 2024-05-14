@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Components.Routing;
 
 namespace Blazing.Mvvm.Sample.Wasm.ViewModels;
 
-public partial class MainLayoutViewModel : ViewModelBase, IDisposable
+[ViewModelDefinition(Lifetime = ServiceLifetime.Singleton)]
+public sealed partial class MainLayoutViewModel : ViewModelBase, IDisposable
 {
     public MainLayoutViewModel(NavigationManager navigationManager)
     {

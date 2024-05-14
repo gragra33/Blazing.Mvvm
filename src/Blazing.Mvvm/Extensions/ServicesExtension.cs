@@ -43,7 +43,7 @@ public static class ServicesExtension
         AddViewModels(services, configuration.GetScanAssemblies());
     }
 
-    public static void AddMvvmNavigationManager(this IServiceCollection services, LibraryConfiguration configuration)
+    private static void AddMvvmNavigationManager(this IServiceCollection services, LibraryConfiguration configuration)
     {
         if (!configuration.EnableMvvmNavigationManager)
         {
@@ -64,51 +64,48 @@ public static class ServicesExtension
     {
         foreach (var vmImplementationType in assemblies.SelectMany(a => a.GetTypes().Where(t => !t.IsAbstract && t.IsAssignableTo(typeof(IViewModelBase)))))
         {
-            var vmDefinitionAttributes = vmImplementationType.GetCustomAttributes<ViewModelDefinitionAttributeBase>();
-            var vmAttributeCount = vmDefinitionAttributes.Count();
+            var vmDefinitionAttributes = vmImplementationType.GetCustomAttributes<ViewModelDefinitionAttribute>();
+            var viewModelDefinitionAttributes = vmDefinitionAttributes as ViewModelDefinitionAttribute[] ?? vmDefinitionAttributes.ToArray();
 
-            if (vmAttributeCount == 0)
+            if (viewModelDefinitionAttributes.Length == 0)
             {
                 services.TryAddTransient(vmImplementationType);
                 continue;
             }
 
-            if (vmAttributeCount > 1)
+            foreach (var vmDefinitionAttribute in viewModelDefinitionAttributes)
             {
-                // TODO: Create a custom exception type
-                throw new InvalidOperationException($"ViewModel {vmImplementationType.FullName} cannot have more than one {nameof(ViewModelDefinitionAttribute)} defined.");
-            }
+                ServiceDescriptor serviceDescriptor;
 
-            var vmAttribute = vmDefinitionAttributes.First();
-            ServiceDescriptor serviceDescriptor;
+                if (vmDefinitionAttribute is not IViewModelGenericAttributeDefinition)
+                {
+#if NET8_0_OR_GREATER
+                serviceDescriptor = string.IsNullOrWhiteSpace(vmDefinitionAttribute.Key)
+                    ? ServiceDescriptor.Describe(vmImplementationType, vmImplementationType, vmDefinitionAttribute.Lifetime)
+                    : ServiceDescriptor.DescribeKeyed(vmImplementationType, vmDefinitionAttribute.Key, vmImplementationType, vmDefinitionAttribute.Lifetime);
+#else
+                    serviceDescriptor = ServiceDescriptor.Describe(vmImplementationType, vmImplementationType, vmDefinitionAttribute.Lifetime);
+#endif
+                    services.TryAdd(serviceDescriptor);
+                    continue;
+                }
 
-            if (vmAttribute is ViewModelDefinitionAttribute vmDefinitionAttribute)
-            {
-                serviceDescriptor = ServiceDescriptor.Describe(vmImplementationType, vmImplementationType, vmDefinitionAttribute.Lifetime);
-                services.TryAdd(serviceDescriptor);
-                continue;
-            }
+                var vmDefinitionAttributeGeneric = (IViewModelGenericAttributeDefinition)vmDefinitionAttribute;
 
-            if (vmAttribute is not IViewModelDefinition vmDefinitionAttributeGeneric)
-            {
-                // TODO: Create a custom exception type
-                throw new InvalidOperationException($"ViewModel {vmImplementationType.FullName} does not implement {nameof(IViewModelDefinition)}.");
-            }
-
-            if (!vmDefinitionAttributeGeneric.ViewModelType.IsAssignableFrom(vmImplementationType))
-            {
-                // TODO: Create a custom exception type
-                throw new InvalidOperationException($"ViewModel {vmImplementationType.FullName} does not implement {vmDefinitionAttributeGeneric.ViewModelType.FullName}.");
-            }
+                if (!vmDefinitionAttributeGeneric.ViewModelType.IsAssignableFrom(vmImplementationType))
+                {
+                    throw new InvalidOperationException($"ViewModel {vmImplementationType.FullName} does not implement {vmDefinitionAttributeGeneric.ViewModelType.FullName}.");
+                }
 
 #if NET8_0_OR_GREATER
             serviceDescriptor = string.IsNullOrWhiteSpace(vmDefinitionAttributeGeneric.Key)
                ? ServiceDescriptor.Describe(vmDefinitionAttributeGeneric.ViewModelType, vmImplementationType, vmDefinitionAttributeGeneric.Lifetime)
                : ServiceDescriptor.DescribeKeyed(vmDefinitionAttributeGeneric.ViewModelType, vmDefinitionAttributeGeneric.Key, vmImplementationType, vmDefinitionAttributeGeneric.Lifetime);
 #else
-            serviceDescriptor = ServiceDescriptor.Describe(vmDefinitionAttributeGeneric.ViewModelType, vmImplementationType, vmDefinitionAttributeGeneric.Lifetime);
+                serviceDescriptor = ServiceDescriptor.Describe(vmDefinitionAttributeGeneric.ViewModelType, vmImplementationType, vmDefinitionAttributeGeneric.Lifetime);
 #endif
-            services.TryAdd(serviceDescriptor);
+                services.TryAdd(serviceDescriptor);
+            }
         }
     }
 }

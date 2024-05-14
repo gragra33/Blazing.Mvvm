@@ -1,24 +1,31 @@
 ﻿using Blazing.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Blazing.Mvvm.Sample.Wasm.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Blazing.Mvvm.Sample.Wasm.ViewModels;
 
 public partial class EditContactViewModel : ViewModelBase
 {
+    private readonly ILogger<EditContactViewModel> _logger;
+
     [ObservableProperty]
     private ContactInfo _contact = new();
+
+    public EditContactViewModel(ILogger<EditContactViewModel> logger)
+    {
+        _logger = logger;
+    }
 
     [RelayCommand]
     private void Save()
     {
         Contact.Validate();
-        Console.WriteLine(Contact.HasErrors
+        var logMessage = Contact.HasErrors
             ? "After validating, errors found!"
-            : "Sending contact to server!");
+            : "Sending contact to server!";
+        _logger.LogInformation("{LogMessage}", logMessage);
     }
-
 
     [RelayCommand]
     protected void ClearForm()

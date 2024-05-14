@@ -5,77 +5,78 @@ using Microsoft.AspNetCore.Components;
 namespace Blazing.Mvvm.Components;
 
 /// <summary>
-///  Optional base class for components that represent a layout and resolves a ViewModel of type <typeparam name="TViewModel"></typeparam>/>.
+///  A base class for components that represent a layout and resolves a ViewModel of type <typeparamref name="TViewModel"/>.
 /// </summary>
 /// <typeparam name="TViewModel">The ViewModel.</typeparam>
-/// <remarks>
-/// Use the <see cref="T:Blazing.Mvvm.Components.MvvmLayoutComponentBase" /> class as a base layout to author layout components that control
-/// the lifetime of a ViewModel. This is useful when using a transient or scoped service that
-/// requires disposal. Using <see cref="T:Blazing.Mvvm.Components.MvvmLayoutComponentBase" />
-/// as a base class ensures that the ViewModel is disposed with the component.
-/// </remarks>
-public abstract class MvvmLayoutComponentBase<TViewModel>
-    : LayoutComponentBase, IAsyncDisposable, IDisposable, IView<TViewModel>
+public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase, IView<TViewModel>
     where TViewModel : IViewModelBase
 {
-    private bool _disposed;
+    protected bool IsDisposed { get; private set; }
 
     [Inject]
-    protected TViewModel? ViewModel { get; set; }
+    protected virtual TViewModel ViewModel { get; set; } = default!;
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        ViewModel.OnAfterRender(firstRender);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        await ViewModel.OnAfterRenderAsync(firstRender);
+    }
 
     protected override void OnInitialized()
     {
-        // Cause changes to the ViewModel to make Blazor re-render
-        ViewModel!.PropertyChanged += OnPropertyChanged;
         base.OnInitialized();
+        ViewModel.PropertyChanged += OnPropertyChanged;
+        ViewModel.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await ViewModel.OnInitializedAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        ViewModel.OnParametersSet();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        await ViewModel.OnParametersSetAsync();
+    }
+
+    protected override bool ShouldRender()
+        => ViewModel.ShouldRender();
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (IsDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            ViewModel.PropertyChanged -= OnPropertyChanged;
+        }
+
+        IsDisposed = true;
     }
 
     private void OnPropertyChanged(object? o, PropertyChangedEventArgs propertyChangedEventArgs)
         => InvokeAsync(StateHasChanged);
-
-    protected override Task OnInitializedAsync()
-        => ViewModel!.OnInitializedAsync();
-
-    #region Dispose
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposed)
-            return;
-
-        if (disposing)
-            ViewModel!.PropertyChanged -= OnPropertyChanged;
-
-#if DEBUG
-        Console.WriteLine($"..Disposing: {GetType().FullName}");
-#endif
-        _disposed = true;
-    }
-
-    public void Dispose()
-    {
-        if (_disposed)
-            return;
-
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
-    async ValueTask IAsyncDisposable.DisposeAsync()
-    {
-        if (_disposed)
-            return;
-
-        TViewModel? viewModel = ViewModel;
-
-        if (viewModel is IAsyncDisposable asyncDisposable)
-            await asyncDisposable.DisposeAsync();
-
-        if (viewModel is IDisposable disposable)
-            disposable.Dispose();
-
-        Dispose();
-    }
-
-    #endregion
 }

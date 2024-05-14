@@ -1,158 +1,113 @@
 ﻿using System.ComponentModel;
 using Blazing.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazing.Mvvm.Components;
 
 /// <summary>
-/// A base class that creates a service provider scope, and resolves a ViewModel of type <typeparam name="TViewModel"></typeparam>/>.
+/// A base class that creates a service provider scope, and resolves a ViewModel of type <typeparamref name="TViewModel"/>.
 /// </summary>
 /// <typeparam name="TViewModel">The ViewModel.</typeparam>
-/// <typeparam name="TService">The service type.</typeparam>
 /// <remarks>
-/// Use the <see cref="T:Blazing.Mvvm.Components.MvvmOwningComponentBase" /> class as a base class to author components that control
+/// Use the <see cref="MvvmComponentBase{TViewModel}" /> class as a base class to author components that control
 /// the lifetime of a ViewModel and of a service provider scope. This is useful when using a transient or scoped service that
-/// requires disposal such as a repository or database abstraction. Using <see cref="T:Blazing.Mvvm.Components.MvvmOwningComponentBase" />
+/// requires disposal such as a repository or database abstraction. Using <see cref="MvvmComponentBase{TViewModel}" />
 /// as a base class ensures that the ViewModel and service and relates services that share its scope are disposed with the component.
 /// </remarks>
-public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase, IView<TViewModel>, IAsyncDisposable, IDisposable
+public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase, IView<TViewModel>, IAsyncDisposable
     where TViewModel : IViewModelBase
 {
-    private bool _disposed;
+    private TViewModel _viewModel = default!;
 
-    [Inject]
-    protected TViewModel? ViewModel { get; set; }
+    protected virtual TViewModel ViewModel
+    {
+        get
+        {
+            _viewModel ??= ScopedServices.GetRequiredService<TViewModel>();
+            return _viewModel;
+        }
+
+        set => _viewModel = value;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await DisposeAsyncCore();
+
+        // The is to call the base class implementation as it won't be called when this is being disposed
+        // https://github.com/dotnet/aspnetcore/issues/25873
+        // https://github.com/dotnet/aspnetcore/discussions/25817
+        ((IDisposable)this).Dispose();
+
+        GC.SuppressFinalize(this);
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        ViewModel.OnAfterRender(firstRender);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        await ViewModel.OnAfterRenderAsync(firstRender);
+    }
 
     protected override void OnInitialized()
     {
-        // Cause changes to the ViewModel to make Blazor re-render
-        ViewModel!.PropertyChanged += OnPropertyChanged;
         base.OnInitialized();
+        ViewModel.PropertyChanged += OnPropertyChanged;
+        ViewModel.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await ViewModel.OnInitializedAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        ViewModel.OnParametersSet();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        await ViewModel.OnParametersSetAsync();
+    }
+
+    protected override bool ShouldRender()
+        => ViewModel.ShouldRender();
+
+    protected override void Dispose(bool disposing)
+    {
+        if (!IsDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            ViewModel.PropertyChanged -= OnPropertyChanged;
+        }
+
+        base.Dispose(disposing);
+    }
+
+    protected async virtual ValueTask DisposeAsyncCore()
+    {
+        if (ScopedServices is not IAsyncDisposable asyncDisposable)
+        {
+            return;
+        }
+
+        await asyncDisposable.DisposeAsync();
     }
 
     private void OnPropertyChanged(object? o, PropertyChangedEventArgs propertyChangedEventArgs)
         => InvokeAsync(StateHasChanged);
-
-    protected override Task OnInitializedAsync()
-        => ViewModel!.OnInitializedAsync();
-
-    #region Dispose
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposed)
-            return;
-
-        if (disposing)
-            ViewModel!.PropertyChanged -= OnPropertyChanged;
-
-#if DEBUG
-        Console.WriteLine($"..Disposing: {GetType().FullName}");
-#endif
-        _disposed = true;
-    }
-
-    public void Dispose()
-    {
-        if (_disposed)
-            return;
-
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
-    async ValueTask IAsyncDisposable.DisposeAsync()
-    {
-        if (_disposed)
-            return;
-
-        TViewModel? viewModel = ViewModel;
-
-        if (viewModel is IAsyncDisposable asyncDisposable)
-            await asyncDisposable.DisposeAsync();
-
-        if (viewModel is IDisposable disposable)
-            disposable.Dispose();
-
-        Dispose();
-    }
-
-    #endregion
-}
-
-/// <summary>
-/// A base class that creates a service provider scope, and resolves a ViewModel of type <typeparam name="TViewModel"></typeparam> service of type <typeparamref name="TService" />.
-/// </summary>
-/// <typeparam name="TViewModel">The ViewModel.</typeparam>
-/// <typeparam name="TService">The service type.</typeparam>
-/// <remarks>
-/// Use the <see cref="T:Blazing.Mvvm.Components.MvvmOwningComponentBase`1" /> class as a base class to author components that control
-/// the lifetime of a ViewModel and a service or multiple services. This is useful when using a transient or scoped service that
-/// requires disposal such as a repository or database abstraction. Using <see cref="T:Blazing.Mvvm.Components.MvvmOwningComponentBase`1" />
-/// as a base class ensures that the ViewModel and service and relates services that share its scope are disposed with the component.
-/// </remarks>
-public abstract class MvvmOwningComponentBase<TViewModel, TService> : OwningComponentBase<TService>, IView<TViewModel>, IAsyncDisposable, IDisposable
-    where TViewModel : IViewModelBase
-    where TService : notnull
-{
-    private bool _disposed;
-
-    [Inject]
-    protected TViewModel? ViewModel { get; set; }
-
-    protected override void OnInitialized()
-    {
-        // Cause changes to the ViewModel to make Blazor re-render
-        ViewModel!.PropertyChanged += OnPropertyChanged;
-        base.OnInitialized();
-    }
-
-    private void OnPropertyChanged(object? o, PropertyChangedEventArgs propertyChangedEventArgs)
-        => InvokeAsync(StateHasChanged);
-
-    protected override Task OnInitializedAsync()
-        => ViewModel!.OnInitializedAsync();
-
-    #region Dispose
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposed)
-            return;
-
-        if (disposing)
-            ViewModel!.PropertyChanged -= OnPropertyChanged;
-
-#if DEBUG
-        Console.WriteLine($"..Disposing: {GetType().FullName}");
-#endif
-        _disposed = true;
-    }
-
-    public void Dispose()
-    {
-        if (_disposed)
-            return;
-
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
-    async ValueTask IAsyncDisposable.DisposeAsync()
-    {
-        if (_disposed)
-            return;
-
-        TViewModel? viewModel = ViewModel;
-
-        if (viewModel is IAsyncDisposable asyncDisposable)
-            await asyncDisposable.DisposeAsync();
-
-        if (viewModel is IDisposable disposable)
-            disposable.Dispose();
-
-        Dispose();
-    }
-
-    #endregion
 }
