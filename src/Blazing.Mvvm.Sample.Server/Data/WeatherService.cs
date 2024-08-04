@@ -2,7 +2,7 @@ using Blazing.Mvvm.Sample.Server.Models;
 
 namespace Blazing.Mvvm.Sample.Server.Data;
 
-public class WeatherForecastService
+public class WeatherService : IWeatherService
 {
     private static readonly string[] Summaries =
     [
@@ -23,6 +23,6 @@ public class WeatherForecastService
             Date = DateTime.Now.AddDays(index),
             TemperatureC = Random.Shared.Next(-20, 55),
             Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        });
+        }).ToArray();
     }
 }

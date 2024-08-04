@@ -29,16 +29,7 @@ public sealed partial class TestNavigationViewModel : ViewModelBase, ITestNaviga
         _navigationManager.LocationChanged += OnLocationChanged;
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-        => ProcessQueryString();
-
-    public override Task Loaded()
-    {
-        ProcessQueryString();
-        return base.Loaded();
-    }
-
-    public string? Echo { get; set; } = "";
+    public string? Echo { get; set; } = string.Empty;
 
     public RelayCommand HexTranslateNavigateCommand
         => _hexTranslateNavigateCommand ??= new RelayCommand(() => Navigate<HexTranslateViewModel>());
@@ -49,8 +40,23 @@ public sealed partial class TestNavigationViewModel : ViewModelBase, ITestNaviga
     public void Dispose()
         => _navigationManager.LocationChanged -= OnLocationChanged;
 
-    private void Navigate<T>(string? @params = null) where T : IViewModelBase
-        => _mvvmNavigationManager.NavigateTo<T>(@params);
+    public override void OnInitialized()
+        => ProcessQueryString();
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+        => ProcessQueryString();
+
+    private void Navigate<T>(string? @params = null)
+        where T : IViewModelBase
+    {
+        if (string.IsNullOrWhiteSpace(@params))
+        {
+            _mvvmNavigationManager.NavigateTo<T>();
+            return;
+        }
+
+        _mvvmNavigationManager.NavigateTo<T>(@params);
+    }
 
     private void ProcessQueryString()
     {

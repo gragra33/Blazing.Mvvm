@@ -1,23 +1,18 @@
 using Blazing.Mvvm;
 using Blazing.Mvvm.Infrastructure;
 using Blazing.Mvvm.Sample.Server.Data;
+using CommunityToolkit.Mvvm.Messaging;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddSingleton<IWeatherService, WeatherService>();
+builder.Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
 
 // Add Blazing.Mvvm
-builder.Services.AddMvvm(options =>
-{
-    options.HostingModelType = BlazorHostingModelType.Server;
-
-    // Auto discovery is the default behaviour.
-    // However, you can specify the assemblies to scan for view models, which is useful when you want to scan only specific assemblies and also helps to reduce the startup time.
-    //options.RegisterViewModelsFromAssemblyContaining<Program>();
-});
+builder.Services.AddMvvm(options => options.HostingModelType = BlazorHostingModelType.Server);
 
 #if DEBUG
 builder.Logging.SetMinimumLevel(LogLevel.Debug);

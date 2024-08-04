@@ -6,9 +6,10 @@ using CommunityToolkit.Mvvm.Messaging;
 
 namespace Blazing.Mvvm.Sample.Server.ViewModels;
 
-public partial class HexEntryViewModel : RecipientViewModelBase<ConvertAsciiToHexMessage>
+public sealed partial class HexEntryViewModel : RecipientViewModelBase<ConvertAsciiToHexMessage>, IRecipient<ResetHexAsciiInputsMessage>
 {
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SendToAsciiConverterCommand))]
     private string? _hexText;
 
     public override void Receive(ConvertAsciiToHexMessage message)
@@ -23,15 +24,13 @@ public partial class HexEntryViewModel : RecipientViewModelBase<ConvertAsciiToHe
         HexText = hexOutput;
     }
 
-    public override Task Loaded()
-    {
-        IsActive = true;
-        return base.Loaded();
-    }
+    public void Receive(ResetHexAsciiInputsMessage _)
+        => HexText = string.Empty;
 
-    [RelayCommand]
-    public virtual void SendToAsciiConverter()
-    {
-        Messenger.Send(new ConvertHexToAsciiMessage(HexText ?? string.Empty));
-    }
+    [RelayCommand(CanExecute = nameof(CanSendToAsciiConverter))]
+    private void SendToAsciiConverter()
+        => Messenger.Send(new ConvertHexToAsciiMessage(HexText!));
+
+    private bool CanSendToAsciiConverter()
+        => !string.IsNullOrWhiteSpace(HexText);
 }

@@ -1,5 +1,6 @@
 using Blazing.Mvvm;
 using Blazing.Mvvm.Sample.Wasm;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -7,14 +8,11 @@ WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
 
 // Add Blazing.Mvvm
 builder.Services.AddMvvm();
-
-// Auto discovery is the default behaviour.
-// However, you can specify the assemblies to scan for view models, which is useful when you want to scan only specific assemblies and also helps to reduce the startup time.
-//builder.Services.AddMvvm(opt => opt.RegisterViewModelsFromAssemblyContaining<Program>());
 
 #if DEBUG
 builder.Logging.SetMinimumLevel(LogLevel.Debug);

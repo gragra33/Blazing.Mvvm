@@ -1,35 +1,41 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 
 namespace Blazing.Mvvm.ComponentModel;
 
-public abstract partial class ValidatorViewModelBase : ObservableValidator, IViewModelBase
+/// <summary>
+/// A base class for a <c>ViewModel</c> that implements <see cref="ObservableValidator"/> which provides support for validation.
+/// </summary>
+public abstract class ValidatorViewModelBase : ObservableValidator, IViewModelBase
 {
-    [RelayCommand]
-    public virtual async Task Loaded()
-        => await Task.CompletedTask.ConfigureAwait(false);
-
+    /// <inheritdoc/>
     public virtual void OnAfterRender(bool firstRender)
     { }
 
+    /// <inheritdoc/>
     public virtual Task OnAfterRenderAsync(bool firstRender)
         => Task.CompletedTask;
 
+    /// <inheritdoc/>
     public virtual void OnInitialized()
     { }
 
-    public virtual async Task OnInitializedAsync()
-        => await Loaded().ConfigureAwait(true);
+    /// <inheritdoc/>
+    public virtual Task OnInitializedAsync()
+        => Task.CompletedTask;
 
+    /// <inheritdoc/>
     public virtual void OnParametersSet()
     { }
 
+    /// <inheritdoc/>
     public virtual Task OnParametersSetAsync()
         => Task.CompletedTask;
 
+    /// <inheritdoc/>
     public virtual bool ShouldRender()
         => true;
 
+    /// <inheritdoc/>
     public virtual void NotifyStateChanged()
         => OnPropertyChanged();
 }

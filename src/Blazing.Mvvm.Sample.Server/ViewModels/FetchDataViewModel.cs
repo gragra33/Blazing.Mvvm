@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using Blazing.Mvvm.ComponentModel;
+﻿using Blazing.Mvvm.ComponentModel;
 using Blazing.Mvvm.Sample.Server.Data;
 using Blazing.Mvvm.Sample.Server.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,34 +8,27 @@ namespace Blazing.Mvvm.Sample.Server.ViewModels;
 [ViewModelDefinition(Lifetime = ServiceLifetime.Scoped)]
 public sealed partial class FetchDataViewModel : ViewModelBase, IDisposable
 {
-    private readonly WeatherForecastService _weatherForecastService;
+    private readonly IWeatherService _weatherService;
     private readonly ILogger<FetchDataViewModel> _logger;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     [ObservableProperty]
-    private ObservableCollection<WeatherForecast> _weatherForecasts = [];
+    private IEnumerable<WeatherForecast>? _weatherForecasts;
 
-    public FetchDataViewModel(WeatherForecastService weatherForecastService, ILogger<FetchDataViewModel> logger)
+    public FetchDataViewModel(IWeatherService weatherService, ILogger<FetchDataViewModel> logger)
     {
-        _weatherForecastService = weatherForecastService;
+        _weatherService = weatherService;
         _logger = logger;
     }
 
-    public override async Task Loaded()
+    public override async Task OnInitializedAsync()
     {
-        var weatherForecasts = await _weatherForecastService.GetForecastAsync();
-
-        if (weatherForecasts is null)
-        {
-            return;
-        }
-
-        WeatherForecasts = new ObservableCollection<WeatherForecast>(weatherForecasts);
+        WeatherForecasts = await _weatherService.GetForecastAsync() ?? [];
     }
 
     public void Dispose()
     {
-        _logger.LogInformation("Disposing FetchDataViewModel");
+        _logger.LogInformation("Disposing {VMName}.", nameof(FetchDataViewModel));
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
     }

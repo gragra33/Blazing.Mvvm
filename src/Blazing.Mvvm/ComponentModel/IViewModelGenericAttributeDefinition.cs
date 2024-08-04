@@ -8,7 +8,5 @@ internal interface IViewModelGenericAttributeDefinition
 
     Type ViewModelType { get; }
 
-#if NET8_0_OR_GREATER
-    string? Key { get; set; }
-#endif
+    object? Key { get; set; }
 }

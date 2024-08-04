@@ -1,13 +1,10 @@
-﻿using Blazing.Mvvm.ComponentModel;
-using Blazing.Mvvm.Components;
-using Blazing.Mvvm.Sample.Wasm.ViewModels;
-using FluentAssertions;
+﻿using Blazing.Mvvm.Components;
+using Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
+using Blazing.Mvvm.Tests.Infrastructure.Fakes;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
-using Moq;
-using Xunit;
 
-namespace Blazing.Mvvm.Tests;
+namespace Blazing.Mvvm.Tests.UnitTests;
 
 public class MvvmNavigationManagerTests
 {
@@ -20,10 +17,11 @@ public class MvvmNavigationManagerTests
         MvvmNavigationManager mvvmNavigationManager = new(navigationManagerMock.Object, loggerMock.Object);
 
         // Act
-        ArgumentException exception = Assert.Throws<ArgumentException>(() => mvvmNavigationManager.NavigateTo<InvalidViewModel>(false));
+        var act = () => mvvmNavigationManager.NavigateTo<TestViewModel>();
 
         // Assert
-        exception.Message.Should().Be($"{typeof(InvalidViewModel)} has no associated page");
+        act.Should().Throw<ArgumentException>()
+            .WithMessage($"{typeof(TestViewModel)} has no associated page");
     }
 
     [Fact]
@@ -35,14 +33,30 @@ public class MvvmNavigationManagerTests
         MvvmNavigationManager mvvmNavigationManager = new(navigationManagerMock.Object, loggerMock.Object);
 
         // Act
-        ArgumentException exception = Assert.Throws<ArgumentException>(() => mvvmNavigationManager.GetUri<InvalidViewModel>());
+        var act = () => mvvmNavigationManager.GetUri<TestViewModel>();
 
         // Assert
-        exception.Message.Should().Be($"{typeof(InvalidViewModel)} has no associated page");
+        act.Should().Throw<ArgumentException>()
+            .WithMessage($"{typeof(TestViewModel)} has no associated page");
     }
 
     [Fact]
     public void GetUri_GivenValidViewModelType_ShouldReturnUri()
+    {
+        // Arrange
+        Mock<NavigationManager> navigationManagerMock = new();
+        Mock<ILogger<MvvmNavigationManager>> loggerMock = new();
+        MvvmNavigationManager mvvmNavigationManager = new(navigationManagerMock.Object, loggerMock.Object);
+
+        // Act
+        string uri = mvvmNavigationManager.GetUri<CounterViewModel>();
+
+        // Assert
+        uri.Should().Be("/counter");
+    }
+
+    [Fact]
+    public void GetUri_GivenValidViewModelTypeHasOwingComponentParent_ShouldReturnUri()
     {
         // Arrange
         Mock<NavigationManager> navigationManagerMock = new();
@@ -69,9 +83,5 @@ public class MvvmNavigationManagerTests
 
         // Assert
         uri.Should().Be("/test");
-    }
-
-    public class InvalidViewModel : ViewModelBase
-    {
     }
 }

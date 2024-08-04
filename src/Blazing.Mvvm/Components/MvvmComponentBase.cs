@@ -11,57 +11,59 @@ namespace Blazing.Mvvm.Components;
 public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TViewModel>
     where TViewModel : IViewModelBase
 {
+    /// <summary>
+    /// Indicates if the component has been disposed.
+    /// </summary>
     protected bool IsDisposed { get; private set; }
 
+    /// <summary>
+    /// The <c>ViewModel</c> associated with this component, resolved from the dependency injection container.
+    /// </summary>
     [Inject]
     protected virtual TViewModel ViewModel { get; set; } = default!;
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
+    /// <inheritdoc/>
     protected override void OnAfterRender(bool firstRender)
-    {
-        base.OnAfterRender(firstRender);
-        ViewModel.OnAfterRender(firstRender);
-    }
+        => ViewModel.OnAfterRender(firstRender);
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-        await ViewModel.OnAfterRenderAsync(firstRender);
-    }
+    /// <inheritdoc/>
+    protected override Task OnAfterRenderAsync(bool firstRender)
+        => ViewModel.OnAfterRenderAsync(firstRender);
 
+    /// <inheritdoc/>
     protected override void OnInitialized()
     {
-        base.OnInitialized();
         ViewModel.PropertyChanged += OnPropertyChanged;
         ViewModel.OnInitialized();
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-        await ViewModel.OnInitializedAsync();
-    }
+    /// <inheritdoc/>
+    protected override Task OnInitializedAsync()
+        => ViewModel.OnInitializedAsync();
 
+    /// <inheritdoc/>
     protected override void OnParametersSet()
-    {
-        base.OnParametersSet();
-        ViewModel.OnParametersSet();
-    }
+        => ViewModel.OnParametersSet();
 
-    protected override async Task OnParametersSetAsync()
-    {
-        await base.OnParametersSetAsync();
-        await ViewModel.OnParametersSetAsync();
-    }
+    /// <inheritdoc/>
+    protected override Task OnParametersSetAsync()
+        => ViewModel.OnParametersSetAsync();
 
+    /// <inheritdoc/>
     protected override bool ShouldRender()
         => ViewModel.ShouldRender();
 
+    /// <summary>
+    /// Disposes the component and releases unmanaged resources.
+    /// </summary>
+    /// <param name="disposing">A boolean value indicating whether the method was called from the dispose method or from a finalizer.</param>
     protected virtual void Dispose(bool disposing)
     {
         if (IsDisposed)

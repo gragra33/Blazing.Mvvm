@@ -19,11 +19,9 @@ public sealed partial class MainLayoutViewModel : ViewModelBase, IDisposable
         _navigationManager.LocationChanged += OnLocationChanged;
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        Counter++;
-    }
-
     public void Dispose()
         => _navigationManager.LocationChanged -= OnLocationChanged;
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+        => Counter++;
 }

@@ -11,7 +11,7 @@ public enum BlazorHostingModelType
     NotSpecified,
 
     /// <summary>
-    /// Blazor Server 
+    /// Blazor Server
     /// </summary>
     Server,
 

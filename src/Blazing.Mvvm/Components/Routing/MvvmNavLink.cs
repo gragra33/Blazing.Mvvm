@@ -18,6 +18,7 @@ public sealed class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where T
     private bool _isActive;
     private string? _hrefAbsolute;
     private string? _class;
+    private string? _cssClass;
 
     [Inject]
     private IMvvmNavigationManager MvvmNavigationManager { get; set; } = default!;
@@ -40,11 +41,6 @@ public sealed class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where T
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
 
     /// <summary>
-    /// Gets or sets the computed CSS class based on whether or not the link is active.
-    /// </summary>
-    protected string? CssClass { get; set; }
-
-    /// <summary>
     /// Gets or sets the child content of the component.
     /// </summary>
     [Parameter]
@@ -57,7 +53,7 @@ public sealed class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where T
     public NavLinkMatch Match { get; set; }
 
     /// <summary>
-    ///Relative URI &/or QueryString appended to the associate URI.
+    ///Relative URI or QueryString appended to the associate URI.
     /// </summary>
     [Parameter]
     public string? RelativeUri { get; set; }
@@ -124,7 +120,7 @@ public sealed class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where T
     }
 
     private void UpdateCssClass()
-        => CssClass = _isActive ? CombineWithSpace(_class, ActiveClass ?? DefaultActiveClass) : _class;
+        => _cssClass = _isActive ? CombineWithSpace(_class, ActiveClass ?? DefaultActiveClass) : _class;
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
     {
@@ -191,7 +187,7 @@ public sealed class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where T
         builder.OpenElement(0, "a");
 
         builder.AddMultipleAttributes(1, AdditionalAttributes);
-        builder.AddAttribute(2, "class", CssClass);
+        builder.AddAttribute(2, "class", _cssClass);
         builder.AddContent(3, ChildContent);
 
         builder.CloseElement();

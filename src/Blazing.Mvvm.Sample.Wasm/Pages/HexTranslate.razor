@@ -4,17 +4,17 @@
 <div class="container text-center">
     <div class="row">
         <div class="col">
-            <TextEntry></TextEntry>
+            <TextEntry />
         </div>
         <div class="col">
-            <HexEntry></HexEntry>
+            <HexEntry />
         </div>
     </div>
+
+    <button id="reset-child-inputs" class="btn btn-secondary mt-2" @onclick="ViewModel.ResetChildInputs">Clear</button>
 </div>
 
 @code {
-#if NET8_0_OR_GREATER
     [Inject(Key = nameof(HexTranslateViewModel))]
     protected override HexTranslateViewModel ViewModel { get; set; } = default!;
-#endif
 }

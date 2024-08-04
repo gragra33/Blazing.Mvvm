@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using Blazing.Mvvm.ComponentModel;
 using Blazing.Mvvm.Sample.Wasm.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -14,7 +13,7 @@ public sealed partial class FetchDataViewModel : ViewModelBase, IDisposable
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     [ObservableProperty]
-    private ObservableCollection<WeatherForecast> _weatherForecasts = new();
+    private IEnumerable<WeatherForecast>? _weatherForecasts;
 
     public FetchDataViewModel(HttpClient httpClient, ILogger<FetchDataViewModel> logger)
     {
@@ -22,22 +21,15 @@ public sealed partial class FetchDataViewModel : ViewModelBase, IDisposable
         _logger = logger;
     }
 
-    public override async Task Loaded()
+    public override async Task OnInitializedAsync()
     {
         await Task.Delay(1000, _cancellationTokenSource.Token);
-        var weatherForecasts = await _httpClient.GetFromJsonAsync<ObservableCollection<WeatherForecast>>("sample-data/weather.json", _cancellationTokenSource.Token);
-
-        if (weatherForecasts is null)
-        {
-            return;
-        }
-
-        WeatherForecasts = weatherForecasts;
+        WeatherForecasts = await _httpClient.GetFromJsonAsync<IEnumerable<WeatherForecast>>("sample-data/weather.json", _cancellationTokenSource.Token) ?? [];
     }
 
     public void Dispose()
     {
-        _logger.LogInformation("Disposing FetchDataViewModel");
+        _logger.LogInformation("Disposing {VMName}.", nameof(FetchDataViewModel));
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
     }

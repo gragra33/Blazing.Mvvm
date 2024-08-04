@@ -14,5 +14,4 @@ public interface ITestNavigationViewModel : IViewModelBase, IDisposable
     RelayCommand HexTranslateNavigateCommand { get; }
 
     RelayCommand<string> TestNavigateCommand { get; }
-
 }
