@@ -5,9 +5,9 @@
 
 <h3>Test Navigation</h3>
 
-@if (!string.IsNullOrWhiteSpace(Echo))
+@if (!string.IsNullOrWhiteSpace(ViewModel.Echo))
 {
-    <p aria-label="relative path">Relative Path: @Echo</p>
+    <p aria-label="relative path">Relative Path: @ViewModel.Echo</p>
 }
 
 @if (!string.IsNullOrWhiteSpace(ViewModel.QueryString))
@@ -47,9 +47,5 @@
 
 @code {
     [Parameter]
-    public string? Echo
-    {
-        get => ViewModel.Echo;
-        set => ViewModel.Echo = value;
-    }
+    public string? Echo { get; set; }
 }

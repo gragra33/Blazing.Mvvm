@@ -1,4 +1,4 @@
-﻿namespace Blazing.Mvvm.Infrastructure;
+﻿namespace Blazing.Mvvm;
 
 /// <summary>
 /// The ASP.NET Core Blazor hosing models

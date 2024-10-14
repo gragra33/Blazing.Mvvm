@@ -1,5 +1,4 @@
 using Blazing.Mvvm;
-using Blazing.Mvvm.Infrastructure;
 using Blazing.Mvvm.Sample.WebApp.Client.Data;
 using Blazing.Mvvm.Sample.WebApp.Components;
 using Blazing.Mvvm.Sample.WebApp.Data;
@@ -19,6 +18,7 @@ builder.Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
 builder.Services.AddMvvm(options =>
 {
     options.HostingModelType = BlazorHostingModelType.WebApp;
+    options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
     options.RegisterViewModelsFromAssemblyContaining<Blazing.Mvvm.Sample.WebApp.Client._Imports>();
 });
 

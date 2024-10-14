@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Blazing.Mvvm.ComponentModel;
 using Blazing.Mvvm.Components;
-using Blazing.Mvvm.Infrastructure;
+using Blazing.Mvvm.Components.Parameter;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -39,6 +39,7 @@ public static class ServicesExtension
             configuration.RegisterViewModelsFromAssembly(callingAssembly);
         }
 
+        services.TryAddSingleton<IParameterResolver>(_ => new ParameterResolver(configuration.ParameterResolutionMode));
         AddMvvmNavigationManager(services, configuration);
         AddViewModels(services, configuration.ViewModelAssemblies);
     }

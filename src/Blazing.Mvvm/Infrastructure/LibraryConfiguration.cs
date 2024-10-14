@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
+using Blazing.Mvvm.Components;
 
-namespace Blazing.Mvvm.Infrastructure;
+namespace Blazing.Mvvm;
 
 /// <summary>
 /// Configuration for the library.
@@ -13,6 +14,15 @@ public class LibraryConfiguration
     /// The hosting model of the Blazor application.
     /// </summary>
     public BlazorHostingModelType HostingModelType { get; set; } = BlazorHostingModelType.NotSpecified;
+
+    /// <summary>
+    /// The parameter resolution mode for the views and view models.
+    /// <para>
+    /// The default is <see cref="ParameterResolutionMode.None"/>, which disables parameter resolution via the <see cref="IParameterResolver"/> service
+    /// and falls back to the default behaviour of the Blazor framework.
+    /// </para>
+    /// </summary>
+    public ParameterResolutionMode ParameterResolutionMode { get; set; } = ParameterResolutionMode.None;
 
     /// <summary>
     /// Gets the assemblies containing the view models.

@@ -1,4 +1,5 @@
 ﻿using Blazing.Mvvm.Components;
+using Blazing.Mvvm.Components.Parameter;
 using Blazing.Mvvm.Sample.WebApp.Client.Pages;
 using Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
 using Bunit;
@@ -14,6 +15,7 @@ public class TestNavigationTests : ComponentTestBase
         // Add services to the DI container. AutoMocker will not resolve these services.
         Services.AddSingleton<IMvvmNavigationManager, MvvmNavigationManager>();
         Services.AddSingleton<ITestNavigationViewModel, TestNavigationViewModel>();
+        Services.AddSingleton<IParameterResolver>(_ => new ParameterResolver(ParameterResolutionMode.ViewModel));
     }
 
     [Fact]

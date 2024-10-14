@@ -1,5 +1,4 @@
 using Blazing.Mvvm;
-using Blazing.Mvvm.Infrastructure;
 using Blazing.Mvvm.Sample.Server.Data;
 using CommunityToolkit.Mvvm.Messaging;
 
@@ -12,7 +11,11 @@ builder.Services.AddSingleton<IWeatherService, WeatherService>();
 builder.Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
 
 // Add Blazing.Mvvm
-builder.Services.AddMvvm(options => options.HostingModelType = BlazorHostingModelType.Server);
+builder.Services.AddMvvm(options =>
+{
+    options.HostingModelType = BlazorHostingModelType.Server;
+    options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
+});
 
 #if DEBUG
 builder.Logging.SetMinimumLevel(LogLevel.Debug);

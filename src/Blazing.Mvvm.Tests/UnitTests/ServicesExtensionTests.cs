@@ -1,6 +1,5 @@
-﻿using Blazing.Mvvm.ComponentModel;
-using Blazing.Mvvm.Components;
-using Blazing.Mvvm.Infrastructure;
+﻿using Blazing.Mvvm.Components;
+using Blazing.Mvvm.Components.Parameter;
 using Blazing.Mvvm.Tests.Infrastructure.Fakes;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,13 +12,16 @@ public class ServicesExtensionTests
     {
         // Arrange
         var mvvmNavigationServiceDescriptor = ServiceDescriptor.Singleton<IMvvmNavigationManager, MvvmNavigationManager>();
+        var parameterResolverServiceDescriptor = ServiceDescriptor.Singleton<IParameterResolver, ParameterResolver>();
         var sut = new ServiceCollection();
 
         // Act
         sut.AddMvvm();
 
         // Assert
+        using var _ = new AssertionScope();
         sut.Contains(mvvmNavigationServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
+        sut.Contains(parameterResolverServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
     }
 
     [Theory]
@@ -41,116 +43,6 @@ public class ServicesExtensionTests
         sut.Contains(mvvmNavigationServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
     }
 
-    [Fact]
-    public void GivenAddMvvm_WhenViewModelsRegisteredFromCallingAssembly_ThenShouldContainViewModels()
-    {
-        // Arrange
-        const int expectedViewModelCount = 11;
-        const int expectedTransientViewModelCount = 4;
-        const int expectedScopedViewModelCount = 3;
-        const int expectedSingletonViewModelCount = 4;
-
-        var sut = new ServiceCollection();
-
-        // Act
-        sut.AddMvvm();
-
-        // Assert
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase))).Should().Be(expectedViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Transient).Should().Be(expectedTransientViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Scoped).Should().Be(expectedScopedViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Singleton).Should().Be(expectedSingletonViewModelCount);
-    }
-
-    [Fact]
-    public void GivenAddMvvm_WhenViewModelsRegisteredFromAssemblyContainingGenericType_ThenShouldContainViewModels()
-    {
-        // Arrange
-        const int expectedViewModelCount = 11;
-        const int expectedTransientViewModelCount = 4;
-        const int expectedScopedViewModelCount = 3;
-        const int expectedSingletonViewModelCount = 4;
-
-        var sut = new ServiceCollection();
-
-        // Act
-        sut.AddMvvm(c => c.RegisterViewModelsFromAssemblyContaining<ServicesExtensionTests>());
-
-        // Assert
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase))).Should().Be(expectedViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Transient).Should().Be(expectedTransientViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Scoped).Should().Be(expectedScopedViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Singleton).Should().Be(expectedSingletonViewModelCount);
-    }
-
-    [Fact]
-    public void GivenAddMvvm_WhenViewModelsRegisteredFromAssemblyContainingType_ThenShouldContainViewModels()
-    {
-        // Arrange
-        const int expectedViewModelCount = 11;
-        const int expectedTransientViewModelCount = 4;
-        const int expectedScopedViewModelCount = 3;
-        const int expectedSingletonViewModelCount = 4;
-
-        var sut = new ServiceCollection();
-
-        // Act
-        sut.AddMvvm(c => c.RegisterViewModelsFromAssemblyContaining(typeof(ServicesExtensionTests)));
-
-        // Assert
-        using var _ = new AssertionScope();
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase))).Should().Be(expectedViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Transient).Should().Be(expectedTransientViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Scoped).Should().Be(expectedScopedViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Singleton).Should().Be(expectedSingletonViewModelCount);
-    }
-
-    [Fact]
-    public void GivenAddMvvm_WhenViewModelsRegisteredFromSpecifiedAssembly_ShouldContainViewModels()
-    {
-        // Arrange
-        const int expectedViewModelCount = 11;
-        const int expectedTransientViewModelCount = 4;
-        const int expectedScopedViewModelCount = 3;
-        const int expectedSingletonViewModelCount = 4;
-
-        var assembly = typeof(ServicesExtensionTests).Assembly;
-        var sut = new ServiceCollection();
-
-        // Act
-        sut.AddMvvm(c => c.RegisterViewModelsFromAssembly(assembly));
-
-        // Assert
-        using var _ = new AssertionScope();
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase))).Should().Be(expectedViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Transient).Should().Be(expectedTransientViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Scoped).Should().Be(expectedScopedViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Singleton).Should().Be(expectedSingletonViewModelCount);
-    }
-
-    [Fact]
-    public void GivenAddMvvm_WhenViewModelsRegisteredFromSpecifiedAssemblies_ThenShouldContainViewModels()
-    {
-        // Arrange
-        const int expectedViewModelCount = 11;
-        const int expectedTransientViewModelCount = 4;
-        const int expectedScopedViewModelCount = 3;
-        const int expectedSingletonViewModelCount = 4;
-
-        var assemblies = new[] { typeof(ServicesExtensionTests).Assembly };
-        var sut = new ServiceCollection();
-
-        // Act
-        sut.AddMvvm(c => c.RegisterViewModelsFromAssemblies(assemblies));
-
-        // Assert
-        using var _ = new AssertionScope();
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase))).Should().Be(expectedViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Transient).Should().Be(expectedTransientViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Scoped).Should().Be(expectedScopedViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Singleton).Should().Be(expectedSingletonViewModelCount);
-    }
-
     [Theory]
     [MemberData(nameof(ServicesExtensionTestData.ViewModelsInCallingAssembly), MemberType = typeof(ServicesExtensionTestData))]
     public void GivenAddMvvm_WhenViewModelsRegisteredFromCallingAssembly_ThenShouldContainViewModel(ServiceDescriptor vmServiceDescriptor)
@@ -165,25 +57,62 @@ public class ServicesExtensionTests
         sut.Contains(vmServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
     }
 
-    [Fact]
-    public void GivenAddMvvm_WhenViewModelsRegisteredFromDependentAssemblyContainingType_ThenShouldContainViewModels()
+    [Theory]
+    [MemberData(nameof(ServicesExtensionTestData.ViewModelsInCallingAssembly), MemberType = typeof(ServicesExtensionTestData))]
+    public void GivenAddMvvm_WhenViewModelsRegisteredFromAssemblyContainingGenericType_ThenShouldContainViewModel(ServiceDescriptor vmServiceDescriptor)
     {
         // Arrange
-        const int expectedViewModelCount = 8;
-        const int expectedTransientViewModelCount = 6;
-        const int expectedScopedViewModelCount = 1;
-        const int expectedSingletonViewModelCount = 1;
-
         var sut = new ServiceCollection();
 
         // Act
-        sut.AddMvvm(c => c.RegisterViewModelsFromAssemblyContaining<Sample.WebApp.Client._Imports>());
+        sut.AddMvvm(c => c.RegisterViewModelsFromAssemblyContaining<ServicesExtensionTests>());
 
         // Assert
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase))).Should().Be(expectedViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Transient).Should().Be(expectedTransientViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Scoped).Should().Be(expectedScopedViewModelCount);
-        sut.Count(x => x.ServiceType.IsAssignableTo(typeof(IViewModelBase)) && x.Lifetime is ServiceLifetime.Singleton).Should().Be(expectedSingletonViewModelCount);
+        sut.Contains(vmServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
+    }
+
+    [Theory]
+    [MemberData(nameof(ServicesExtensionTestData.ViewModelsInCallingAssembly), MemberType = typeof(ServicesExtensionTestData))]
+    public void GivenAddMvvm_WhenViewModelsRegisteredFromAssemblyContainingType_ThenShouldContainViewModel(ServiceDescriptor vmServiceDescriptor)
+    {
+        // Arrange
+        var sut = new ServiceCollection();
+
+        // Act
+        sut.AddMvvm(c => c.RegisterViewModelsFromAssemblyContaining(typeof(ServicesExtensionTests)));
+
+        // Assert
+        sut.Contains(vmServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
+    }
+
+    [Theory]
+    [MemberData(nameof(ServicesExtensionTestData.ViewModelsInCallingAssembly), MemberType = typeof(ServicesExtensionTestData))]
+    public void GivenAddMvvm_WhenViewModelsRegisteredFromSpecifiedAssembly_ThenShouldContainViewModel(ServiceDescriptor vmServiceDescriptor)
+    {
+        // Arrange
+        var assembly = typeof(ServicesExtensionTests).Assembly;
+        var sut = new ServiceCollection();
+
+        // Act
+        sut.AddMvvm(c => c.RegisterViewModelsFromAssembly(assembly));
+
+        // Assert
+        sut.Contains(vmServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
+    }
+
+    [Theory]
+    [MemberData(nameof(ServicesExtensionTestData.ViewModelsInCallingAssembly), MemberType = typeof(ServicesExtensionTestData))]
+    public void GivenAddMvvm_WhenViewModelsRegisteredFromSpecifiedAssemblies_ThenShouldContainViewModel(ServiceDescriptor vmServiceDescriptor)
+    {
+        // Arrange
+        var assemblies = new[] { typeof(ServicesExtensionTests).Assembly };
+        var sut = new ServiceCollection();
+
+        // Act
+        sut.AddMvvm(c => c.RegisterViewModelsFromAssemblies(assemblies));
+
+        // Assert
+        sut.Contains(vmServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
     }
 
     [Theory]
@@ -223,10 +152,10 @@ public class ServicesExtensionTests
         {
             { ServiceDescriptor.Transient<Sample.WebApp.Client.ViewModels.EditContactViewModel, Sample.WebApp.Client.ViewModels.EditContactViewModel>() },
             { ServiceDescriptor.Transient<Sample.WebApp.Client.ViewModels.HexEntryViewModel, Sample.WebApp.Client.ViewModels.HexEntryViewModel>() },
-            { ServiceDescriptor.KeyedTransient<Sample.WebApp.Client.ViewModels.HexTranslateViewModel, Sample.WebApp.Client.ViewModels.HexTranslateViewModel>(nameof(Sample.WebApp.Client.ViewModels.HexTranslateViewModel)) },
             { ServiceDescriptor.Transient<Sample.WebApp.Client.ViewModels.ITestNavigationViewModel, Sample.WebApp.Client.ViewModels.TestNavigationViewModel>() },
             { ServiceDescriptor.Transient<Sample.WebApp.Client.ViewModels.MainLayoutViewModel, Sample.WebApp.Client.ViewModels.MainLayoutViewModel>() },
             { ServiceDescriptor.Transient<Sample.WebApp.Client.ViewModels.TextEntryViewModel, Sample.WebApp.Client.ViewModels.TextEntryViewModel>() },
+            { ServiceDescriptor.KeyedTransient<Sample.WebApp.Client.ViewModels.HexTranslateViewModel, Sample.WebApp.Client.ViewModels.HexTranslateViewModel>(nameof(Sample.WebApp.Client.ViewModels.HexTranslateViewModel)) },
 
             { ServiceDescriptor.Scoped<Sample.WebApp.Client.ViewModels.FetchDataViewModel, Sample.WebApp.Client.ViewModels.FetchDataViewModel>() },
 

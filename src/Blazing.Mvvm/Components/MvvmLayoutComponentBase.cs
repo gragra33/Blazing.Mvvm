@@ -22,6 +22,12 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
     [Inject]
     protected virtual TViewModel ViewModel { get; set; } = default!;
 
+    /// <summary>
+    /// Resolves parameters in the <c>View</c> and <c>ViewModel</c>.
+    /// </summary>
+    [Inject]
+    protected IParameterResolver ParameterResolver { get; set; } = default!;
+
     /// <inheritdoc/>
     public void Dispose()
     {
@@ -55,6 +61,14 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
     /// <inheritdoc/>
     protected override Task OnParametersSetAsync()
         => ViewModel.OnParametersSetAsync();
+
+    /// <inheritdoc/>
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        return ParameterResolver.SetParameters(this, ViewModel, parameters)
+            ? base.SetParametersAsync(ParameterView.Empty)
+            : base.SetParametersAsync(parameters);
+    }
 
     /// <inheritdoc/>
     protected override bool ShouldRender()

@@ -34,6 +34,12 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
         set => _viewModel = value;
     }
 
+    /// <summary>
+    /// Resolves parameters in the <c>View</c> and <c>ViewModel</c>.
+    /// </summary>
+    [Inject]
+    protected IParameterResolver ParameterResolver { get; set; } = default!;
+
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
@@ -73,6 +79,18 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     /// <inheritdoc/>
     protected override Task OnParametersSetAsync()
         => ViewModel.OnParametersSetAsync();
+
+    /// <inheritdoc/>
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        return ParameterResolver.SetParameters(this, ViewModel, parameters)
+            ? base.SetParametersAsync(ParameterView.Empty)
+            : base.SetParametersAsync(parameters);
+    }
+
+    /// <inheritdoc/>
+    protected override bool ShouldRender()
+        => ViewModel.ShouldRender();
 
     /// <summary>
     /// Disposes the component and releases unmanaged resources.

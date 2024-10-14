@@ -12,7 +12,7 @@ builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.H
 builder.Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
 
 // Add Blazing.Mvvm
-builder.Services.AddMvvm();
+builder.Services.AddMvvm(options => options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel);
 
 #if DEBUG
 builder.Logging.SetMinimumLevel(LogLevel.Debug);

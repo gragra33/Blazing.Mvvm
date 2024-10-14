@@ -29,6 +29,7 @@ public sealed partial class TestNavigationViewModel : ViewModelBase, ITestNaviga
         _navigationManager.LocationChanged += OnLocationChanged;
     }
 
+    [ViewParameter]
     public string? Echo { get; set; } = string.Empty;
 
     public RelayCommand HexTranslateNavigateCommand
