@@ -1,5 +1,4 @@
 ﻿using Blazing.Mvvm.Components;
-using Blazing.Mvvm.Components.Parameter;
 using Blazing.Mvvm.Tests.Infrastructure.Fakes;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,7 +11,7 @@ public class ServicesExtensionTests
     {
         // Arrange
         var mvvmNavigationServiceDescriptor = ServiceDescriptor.Singleton<IMvvmNavigationManager, MvvmNavigationManager>();
-        var parameterResolverServiceDescriptor = ServiceDescriptor.Singleton<IParameterResolver, ParameterResolver>();
+        var parameterResolverServiceDescriptor = ServiceDescriptor.Singleton<IParameterResolver>(_ => default!);
         var sut = new ServiceCollection();
 
         // Act
