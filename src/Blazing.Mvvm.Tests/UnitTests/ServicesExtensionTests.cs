@@ -135,6 +135,7 @@ public class ServicesExtensionTests
             { ServiceDescriptor.Transient<TestViewModel, TestViewModel>() },
             { ServiceDescriptor.Transient<TransientTestViewModel, TransientTestViewModel>() },
             { ServiceDescriptor.Transient<ITransientTestViewModel, TransientTestViewModel>() },
+            { ServiceDescriptor.Transient<AbstractBaseViewModel, ConcreteViewModel>() },
             { ServiceDescriptor.KeyedTransient<TransientKeyedTestViewModel, TransientKeyedTestViewModel>("Transient") },
 
             { ServiceDescriptor.Scoped<ScopedTestViewModel, ScopedTestViewModel>() },

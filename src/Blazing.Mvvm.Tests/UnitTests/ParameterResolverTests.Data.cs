@@ -1,5 +1,6 @@
 ﻿using Blazing.Mvvm.ComponentModel;
 using Blazing.Mvvm.Components;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 
 namespace Blazing.Mvvm.Tests.UnitTests;
@@ -98,13 +99,15 @@ public partial class ParameterResolverTests
         public DateOnly? QueryParameter2 { get; set; }
     }
 
-    private class TestParameterViewModel : ViewModelBase
+    private partial class TestParameterViewModel : ViewModelBase
     {
-        [ViewParameter]
-        public string Parameter1 { get; set; } = default!;
+        [ObservableProperty]
+        [property: ViewParameter]
+        private string parameter1 = default!;
 
-        [ViewParameter("Parameter2")]
-        private int Property1 { get; set; }
+        [ObservableProperty]
+        [property: ViewParameter("Parameter2")]
+        private int _property1;
 
         [ViewParameter]
         public string? Parameter3 { get; set; }

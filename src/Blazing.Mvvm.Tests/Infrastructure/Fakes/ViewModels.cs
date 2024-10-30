@@ -9,26 +9,31 @@ internal interface IScopedTestViewModel : IViewModelBase;
 
 internal interface ISingletonTestViewModel : IViewModelBase;
 
-internal class TestViewModel : ViewModelBase;
+internal sealed class TestViewModel : ViewModelBase;
 
 [ViewModelDefinition<ITransientTestViewModel>]
 [ViewModelDefinition(Lifetime = ServiceLifetime.Transient)]
-internal class TransientTestViewModel : ViewModelBase, ITransientTestViewModel;
+internal sealed class TransientTestViewModel : ViewModelBase, ITransientTestViewModel;
 
 [ViewModelDefinition<IScopedTestViewModel>(Lifetime = ServiceLifetime.Scoped)]
 [ViewModelDefinition(Lifetime = ServiceLifetime.Scoped)]
-internal class ScopedTestViewModel : ViewModelBase, IScopedTestViewModel;
+internal sealed class ScopedTestViewModel : ViewModelBase, IScopedTestViewModel;
 
 [ViewModelDefinition<ISingletonTestViewModel>(Lifetime = ServiceLifetime.Singleton)]
 [ViewModelDefinition<ISingletonTestViewModel>(Key = "ISingleton", Lifetime = ServiceLifetime.Singleton)]
 [ViewModelDefinition(Lifetime = ServiceLifetime.Singleton)]
-internal class SingletonTestViewModel : ViewModelBase, ISingletonTestViewModel;
+internal sealed class SingletonTestViewModel : ViewModelBase, ISingletonTestViewModel;
 
 [ViewModelDefinition(Key = "Transient", Lifetime = ServiceLifetime.Transient)]
-internal class TransientKeyedTestViewModel : ViewModelBase;
+internal sealed class TransientKeyedTestViewModel : ViewModelBase;
 
 [ViewModelDefinition(Key = "Scoped", Lifetime = ServiceLifetime.Scoped)]
-internal class ScopedKeyedTestViewModel : ViewModelBase;
+internal sealed class ScopedKeyedTestViewModel : ViewModelBase;
 
 [ViewModelDefinition(Key = "Singleton", Lifetime = ServiceLifetime.Singleton)]
-internal class SingletonKeyedTestViewModel : ViewModelBase;
+internal sealed class SingletonKeyedTestViewModel : ViewModelBase;
+
+internal abstract class AbstractBaseViewModel : ViewModelBase;
+
+[ViewModelDefinition<AbstractBaseViewModel>]
+internal sealed class ConcreteViewModel : AbstractBaseViewModel;
