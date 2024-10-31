@@ -68,9 +68,48 @@
         <div class="nav-item px-3">
             <MvvmNavLink class="nav-link"
                          TViewModel="ITestNavigationViewModel"
-                         RelativeUri="this is a MvvmNvLink test/?test=this%20is%20a%20MvvmNavLink%20querystring%20test"
+                         RelativeUri="this is a MvvmNavLink test/?test=this%20is%20a%20MvvmNavLink%20querystring%20test"
                          Match="NavLinkMatch.All">
                 <span class="oi oi-calculator" aria-hidden="true"></span> Test + Both
+            </MvvmNavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link"
+                         TViewModel="ITestNavigationViewModel"
+                         NavigationKey="@nameof(TestNamedNavigationViewModel)"
+                         Match="NavLinkMatch.All">
+                <span class="oi oi-calculator" aria-hidden="true"></span> Keyed Test
+            </MvvmNavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link"
+                         TViewModel="ITestNavigationViewModel"
+                         NavigationKey="@nameof(TestNamedNavigationViewModel)"
+                         RelativeUri="this is a MvvmNavLink test"
+                         Match="NavLinkMatch.All">
+                <span class="oi oi-calculator" aria-hidden="true"></span> Keyed + Params
+            </MvvmNavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link"
+                         TViewModel="ITestNavigationViewModel"
+                         NavigationKey="@nameof(TestNamedNavigationViewModel)"
+                         RelativeUri="?test=this%20is%20a%20MvvmNavLink%20querystring%20test"
+                         Match="NavLinkMatch.All">
+                <span class="oi oi-calculator" aria-hidden="true"></span> Keyed + QueryString
+            </MvvmNavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link"
+                         TViewModel="ITestNavigationViewModel"
+                         NavigationKey="@nameof(TestNamedNavigationViewModel)"
+                         RelativeUri="this is a MvvmNavLink test/?test=this%20is%20a%20MvvmNavLink%20querystring%20test"
+                         Match="NavLinkMatch.All">
+                <span class="oi oi-calculator" aria-hidden="true"></span> Keyed + Both
             </MvvmNavLink>
         </div>
     </nav>

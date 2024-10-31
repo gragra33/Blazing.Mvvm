@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Blazing.Mvvm.Components;
 
 /// <summary>
-/// Provides an abstraction for querying and managing navigation via ViewModel (class/interface).
+/// Manages navigation via ViewModel.
 /// </summary>
 public partial class MvvmNavigationManager : IMvvmNavigationManager
 {
@@ -14,12 +14,13 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     private readonly ILogger<MvvmNavigationManager> _logger;
 
     private readonly Dictionary<Type, string> _references = [];
+    private readonly Dictionary<string, string> _keyedReferences = [];
 
     /// <summary>
-    /// Initializes a new instance of <see cref="MvvmNavigationManager"/>.
+    /// Initializes a new instance of the <see cref="MvvmNavigationManager"/> class.
     /// </summary>
-    /// <param name="navigationManager">The</param>
-    /// <param name="logger">The logger</param>
+    /// <param name="navigationManager">The navigation manager.</param>
+    /// <param name="logger">The logger.</param>
     public MvvmNavigationManager(NavigationManager navigationManager, ILogger<MvvmNavigationManager> logger)
     {
         _navigationManager = navigationManager;
@@ -28,13 +29,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         GenerateReferenceCache();
     }
 
-    /// <summary>
-    /// Navigates to the specified associated URI.
-    /// </summary>
-    /// <typeparam name="TViewModel">The type <see cref="IViewModelBase"/> to use to determine the URI to navigate to.</typeparam>
-    /// <param name="forceLoad">If true, bypasses client-side routing and forces the browser to load the new page from the server, whether or not the URI would normally be handled by the client-side router.</param>
-    /// <param name="replace">If true, replaces the current entry in the history stack. If false, appends the new entry to the history stack.</param>
-    /// <exception cref="ArgumentException"></exception>
+    /// <inheritdoc/>
     public void NavigateTo<TViewModel>(bool forceLoad = false, bool replace = false)
         where TViewModel : IViewModelBase
     {
@@ -47,11 +42,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         _navigationManager.NavigateTo(uri, forceLoad, replace);
     }
 
-    /// <summary>
-    /// Navigates to the specified associated URI.
-    /// </summary>
-    /// <typeparam name="TViewModel">The type <see cref="IViewModelBase"/> to use to determine the URI to navigate to.</typeparam>
-    /// <param name="options">Provides additional <see cref="NavigationOptions"/>.</param>
+    /// <inheritdoc/>
     public void NavigateTo<TViewModel>(NavigationOptions options)
         where TViewModel : IViewModelBase
     {
@@ -64,15 +55,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         _navigationManager.NavigateTo(uri, options);
     }
 
-    /// <summary>
-    /// Navigates to the specified associated URI.
-    /// </summary>
-    /// <typeparam name="TViewModel">The type <see cref="IViewModelBase"/> to use to determine the URI to navigate to.</typeparam>
-    /// <param name="relativeUri">relative URI or QueryString appended to the navigation Uri.</param>
-    /// <param name="forceLoad">If true, bypasses client-side routing and forces the browser to load the new page from the server, whether or not the URI would normally be handled by the client-side router.</param>
-    /// <param name="replace">If true, replaces the current entry in the history stack. If false, appends the new entry to the history stack.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="relativeUri"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException">Throw when <typeparamref name="TViewModel"/> has no associated <c>page</c>.</exception>
+    /// <inheritdoc/>
     public void NavigateTo<TViewModel>(string relativeUri, bool forceLoad = false, bool replace = false)
         where TViewModel : IViewModelBase
     {
@@ -89,14 +72,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         _navigationManager.NavigateTo(uri, forceLoad, replace);
     }
 
-    /// <summary>
-    /// Navigates to the specified associated URI.
-    /// </summary>
-    /// <typeparam name="TViewModel">The type <see cref="IViewModelBase"/> to use to determine the URI to navigate to.</typeparam>
-    /// <param name="relativeUri">relative URI or QueryString appended to the navigation Uri.</param>
-    /// <param name="options">Provides additional <see cref="NavigationOptions"/>.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="relativeUri"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException">Throw when <typeparamref name="TViewModel"/> has no associated <c>page</c>.</exception>
+    /// <inheritdoc/>
     public void NavigateTo<TViewModel>(string relativeUri, NavigationOptions options)
         where TViewModel : IViewModelBase
     {
@@ -113,12 +89,63 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         _navigationManager.NavigateTo(uri, options);
     }
 
-    /// <summary>
-    /// Get the <see cref="IViewModelBase"/> associated URI.
-    /// </summary>
-    /// <typeparam name="TViewModel">The type <see cref="IViewModelBase"/> to use to determine the URI to navigate to.</typeparam>
-    /// <returns>A relative URI path.</returns>
-    /// <exception cref="ArgumentException"></exception>
+    /// <inheritdoc/>
+    public void NavigateTo(string key, bool forceLoad = false, bool replace = false)
+    {
+        if (!_keyedReferences.TryGetValue(key, out string? uri))
+        {
+            throw new ArgumentException($"No associated page for key '{key}'");
+        }
+
+        LogNavigationEvent(key, uri);
+        _navigationManager.NavigateTo(uri, forceLoad, replace);
+    }
+
+    /// <inheritdoc/>
+    public void NavigateTo(string key, NavigationOptions options)
+    {
+        if (!_keyedReferences.TryGetValue(key, out string? uri))
+        {
+            throw new ArgumentException($"No associated page for key '{key}'");
+        }
+
+        LogNavigationEvent(key, uri);
+        _navigationManager.NavigateTo(uri, options);
+    }
+
+    /// <inheritdoc/>
+    public void NavigateTo(string key, string relativeUri, bool forceLoad = false, bool replace = false)
+    {
+        ArgumentNullException.ThrowIfNull(relativeUri);
+
+        if (!_keyedReferences.TryGetValue(key, out string? uri))
+        {
+            throw new ArgumentException($"No associated page for key '{key}'");
+        }
+
+        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
+
+        LogNavigationEvent(key, uri);
+        _navigationManager.NavigateTo(uri, forceLoad, replace);
+    }
+
+    /// <inheritdoc/>
+    public void NavigateTo(string key, string relativeUri, NavigationOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(relativeUri);
+
+        if (!_keyedReferences.TryGetValue(key, out string? uri))
+        {
+            throw new ArgumentException($"No associated page for key '{key}'");
+        }
+
+        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
+
+        LogNavigationEvent(key, uri);
+        _navigationManager.NavigateTo(uri, options);
+    }
+
+    /// <inheritdoc/>
     public string GetUri<TViewModel>()
         where TViewModel : IViewModelBase
     {
@@ -130,8 +157,25 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         return uri;
     }
 
+    /// <inheritdoc/>
+    public string GetUri(string key)
+    {
+        if (!_keyedReferences.TryGetValue(key, out string? uri))
+        {
+            throw new ArgumentException($"No associated page for key '{key}'");
+        }
+
+        return uri;
+    }
+
     #region Internals
 
+    /// <summary>
+    /// Builds a complete URI from a base URI and a relative URI.
+    /// </summary>
+    /// <param name="uri">The base URI.</param>
+    /// <param name="relativeUri">The relative URI or query string.</param>
+    /// <returns>The complete URI.</returns>
     private static string BuildUri(string uri, string relativeUri)
     {
         if (string.IsNullOrWhiteSpace(relativeUri))
@@ -160,6 +204,9 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         return builder.Uri.AbsoluteUri;
     }
 
+    /// <summary>
+    /// Generates a cache of references for navigation.
+    /// </summary>
     private void GenerateReferenceCache()
     {
         Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -192,27 +239,67 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
 
             foreach ((Type Type, Type? Argument) item in items)
             {
-                Attribute? attribute = item.Type.GetCustomAttributes().FirstOrDefault(a => a is RouteAttribute);
+                IEnumerable<ViewModelDefinitionAttribute> vmDefinitionAttributes = item.Type.GetCustomAttributes<ViewModelDefinitionAttribute>();
+                ViewModelDefinitionAttribute[] viewModelDefinitionAttributes = vmDefinitionAttributes as ViewModelDefinitionAttribute[] ?? vmDefinitionAttributes.ToArray();
 
-                // is this a page or a component?
-                if (attribute is null)
+                if (viewModelDefinitionAttributes.Length == 0)
                 {
+                    Attribute? routeAttribute = item.Type.GetCustomAttributes().FirstOrDefault(a => a is RouteAttribute);
+                    if (routeAttribute is null)
+                    {
+                        continue;
+                    }
+
+                    string uri = ((RouteAttribute)routeAttribute).Template;
+                    _references.Add(item.Argument!, uri);
+                    _logger.LogDebug("Caching navigation reference '{Argument}' with uri '{Uri}' for '{FullName}'", item.Argument, uri, item.Type.FullName);
                     continue;
                 }
 
-                // we have a page, let's reference it!
-                string uri = ((RouteAttribute)attribute).Template;
-                _references.Add(item.Argument!, uri);
-                _logger.LogDebug("Caching navigation reference '{Argument}' with uri '{Uri}' for '{FullName}'", item.Argument, uri, item.Type.FullName);
+                foreach (ViewModelDefinitionAttribute vmDefinitionAttribute in viewModelDefinitionAttributes)
+                {
+                    Attribute? routeAttribute = item.Type.GetCustomAttributes().FirstOrDefault(a => a is RouteAttribute);
+ 
+                    // is this a page or a component?
+                    if (routeAttribute is null)
+                    {
+                        continue;
+                    }
+
+                    // we have a page, let's reference it!
+                    string uri = ((RouteAttribute)routeAttribute).Template;
+
+                    if (vmDefinitionAttribute.Key is not null)
+                    {
+                        _keyedReferences.Add(vmDefinitionAttribute.Key!.ToString()!, uri);
+                        _logger.LogDebug("Caching keyed navigation reference '{Key}' with uri '{Uri}' for '{FullName}'", vmDefinitionAttribute.Key, uri, item.Type.FullName);
+                    }
+                    else
+                    {
+                        _references.Add(item.Argument!, uri);
+                        _logger.LogDebug("Caching navigation reference '{Argument}' with uri '{Uri}' for '{FullName}'", item.Argument, uri, item.Type.FullName);
+                    }
+
+                }
             }
         }
 
         _logger.LogDebug("Completed generating the Reference Cache");
     }
 
+    /// <summary>
+    /// Logs a navigation event.
+    /// </summary>
+    /// <param name="viewModel">The ViewModel being navigated to.</param>
+    /// <param name="uri">The URI being navigated to.</param>
     [LoggerMessage(LogLevel.Debug, Message = "Navigating '{ViewModel}' to uri '{Uri}'")]
     private partial void LogNavigationEvent(string? viewModel, string uri);
 
+    /// <summary>
+    /// Gets the ViewModel argument type for a given type.
+    /// </summary>
+    /// <param name="type">The type to get the ViewModel argument type for.</param>
+    /// <returns>A tuple containing the type and its ViewModel argument type.</returns>
     private static (Type Type, Type? Argument) GetViewArgumentType(Type type)
     {
         Type viewInterfaceType = typeof(IView<>);
@@ -222,7 +309,6 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         Type? componentBaseType = null;
         Type? typeArgument = null;
 
-        // Find the generic type definition for MvvmComponentBase<> with the correct type argument
         foreach (Type interfaceType in type.GetInterfaces())
         {
             if (!interfaceType.IsGenericType || interfaceType.GetGenericTypeDefinition() != viewInterfaceType)
@@ -234,7 +320,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             componentBaseType = componentBaseGenericType.MakeGenericType(typeArgument);
 
             // Check if the type constraint is a subtype of MvvmComponentBase<>
-            if (componentBaseType?.IsAssignableFrom(type) == true)
+            if (componentBaseType.IsAssignableFrom(type))
             {
                 break;
             }
@@ -242,7 +328,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             // Check if the type constraint is a subtype of MvvmOwningComponentBase<>
             componentBaseType = owingComponentBaseGenericType.MakeGenericType(typeArgument);
 
-            if (componentBaseType?.IsAssignableFrom(type) == true)
+            if (componentBaseType.IsAssignableFrom(type))
             {
                 break;
             }

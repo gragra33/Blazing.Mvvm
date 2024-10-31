@@ -53,10 +53,16 @@ public sealed class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where T
     public NavLinkMatch Match { get; set; }
 
     /// <summary>
-    ///Relative URI or QueryString appended to the associate URI.
+    /// Relative URI or QueryString appended to the associate URI.
     /// </summary>
     [Parameter]
     public string? RelativeUri { get; set; }
+
+    /// <summary>
+    /// Gets or sets the key to use for keyed navigation.
+    /// </summary>
+    [Parameter]
+    public string? NavigationKey { get; set; }
 
     /// <inheritdoc />
     protected override void OnInitialized()
@@ -68,7 +74,14 @@ public sealed class MvvmNavLink<TViewModel> : ComponentBase, IDisposable where T
     /// <inheritdoc />
     protected override void OnParametersSet()
     {
-        _hrefAbsolute = BuildUri(NavigationManager.ToAbsoluteUri(MvvmNavigationManager.GetUri<TViewModel>()).AbsoluteUri, RelativeUri);
+        if (!string.IsNullOrEmpty(NavigationKey))
+        {
+            _hrefAbsolute = BuildUri(NavigationManager.ToAbsoluteUri(MvvmNavigationManager.GetUri(NavigationKey)).AbsoluteUri, RelativeUri);
+        }
+        else
+        {
+            _hrefAbsolute = BuildUri(NavigationManager.ToAbsoluteUri(MvvmNavigationManager.GetUri<TViewModel>()).AbsoluteUri, RelativeUri);
+        }
 
         AdditionalAttributes?.Add("href", _hrefAbsolute);
 

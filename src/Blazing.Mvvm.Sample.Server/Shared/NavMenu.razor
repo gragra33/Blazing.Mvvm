@@ -1,8 +1,6 @@
-﻿@using System.Net
-
-<div class="top-row ps-3 navbar navbar-dark">
+﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Sample.Server</a>
+        <a class="navbar-brand" href="">Sample.Wasm</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -16,33 +14,39 @@
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </div>
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="counter">
                 <span class="oi oi-plus" aria-hidden="true"></span> Counter
             </NavLink>
         </div>
+
         <div class="nav-item px-3">
             <MvvmNavLink class="nav-link" TViewModel="EditContactViewModel">
                 <span class="oi oi-project" aria-hidden="true"></span> Form
             </MvvmNavLink>
         </div>
+
         <div class="nav-item px-3">
             <MvvmNavLink class="nav-link" TViewModel="FetchDataViewModel">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
             </MvvmNavLink>
         </div>
+
         <div class="nav-item px-3">
             <MvvmNavLink class="nav-link" TViewModel="HexTranslateViewModel">
                 <span class="oi oi-calculator" aria-hidden="true"></span> Hex translate
             </MvvmNavLink>
         </div>
+
         <div class="nav-item px-3">
             <MvvmNavLink class="nav-link"
                          TViewModel="ITestNavigationViewModel"
                          Match="NavLinkMatch.All">
-                <span class="oi oi-calculator" aria-hidden="true"></span>Test
+                <span class="oi oi-calculator" aria-hidden="true"></span> Test
             </MvvmNavLink>
         </div>
+
         <div class="nav-item px-3">
             <MvvmNavLink class="nav-link"
                          TViewModel="ITestNavigationViewModel"
@@ -51,20 +55,61 @@
                 <span class="oi oi-calculator" aria-hidden="true"></span> Test + Params
             </MvvmNavLink>
         </div>
+
         <div class="nav-item px-3">
             <MvvmNavLink class="nav-link"
-                         TViewModel=ITestNavigationViewModel
+                         TViewModel="ITestNavigationViewModel"
                          RelativeUri="?test=this%20is%20a%20MvvmNavLink%20querystring%20test"
                          Match="NavLinkMatch.All">
                 <span class="oi oi-calculator" aria-hidden="true"></span> Test + QueryString
             </MvvmNavLink>
         </div>
+
         <div class="nav-item px-3">
             <MvvmNavLink class="nav-link"
                          TViewModel="ITestNavigationViewModel"
-                         RelativeUri="this is a MvvmNvLink test/?test=this%20is%20a%20MvvmNavLink%20querystring%20test"
+                         RelativeUri="this is a MvvmNavLink test/?test=this%20is%20a%20MvvmNavLink%20querystring%20test"
                          Match="NavLinkMatch.All">
                 <span class="oi oi-calculator" aria-hidden="true"></span> Test + Both
+            </MvvmNavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link"
+                         TViewModel="ITestNavigationViewModel"
+                         NavigationKey="@nameof(TestNamedNavigationViewModel)"
+                         Match="NavLinkMatch.All">
+                <span class="oi oi-calculator" aria-hidden="true"></span> Keyed Test
+            </MvvmNavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link"
+                         TViewModel="ITestNavigationViewModel"
+                         NavigationKey="@nameof(TestNamedNavigationViewModel)"
+                         RelativeUri="this is a MvvmNavLink test"
+                         Match="NavLinkMatch.All">
+                <span class="oi oi-calculator" aria-hidden="true"></span> Keyed + Params
+            </MvvmNavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link"
+                         TViewModel="ITestNavigationViewModel"
+                         NavigationKey="@nameof(TestNamedNavigationViewModel)"
+                         RelativeUri="?test=this%20is%20a%20MvvmNavLink%20querystring%20test"
+                         Match="NavLinkMatch.All">
+                <span class="oi oi-calculator" aria-hidden="true"></span> Keyed + QueryString
+            </MvvmNavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link"
+                         TViewModel="ITestNavigationViewModel"
+                         NavigationKey="@nameof(TestNamedNavigationViewModel)"
+                         RelativeUri="this is a MvvmNavLink test/?test=this%20is%20a%20MvvmNavLink%20querystring%20test"
+                         Match="NavLinkMatch.All">
+                <span class="oi oi-calculator" aria-hidden="true"></span> Keyed + Both
             </MvvmNavLink>
         </div>
     </nav>
