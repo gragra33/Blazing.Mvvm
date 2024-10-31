@@ -1,8 +1,8 @@
 using Blazing.Mvvm;
-using Blazing.Mvvm.Infrastructure;
-using Blazing.Mvvm.Sample.WebApp.Client;
-using Blazing.Mvvm.Sample.WebApp.Client.Pages;
+using Blazing.Mvvm.Sample.WebApp.Client.Data;
 using Blazing.Mvvm.Sample.WebApp.Components;
+using Blazing.Mvvm.Sample.WebApp.Data;
+using CommunityToolkit.Mvvm.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,13 +11,15 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
-// register ViewModels
-builder.Services.AddViewModels();
+builder.Services.AddSingleton<IWeatherService, ServerWeatherService>();
+builder.Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
 
-// enable MvvmNavigationManager
-builder.Services.AddMvvmNavigation(options =>
-{ 
+// Add Blazing.Mvvm
+builder.Services.AddMvvm(options =>
+{
     options.HostingModelType = BlazorHostingModelType.WebApp;
+    options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
+    options.RegisterViewModelsFromAssemblyContaining<Blazing.Mvvm.Sample.WebApp.Client._Imports>();
 });
 
 var app = builder.Build();
@@ -42,6 +44,9 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(Counter).Assembly);
+    .AddAdditionalAssemblies(typeof(Blazing.Mvvm.Sample.WebApp.Client._Imports).Assembly);
+
+app.MapGet("/api/weatherforecast", (IWeatherService weatherService, CancellationToken cancellationToken)
+    => weatherService.GetForecastAsync(cancellationToken));
 
 app.Run();

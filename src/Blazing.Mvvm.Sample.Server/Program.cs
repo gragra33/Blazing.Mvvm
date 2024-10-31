@@ -1,22 +1,20 @@
 using Blazing.Mvvm;
-using Blazing.Mvvm.Infrastructure;
-using Blazing.Mvvm.Sample.Server;
 using Blazing.Mvvm.Sample.Server.Data;
+using CommunityToolkit.Mvvm.Messaging;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddSingleton<IWeatherService, WeatherService>();
+builder.Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
 
-// register ViewModels
-builder.Services.AddViewModels();
-
-// enable MvvmNavigationManager for server
-builder.Services.AddMvvmNavigation(options =>
-{ 
+// Add Blazing.Mvvm
+builder.Services.AddMvvm(options =>
+{
     options.HostingModelType = BlazorHostingModelType.Server;
+    options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
 });
 
 #if DEBUG

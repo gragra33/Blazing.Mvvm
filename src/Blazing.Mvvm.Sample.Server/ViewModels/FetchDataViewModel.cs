@@ -1,29 +1,35 @@
-﻿using Blazing.Mvvm.Sample.Server.Models;
-using System.Collections.ObjectModel;
-using Blazing.Mvvm.ComponentModel;
+﻿using Blazing.Mvvm.ComponentModel;
+using Blazing.Mvvm.Sample.Server.Data;
+using Blazing.Mvvm.Sample.Server.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Blazing.Mvvm.Sample.Server.ViewModels;
 
-public partial class FetchDataViewModel : ViewModelBase
+[ViewModelDefinition(Lifetime = ServiceLifetime.Scoped)]
+public sealed partial class FetchDataViewModel : ViewModelBase, IDisposable
 {
+    private readonly IWeatherService _weatherService;
+    private readonly ILogger<FetchDataViewModel> _logger;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+
     [ObservableProperty]
-    private ObservableCollection<WeatherForecast> _weatherForecasts = new();
+    private IEnumerable<WeatherForecast>? _weatherForecasts;
 
-    public override async Task Loaded()
-        => WeatherForecasts = new ObservableCollection<WeatherForecast>(Get());
-
-    private static readonly string[] Summaries =
+    public FetchDataViewModel(IWeatherService weatherService, ILogger<FetchDataViewModel> logger)
     {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
+        _weatherService = weatherService;
+        _logger = logger;
+    }
 
-    public IEnumerable<WeatherForecast> Get()
-        => Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+    public override async Task OnInitializedAsync()
+    {
+        WeatherForecasts = await _weatherService.GetForecastAsync() ?? [];
+    }
+
+    public void Dispose()
+    {
+        _logger.LogInformation("Disposing {VMName}.", nameof(FetchDataViewModel));
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+    }
 }

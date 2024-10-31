@@ -5,75 +5,94 @@ using Microsoft.AspNetCore.Components;
 namespace Blazing.Mvvm.Components;
 
 /// <summary>
-/// A base class that resolves a ViewModel of type <typeparam name="TViewModel"></typeparam>/>.
+/// A base class that resolves a ViewModel of type <typeparamref name="TViewModel"/>.
 /// </summary>
 /// <typeparam name="TViewModel">The ViewModel.</typeparam>
-/// <remarks>
-/// Use the <see cref="T:Blazing.Mvvm.Components.MvvmComponentBase" /> class as a base class to author components that control
-/// the lifetime of a ViewModel. This is useful when using a transient or scoped service that
-/// requires disposal. Using <see cref="T:Blazing.Mvvm.Components.MvvmComponentBase" />
-/// as a base class ensures that the ViewModel is disposed with the component.
-/// </remarks>
-public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IAsyncDisposable, IDisposable, IView<TViewModel> where TViewModel : IViewModelBase
+public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TViewModel>
+    where TViewModel : IViewModelBase
 {
-    private bool _disposed;
+    /// <summary>
+    /// Indicates if the component has been disposed.
+    /// </summary>
+    protected bool IsDisposed { get; private set; }
 
+    /// <summary>
+    /// The <c>ViewModel</c> associated with this component, resolved from the dependency injection container.
+    /// </summary>
     [Inject]
-    protected TViewModel? ViewModel { get; set; }
+    protected virtual TViewModel ViewModel { get; set; } = default!;
 
+    /// <summary>
+    /// Resolves parameters in the <c>View</c> and <c>ViewModel</c>.
+    /// </summary>
+    [Inject]
+    protected IParameterResolver ParameterResolver { get; set; } = default!;
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <inheritdoc/>
+    protected override void OnAfterRender(bool firstRender)
+        => ViewModel.OnAfterRender(firstRender);
+
+    /// <inheritdoc/>
+    protected override Task OnAfterRenderAsync(bool firstRender)
+        => ViewModel.OnAfterRenderAsync(firstRender);
+
+    /// <inheritdoc/>
     protected override void OnInitialized()
     {
-        // Cause changes to the ViewModel to make Blazor re-render
-        ViewModel!.PropertyChanged += OnPropertyChanged;
-        base.OnInitialized();
+        ViewModel.PropertyChanged += OnPropertyChanged;
+        ViewModel.OnInitialized();
+    }
+
+    /// <inheritdoc/>
+    protected override Task OnInitializedAsync()
+        => ViewModel.OnInitializedAsync();
+
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
+        => ViewModel.OnParametersSet();
+
+    /// <inheritdoc/>
+    protected override Task OnParametersSetAsync()
+        => ViewModel.OnParametersSetAsync();
+
+    /// <inheritdoc/>
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        return ParameterResolver.SetParameters(this, ViewModel, parameters)
+            ? base.SetParametersAsync(ParameterView.Empty)
+            : base.SetParametersAsync(parameters);
+    }
+
+    /// <inheritdoc/>
+    protected override bool ShouldRender()
+        => ViewModel.ShouldRender();
+
+    /// <summary>
+    /// Disposes the component and releases unmanaged resources.
+    /// </summary>
+    /// <param name="disposing">A boolean value indicating whether the method was called from the dispose method or from a finalizer.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (IsDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            ViewModel.PropertyChanged -= OnPropertyChanged;
+        }
+
+        IsDisposed = true;
     }
 
     private void OnPropertyChanged(object? o, PropertyChangedEventArgs propertyChangedEventArgs)
         => InvokeAsync(StateHasChanged);
-
-    protected override Task OnInitializedAsync()
-        => ViewModel!.OnInitializedAsync();
-
-    #region Dispose
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposed)
-            return;
-
-        if (disposing)
-            ViewModel!.PropertyChanged -= OnPropertyChanged;
-
-#if DEBUG
-        Console.WriteLine($"..Disposing: {GetType().FullName}");
-#endif
-        _disposed = true;
-    }
-
-    public void Dispose()
-    {
-        if (_disposed)
-            return;
-
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
-    async ValueTask IAsyncDisposable.DisposeAsync()
-    {
-        if (_disposed)
-            return;
-
-        TViewModel? viewModel = ViewModel;
-
-        if (viewModel is IAsyncDisposable asyncDisposable)
-            await asyncDisposable.DisposeAsync();
-
-        if (viewModel is IDisposable disposable)
-            disposable.Dispose();
-
-        Dispose();
-    }
-
-    #endregion
 }

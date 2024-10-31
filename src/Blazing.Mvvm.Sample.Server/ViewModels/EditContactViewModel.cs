@@ -1,26 +1,35 @@
-﻿using Blazing.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+﻿using System.ComponentModel;
+using Blazing.Mvvm.ComponentModel;
 using Blazing.Mvvm.Sample.Server.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Blazing.Mvvm.Sample.Server.ViewModels;
 
-public partial class EditContactViewModel : ViewModelBase
+public sealed partial class EditContactViewModel : ViewModelBase, IDisposable
 {
+    private readonly ILogger<EditContactViewModel> _logger;
+
     [ObservableProperty]
     private ContactInfo _contact = new();
 
-    [RelayCommand]
-    private void Save()
+    public EditContactViewModel(ILogger<EditContactViewModel> logger)
     {
-        Contact.Validate();
-        Console.WriteLine(Contact.HasErrors
-            ? "After validating, errors found!"
-            : "Sending contact to server!");
+        _logger = logger;
+        Contact.PropertyChanged += ContactOnPropertyChanged;
     }
 
+    public void Dispose()
+        => Contact.PropertyChanged -= ContactOnPropertyChanged;
 
     [RelayCommand]
-    protected void ClearForm()
+    private void ClearForm()
         => Contact = new ContactInfo();
+
+    [RelayCommand]
+    private void Save()
+        => _logger.LogInformation("Form is valid and submitted!");
+
+    private void ContactOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        => NotifyStateChanged();
 }

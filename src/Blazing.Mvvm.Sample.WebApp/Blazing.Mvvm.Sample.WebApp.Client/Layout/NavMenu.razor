@@ -1,6 +1,6 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Blazing.Mvvm.Sample.WebApp</a>
+        <a class="navbar-brand" href="">Sample.WebApp</a>
     </div>
 </div>
 
@@ -21,26 +21,26 @@
         </div>
 
         <div class="nav-item px-3">
-            <MvvmNavLink class="nav-link" TViewModel=EditContactViewModel>
+            <MvvmNavLink class="nav-link" TViewModel="EditContactViewModel">
                 <span class="bi bi-list-nested" aria-hidden="true"></span> Form
             </MvvmNavLink>
         </div>
 
         <div class="nav-item px-3">
-            <MvvmNavLink class="nav-link" TViewModel=WeatherViewModel>
-                <span class="bi bi-list-nested" aria-hidden="true"></span> Weather
+            <MvvmNavLink class="nav-link" TViewModel="FetchDataViewModel">
+                <span class="bi bi-list-nested" aria-hidden="true"></span> Fetch data
             </MvvmNavLink>
         </div>
 
         <div class="nav-item px-3">
-            <MvvmNavLink class="nav-link" TViewModel=HexTranslateViewModel>
+            <MvvmNavLink class="nav-link" TViewModel="HexTranslateViewModel">
                 <span class="bi bi-list-nested" aria-hidden="true"></span> Hex translate
             </MvvmNavLink>
         </div>
 
         <div class="nav-item px-3">
             <MvvmNavLink class="nav-link"
-                         TViewModel=ITestNavigationViewModel
+                         TViewModel="ITestNavigationViewModel"
                          Match="NavLinkMatch.All">
                 <span class="bi bi-list-nested" aria-hidden="true"></span> Test
             </MvvmNavLink>
@@ -48,7 +48,7 @@
 
         <div class="nav-item px-3">
             <MvvmNavLink class="nav-link"
-                         TViewModel=ITestNavigationViewModel
+                         TViewModel="ITestNavigationViewModel"
                          RelativeUri="this is a MvvmNavLink test"
                          Match="NavLinkMatch.All">
                 <span class="bi bi-list-nested" aria-hidden="true"></span> Test + Params
@@ -57,7 +57,7 @@
 
         <div class="nav-item px-3">
             <MvvmNavLink class="nav-link"
-                         TViewModel=ITestNavigationViewModel
+                         TViewModel="ITestNavigationViewModel"
                          RelativeUri="?test=this%20is%20a%20MvvmNavLink%20querystring%20test"
                          Match="NavLinkMatch.All">
                 <span class="bi bi-list-nested" aria-hidden="true"></span> Test + QueryString
@@ -66,7 +66,7 @@
 
         <div class="nav-item px-3">
             <MvvmNavLink class="nav-link"
-                         TViewModel=ITestNavigationViewModel
+                         TViewModel="ITestNavigationViewModel"
                          RelativeUri="this is a MvvmNvLink test/?test=this%20is%20a%20MvvmNavLink%20querystring%20test"
                          Match="NavLinkMatch.All">
                 <span class="bi bi-list-nested" aria-hidden="true"></span> Test + Both

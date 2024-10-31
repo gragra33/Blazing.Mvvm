@@ -1,21 +1,26 @@
 ﻿@page "/form"
 @inherits MvvmComponentBase<EditContactViewModel>
 
-<EditForm Model="ViewModel.Contact">
-    <MvvmValidationSummary Context="ViewModel.Contact"/>
+<EditForm Model="ViewModel.Contact" FormName="EditContact" OnValidSubmit="ViewModel.SaveCommand.Execute">
+    <MvvmObservableValidator />
+    <ValidationSummary aria-label="validation summary" />
+
     <div class="row g-3">
         <div class="col-12">
             <label class="form-label">Name:</label>
-            <InputText @bind-Value="ViewModel.Contact.Name" class="form-control" placeholder="Some Name"></InputText>
+            <InputText aria-label="name" @bind-Value="ViewModel.Contact.Name" class="form-control" placeholder="Some Name" />
+            <ValidationMessage For="() => ViewModel.Contact.Name" aria-label="name validation message" />
         </div>
 
         <div class="col-12">
             <label class="form-label">Email:</label>
-            <InputText @bind-Value="ViewModel.Contact.Email" class="form-control" placeholder="user@domain.tld"></InputText>
+            <InputText aria-label="email" @bind-Value="ViewModel.Contact.Email" class="form-control" placeholder="user@domain.tld" />
+            <ValidationMessage For="() => ViewModel.Contact.Email" aria-label="email validation message" />
         </div>
         <div class="col-12">
             <label class="form-label">Phone Number:</label>
-            <InputText @bind-Value="ViewModel.Contact.PhoneNumber" class="form-control" placeholder="555-1212"></InputText>
+            <InputText aria-label="phone number" @bind-Value="ViewModel.Contact.PhoneNumber" class="form-control" placeholder="555-1212" />
+            <ValidationMessage For="() => ViewModel.Contact.PhoneNumber" aria-label="phone number validation message" />
         </div>
     </div>
 
@@ -23,14 +28,13 @@
 
     <div class="row">
         <button class="btn btn-primary btn-lg col"
-                type="submit" @onclick="() => ViewModel.SaveCommand.Execute(null)"
-                disabled="@(ViewModel.Contact.HasErrors)">
-            Save
+                type="submit"
+                disabled="@ViewModel.Contact.HasErrors">
+        Save
         </button>
         <button class="btn btn-secondary btn-lg col"
-                type="button" @onclick="() => ViewModel.ClearFormCommand.Execute(null)">
+                type="button" @onclick="ViewModel.ClearFormCommand.Execute">
             Clear Form
         </button>
     </div>
-
 </EditForm>
