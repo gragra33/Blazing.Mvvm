@@ -75,42 +75,38 @@
         </div>
 
         <div class="nav-item px-3">
-            <MvvmNavLink class="nav-link"
-                         TViewModel="ITestNavigationViewModel"
+            <MvvmKeyNavLink class="nav-link"
                          NavigationKey="@nameof(TestNamedNavigationViewModel)"
                          Match="NavLinkMatch.All">
                 <span class="oi oi-calculator" aria-hidden="true"></span> Keyed Test
-            </MvvmNavLink>
+            </MvvmKeyNavLink>
         </div>
 
         <div class="nav-item px-3">
-            <MvvmNavLink class="nav-link"
-                         TViewModel="ITestNavigationViewModel"
+            <MvvmKeyNavLink class="nav-link"
                          NavigationKey="@nameof(TestNamedNavigationViewModel)"
                          RelativeUri="this is a MvvmNavLink test"
                          Match="NavLinkMatch.All">
                 <span class="oi oi-calculator" aria-hidden="true"></span> Keyed + Params
-            </MvvmNavLink>
+            </MvvmKeyNavLink>
         </div>
 
         <div class="nav-item px-3">
-            <MvvmNavLink class="nav-link"
-                         TViewModel="ITestNavigationViewModel"
+            <MvvmKeyNavLink class="nav-link"
                          NavigationKey="@nameof(TestNamedNavigationViewModel)"
                          RelativeUri="?test=this%20is%20a%20MvvmNavLink%20querystring%20test"
                          Match="NavLinkMatch.All">
                 <span class="oi oi-calculator" aria-hidden="true"></span> Keyed + QueryString
-            </MvvmNavLink>
+            </MvvmKeyNavLink>
         </div>
 
         <div class="nav-item px-3">
-            <MvvmNavLink class="nav-link"
-                         TViewModel="ITestNavigationViewModel"
+            <MvvmKeyNavLink class="nav-link"
                          NavigationKey="@nameof(TestNamedNavigationViewModel)"
                          RelativeUri="this is a MvvmNavLink test/?test=this%20is%20a%20MvvmNavLink%20querystring%20test"
                          Match="NavLinkMatch.All">
                 <span class="oi oi-calculator" aria-hidden="true"></span> Keyed + Both
-            </MvvmNavLink>
+            </MvvmKeyNavLink>
         </div>
     </nav>
 </div>
