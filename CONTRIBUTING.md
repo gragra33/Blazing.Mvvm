@@ -15,7 +15,7 @@ Obviously...
 
 Mostly. But pretty much exclusively for non-maintainers. You'll need to fork the repo in order to submit a pull request. Here are the basic steps:
 
-1. Fork the repo and create your branch from `main`.
+1. Fork the repo and create your branch from `updates`.
 2. If you've added code that should be tested, add tests.
 3. If you've changed APIs, update the documentation.
 4. Ensure the test suite passes.
