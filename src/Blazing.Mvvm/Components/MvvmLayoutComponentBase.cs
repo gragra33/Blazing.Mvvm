@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Reflection;
 using Blazing.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 
@@ -11,16 +12,27 @@ namespace Blazing.Mvvm.Components;
 public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase, IView<TViewModel>
     where TViewModel : IViewModelBase
 {
+    private TViewModel? _viewModel;
+
     /// <summary>
     /// Indicates if the component has been disposed.
     /// </summary>
     protected bool IsDisposed { get; private set; }
 
     /// <summary>
-    /// The <c>ViewModel</c> associated with this component, resolved from the dependency injection container.
+    /// The service provider for resolving services.
     /// </summary>
     [Inject]
-    protected virtual TViewModel ViewModel { get; set; } = default!;
+    protected IServiceProvider Services { get; set; } = default!;
+
+    /// <summary>
+    /// The <c>ViewModel</c> associated with this component, resolved from the dependency injection container.
+    /// </summary>
+    protected virtual TViewModel ViewModel
+    {
+        get => SetViewModel();
+        set => _viewModel = value;
+    }
 
     /// <summary>
     /// Resolves parameters in the <c>View</c> and <c>ViewModel</c>.
@@ -91,6 +103,20 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
         }
 
         IsDisposed = true;
+    }
+
+    private TViewModel SetViewModel()
+    {
+        if (_viewModel != null) return
+            _viewModel;
+
+        ViewModelDefinitionAttribute? viewModelDefinition = GetType().GetCustomAttribute<ViewModelDefinitionAttribute>();
+
+        _viewModel = viewModelDefinition != null
+            ? Services.GetRequiredKeyedService<TViewModel>(viewModelDefinition.Key)
+            : Services.GetRequiredService<TViewModel>();
+
+        return _viewModel;
     }
 
     private void OnPropertyChanged(object? o, PropertyChangedEventArgs propertyChangedEventArgs)

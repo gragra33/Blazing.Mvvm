@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Reflection;
 using Blazing.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,19 +19,14 @@ namespace Blazing.Mvvm.Components;
 public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase, IView<TViewModel>, IAsyncDisposable
     where TViewModel : IViewModelBase
 {
-    private TViewModel _viewModel = default!;
+    private TViewModel? _viewModel;
 
     /// <summary>
     /// The <c>ViewModel</c> associated with this component, resolved from the <see cref="OwningComponentBase.ScopedServices"/>.
     /// </summary>
     protected virtual TViewModel ViewModel
     {
-        get
-        {
-            _viewModel ??= ScopedServices.GetRequiredService<TViewModel>();
-            return _viewModel;
-        }
-
+        get => SetViewModel();
         set => _viewModel = value;
     }
 
@@ -122,6 +118,20 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
         }
 
         await asyncDisposable.DisposeAsync();
+    }
+
+    private TViewModel SetViewModel()
+    {
+        if (_viewModel != null) return
+            _viewModel;
+
+        ViewModelDefinitionAttribute? viewModelDefinition = GetType().GetCustomAttribute<ViewModelDefinitionAttribute>();
+
+        _viewModel = viewModelDefinition != null
+            ? ScopedServices.GetRequiredKeyedService<TViewModel>(viewModelDefinition.Key)
+            : ScopedServices.GetRequiredService<TViewModel>();
+
+        return _viewModel;
     }
 
     private void OnPropertyChanged(object? o, PropertyChangedEventArgs propertyChangedEventArgs)
