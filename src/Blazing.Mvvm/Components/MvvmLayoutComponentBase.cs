@@ -2,6 +2,7 @@
 using System.Reflection;
 using Blazing.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazing.Mvvm.Components;
 
