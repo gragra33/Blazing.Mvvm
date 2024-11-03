@@ -4,14 +4,15 @@
 
 This is a major release with breaking changes, migration notes can be found [here](docs/migration-notes/v1.4_to_v2.md).
 
-- Added support for `OwningComponentBase` with new base classes `MvvmOwningComponentBase<TViewModel>` &amp; `MvvmOwningComponentBase<TViewModel, TService>` - thanks to [@Stylus VB](https://www.codeproject.com/script/Membership/View.aspx?mid=6021896) for the suggestion. [@gragra33](https://github.com/gragra33)
 - Added auto registration and discovery of view models. [@mishael-o](https://github.com/mishael-o)
 - Added support for keyed view models. [@mishael-o](https://github.com/mishael-o)
-- Added support for keyed view models to `MvvmNavLink` & `MvvmNavigationManager`. [@gragra33](https://github.com/gragra33)
+- Added support for keyed view models to `MvvmNavLink`, `MvvmKeyNavLink` (new component), `MvvmNavigationManager`, `MvvmComponentBase`, `MvvmOwningComponentBase`, & `MvvmLayoutComponentBase`. [@gragra33](https://github.com/gragra33)
 - Added a `MvvmObservableValidator` component which provides support for `ObservableValidator`. [@mishael-o](https://github.com/mishael-o)
 - Added parameter resolution in the ViewModel. [@mishael-o](https://github.com/mishael-o)
+- Added new `TestKeyedNavigation` samples for Keyed Navigation. [@gragra33](https://github.com/gragra33)
+- Added & Updated tests for all changes made. [@mishael-o](https://github.com/mishael-o) & [@gragra33](https://github.com/gragra33)
 - Dropped support for .NET 7. [@mishael-o](https://github.com/mishael-o)
-- Documentation updates. [@mishael-o](https://github.com/mishael-o)
+- Documentation updates. [@mishael-o](https://github.com/mishael-o) & [@gragra33](https://github.com/gragra33)
 
 **BREAKING CHANGES:**
 - Renamed `BlazorHostingModel` to `BlazorHostingModelType` to avoid confusion

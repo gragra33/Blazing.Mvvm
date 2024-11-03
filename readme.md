@@ -232,6 +232,18 @@ public partial class FetchDataViewModel : ViewModelBase, IFetchDataViewModel
 }
 ```
 
+In the `View` component, use the `Inject` attribute to specify the key of the ViewModel:
+
+```xml
+@page "/fetchdata"
+@inherits MvvmComponentBase<IFetchDataViewModel>
+
+@code {
+    [Inject(Key = "FetchDataViewModel")]
+    protected override FetchDataViewModel ViewModel { get; set; }
+}
+```
+
 To register the ViewModel as a keyed service, use the `ViewModelDefinition` attribute with the `Key` property:
 
 ```csharp
@@ -242,16 +254,12 @@ public partial class FetchDataViewModel : ViewModelBase
 }
 ```
 
-In the `View` component, use the `Inject` attribute to specify the key of the ViewModel:
+In the `View` component, use the `ViewModelDefinition` attribute to specify the key of the ViewModel:
 
 ```xml
 @page "/fetchdata"
+@attribute [ViewModelDefinition(Key = "FetchDataViewModel")]
 @inherits MvvmComponentBase<FetchDataViewModel>
-
-@code {
-    [Inject(Key = "FetchDataViewModel")]
-    protected override FetchDataViewModel ViewModel { get; set; }
-}
 ```
 
 #### Parameter Resolution
@@ -286,7 +294,7 @@ public partial class SampleViewModel : ViewModelBase
 }
 ```
 
-In the `View` component, the parameters should be defined as properties with the `Parameter` attribute.
+In the `View` component, the parameters should be defined as properties with the `Parameter` attribute:
 
 ```xml
 @inherits MvvmComponentBase<SampleViewModel>
@@ -343,7 +351,7 @@ If you prefer abstraction, you can also navigate by interface as shown below:
 mvvmNavigationManager.NavigateTo<ITestNavigationViewModel>();
 ```
 
-The same principle works with the `MvvmNavLink` component.
+The same principle works with the `MvvmNavLink` component:
 
 ```xml
 <div class="nav-item px-3">
@@ -376,6 +384,53 @@ The same principle works with the `MvvmNavLink` component.
                  Match="NavLinkMatch.All">
         <span class="oi oi-calculator" aria-hidden="true"></span>Test + Both
     </MvvmNavLink>
+</div>
+```
+
+**Navigate by ViewModel Key using the `MvvmNavigationManager` from code:**
+
+Inject the `MvvmNavigationManager` class into your page or ViewModel, then use the `NavigateTo` method:
+
+```csharp
+MvvmNavigationManager.NavigateTo("FetchDataViewModel");
+```
+
+The same principle works with the `MvvmKeyNavLink` component:
+
+```xml
+<div class="nav-item px-3">
+    <MvvmKeyNavLink class="nav-link"
+                    NavigationKey="@nameof(TestKeyedNavigationViewModel)"
+                    Match="NavLinkMatch.All">
+        <span class="oi oi-calculator" aria-hidden="true"></span> Keyed Test
+    </MvvmKeyNavLink>
+</div>
+
+<div class="nav-item px-3">
+    <MvvmKeyNavLink class="nav-link"
+                    NavigationKey="@nameof(TestKeyedNavigationViewModel)"
+                    RelativeUri="this is a MvvmKeyNavLink test"
+                    Match="NavLinkMatch.All">
+        <span class="oi oi-calculator" aria-hidden="true"></span> Keyed + Params
+    </MvvmKeyNavLink>
+</div>
+
+<div class="nav-item px-3">
+    <MvvmKeyNavLink class="nav-link"
+                    NavigationKey="@nameof(TestKeyedNavigationViewModel)"
+                    RelativeUri="?test=this%20is%20a%20MvvmKeyNavLink%20querystring%20test"
+                    Match="NavLinkMatch.All">
+        <span class="oi oi-calculator" aria-hidden="true"></span> Keyed + QueryString
+    </MvvmKeyNavLink>
+</div>
+
+<div class="nav-item px-3">
+    <MvvmKeyNavLink class="nav-link"
+                    NavigationKey="@nameof(TestKeyedNavigationViewModel)"
+                    RelativeUri="this is a MvvmKeyNavLink test/?test=this%20is%20a%20MvvmKeyNavLink%20querystring%20test"
+                    Match="NavLinkMatch.All">
+        <span class="oi oi-calculator" aria-hidden="true"></span> Keyed + Both
+    </MvvmKeyNavLink>
 </div>
 ```
 
@@ -510,10 +565,15 @@ This is a major release with breaking changes, migration notes can be found [her
 
 - Added auto registration and discovery of view models. [@mishael-o](https://github.com/mishael-o)
 - Added support for keyed view models. [@mishael-o](https://github.com/mishael-o)
-- Added support for keyed view models to `MvvmNavLink`, `MvvmKeyNavLink` (new component), `MvvmNavigationManager`, ``. [@gragra33](https://github.com/gragra33)
+- Added support for keyed view models to `MvvmNavLink`, `MvvmKeyNavLink` (new component), `MvvmNavigationManager`, `MvvmComponentBase`, `MvvmOwningComponentBase`, & `MvvmLayoutComponentBase`. [@gragra33](https://github.com/gragra33)
 - Added a `MvvmObservableValidator` component which provides support for `ObservableValidator`. [@mishael-o](https://github.com/mishael-o)
 - Added parameter resolution in the ViewModel. [@mishael-o](https://github.com/mishael-o)
+- Added new `TestKeyedNavigation` samples for Keyed Navigation. [@gragra33](https://github.com/gragra33)
+- Added & Updated tests for all changes made. [@mishael-o](https://github.com/mishael-o) & [@gragra33](https://github.com/gragra33)
 - Dropped support for .NET 7. [@mishael-o](https://github.com/mishael-o)
-- Documentation updates. [@mishael-o](https://github.com/mishael-o)
+- Documentation updates. [@mishael-o](https://github.com/mishael-o) & [@gragra33](https://github.com/gragra33)
 
-The full history can be found in the  [Version Tracking](https://github.com/gragra33/Blazing.Mvvm/HISTORY.md) documentation.
+**BREAKING CHANGES:**
+- Renamed `BlazorHostingModel` to `BlazorHostingModelType` to avoid confusion
+
+The full history can be found in the [Version Tracking](https://github.com/gragra33/Blazing.Mvvm/HISTORY.md) documentation.
