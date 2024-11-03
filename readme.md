@@ -510,7 +510,7 @@ This is a major release with breaking changes, migration notes can be found [her
 
 - Added auto registration and discovery of view models. [@mishael-o](https://github.com/mishael-o)
 - Added support for keyed view models. [@mishael-o](https://github.com/mishael-o)
-- Added support for keyed view models to `MvvmNavLink` & `MvvmNavigationManager`. [@gragra33](https://github.com/gragra33)
+- Added support for keyed view models to `MvvmNavLink`, `MvvmKeyNavLink` (new component), `MvvmNavigationManager`, ``. [@gragra33](https://github.com/gragra33)
 - Added a `MvvmObservableValidator` component which provides support for `ObservableValidator`. [@mishael-o](https://github.com/mishael-o)
 - Added parameter resolution in the ViewModel. [@mishael-o](https://github.com/mishael-o)
 - Dropped support for .NET 7. [@mishael-o](https://github.com/mishael-o)
