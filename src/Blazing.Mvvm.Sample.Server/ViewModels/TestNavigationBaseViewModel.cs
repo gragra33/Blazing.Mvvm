@@ -5,7 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 
-namespace Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
+namespace Blazing.Mvvm.Sample.Server.ViewModels;
 
 public abstract partial class TestNavigationBaseViewModel : ViewModelBase, ITestNavigationViewModel
 {

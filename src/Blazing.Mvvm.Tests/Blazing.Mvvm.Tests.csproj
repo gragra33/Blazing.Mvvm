@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="bunit.web.query" Version="1.28.4-preview" />
-    <PackageReference Include="bunit" Version="1.33.3" />    
+    <PackageReference Include="bunit" Version="1.34.0" />    
     <PackageReference Include="FluentAssertions" Version="6.12.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="Moq.AutoMock" Version="3.5.0" />

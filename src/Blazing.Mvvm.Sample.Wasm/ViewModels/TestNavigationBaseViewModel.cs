@@ -28,6 +28,7 @@ public abstract partial class TestNavigationBaseViewModel : ViewModelBase, ITest
         NavigationManager.LocationChanged += OnLocationChanged;
     }
 
+    [ViewParameter] // populated by MvvmComponentBase
     public string? Echo { get; set; } = string.Empty;
 
     public RelayCommand HexTranslateNavigateCommand

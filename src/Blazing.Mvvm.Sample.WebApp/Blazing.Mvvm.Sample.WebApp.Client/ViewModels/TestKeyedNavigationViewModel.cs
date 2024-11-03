@@ -3,14 +3,14 @@ using Blazing.Mvvm.Components;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
 
-namespace Blazing.Mvvm.Sample.Wasm.ViewModels;
+namespace Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
 
-[ViewModelDefinition(Key = nameof(TestNamedNavigationViewModel))]
-public sealed class TestNamedNavigationViewModel(IMvvmNavigationManager mvvmNavigationManager, NavigationManager navigationManager)
+[ViewModelDefinition(Key = nameof(TestKeyedNavigationViewModel))]
+public sealed class TestKeyedNavigationViewModel(IMvvmNavigationManager mvvmNavigationManager, NavigationManager navigationManager)
     : TestNavigationBaseViewModel(mvvmNavigationManager, navigationManager)
 {
     public override RelayCommand<string> TestNavigateCommand
-        => TestNavigateCommandImpl ??= new RelayCommand<string>(s => Navigate(nameof(TestNamedNavigationViewModel), s));
+        => TestNavigateCommandImpl ??= new RelayCommand<string>(s => Navigate(nameof(TestKeyedNavigationViewModel), s));
 
     private void Navigate(string key, string? @params = null)
     {

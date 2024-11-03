@@ -84,4 +84,51 @@ public class MvvmNavigationManagerTests
         // Assert
         uri.Should().Be("/test");
     }
+
+    [Fact]
+    public void NavigateTo_GivenInvalidKey_ShouldThrowArgumentException()
+    {
+        // Arrange
+        Mock<NavigationManager> navigationManagerMock = new();
+        Mock<ILogger<MvvmNavigationManager>> loggerMock = new();
+        MvvmNavigationManager mvvmNavigationManager = new(navigationManagerMock.Object, loggerMock.Object);
+
+        // Act
+        var act = () => mvvmNavigationManager.NavigateTo("InvalidKey");
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("No associated page for key 'InvalidKey'");
+    }
+
+    [Fact]
+    public void GetUri_GivenInvalidKey_ShouldThrowArgumentException()
+    {
+        // Arrange
+        Mock<NavigationManager> navigationManagerMock = new();
+        Mock<ILogger<MvvmNavigationManager>> loggerMock = new();
+        MvvmNavigationManager mvvmNavigationManager = new(navigationManagerMock.Object, loggerMock.Object);
+
+        // Act
+        var act = () => mvvmNavigationManager.GetUri("InvalidKey");
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("No associated page for key 'InvalidKey'");
+    }
+
+    [Fact]
+    public void GetUri_GivenValidKey_ShouldReturnUri()
+    {
+        // Arrange
+        Mock<NavigationManager> navigationManagerMock = new();
+        Mock<ILogger<MvvmNavigationManager>> loggerMock = new();
+        MvvmNavigationManager mvvmNavigationManager = new(navigationManagerMock.Object, loggerMock.Object);
+
+        // Act
+        string uri = mvvmNavigationManager.GetUri(nameof(TestKeyedNavigationViewModel));
+
+        // Assert
+        uri.Should().Be("/keyedtest");
+    }
 }
