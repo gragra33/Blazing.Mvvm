@@ -1,12 +1,19 @@
 ﻿using Blazing.Mvvm.Sample.WebApp.Client.Pages;
 using Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
 using Bunit;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Blazing.Mvvm.Tests.ComponentTests;
 
 public class CounterTests : ComponentTestBase
 {
+    public CounterTests()
+    {
+        // Add a view model to Services because the IScopedFactory created by BUnit does not fall back to AutoMocker.
+        Services.AddScoped(_ => CreateInstance<CounterViewModel>(true));
+    }
+
     private const string ParagraphSelector = "p";
 
     [Theory]
