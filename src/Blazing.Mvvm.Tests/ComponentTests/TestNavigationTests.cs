@@ -15,7 +15,7 @@ public class TestNavigationTests : ComponentTestBase
         // Add services to the DI container. AutoMocker will not resolve these services.
         Services.AddSingleton<IMvvmNavigationManager, MvvmNavigationManager>();
         Services.AddSingleton<ITestNavigationViewModel, TestNavigationViewModel>();
-        Services.AddKeyedSingleton<TestKeyedNavigationViewModel>(nameof(TestKeyedNavigationViewModel));
+        Services.AddKeyedSingleton<ITestKeyedNavigationViewModel, TestKeyedNavigationViewModel>("TestKeyedNavigationViewModel");
         Services.AddSingleton<IParameterResolver>(_ => new ParameterResolver(ParameterResolutionMode.ViewModel));
     }
 
@@ -171,7 +171,7 @@ public class TestNavigationTests : ComponentTestBase
         const string relativePathParagraphAriaLabel = "relative path";
 
         var cut = RenderComponent<TestKeyedNavigation>();
-        var cutViewModel = GetViewModel<TestKeyedNavigationViewModel>(nameof(TestKeyedNavigationViewModel));
+        var cutViewModel = GetViewModel<ITestKeyedNavigationViewModel>("TestKeyedNavigationViewModel");
         var fakeNavigationManager = GetService<FakeNavigationManager>();
         /* Simulating setting Echo after navigation */
         fakeNavigationManager.LocationChanged += (_, _)
@@ -202,7 +202,7 @@ public class TestNavigationTests : ComponentTestBase
 
         var fakeNavigationManager = GetService<FakeNavigationManager>();
         var cut = RenderComponent<TestKeyedNavigation>();
-        var cutViewModel = GetViewModel<TestKeyedNavigationViewModel>(nameof(TestKeyedNavigationViewModel));
+        var cutViewModel = GetViewModel<ITestKeyedNavigationViewModel>("TestKeyedNavigationViewModel");
 
         // Act
         cut.Find(testQueryStringButtonSelector).Click();
@@ -231,7 +231,7 @@ public class TestNavigationTests : ComponentTestBase
         const string testRelativePathQueryStringButtonSelector = "#keyedtest-relpath-qstring";
 
         var cut = RenderComponent<TestKeyedNavigation>();
-        var cutViewModel = GetViewModel<TestKeyedNavigationViewModel>(nameof(TestKeyedNavigationViewModel));
+        var cutViewModel = GetViewModel<ITestKeyedNavigationViewModel>("TestKeyedNavigationViewModel");
         var fakeNavigationManager = GetService<FakeNavigationManager>();
         /* Simulating setting Echo after navigation */
         fakeNavigationManager.LocationChanged += (_, _) =>
