@@ -254,7 +254,7 @@ public partial class FetchDataViewModel : ViewModelBase
 }
 ```
 
-In the `View` component, use the `ViewModelDefinition` attribute to specify the key of the ViewModel:
+In the `View` component, use the `ViewModelKey` attribute to specify the key of the ViewModel:
 
 ```xml
 @page "/fetchdata"
