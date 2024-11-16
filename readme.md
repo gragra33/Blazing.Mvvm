@@ -21,6 +21,8 @@ This project expands upon the [blazor-mvvm](https://github.com/IntelliTect-Sampl
     - [View Model](#view-model)
       - [Lifecycle Methods](#lifecycle-methods)
       - [Service Registration](#service-registration)
+        - [Registering ViewModels with Interfaces or Abstract Classes](#registering-viewmodels-with-interfaces-or-abstract-classes)
+        - [Registering Keyed ViewModels](#registering-keyed-viewmodels)
       - [Parameter Resolution](#parameter-resolution)
     - [MVVM Navigation](#mvvm-navigation)
       - [Navigate by abstraction](#navigate-by-abstraction)
@@ -222,7 +224,16 @@ public partial class FetchDataViewModel : ViewModelBase
 }
 ```
 
-To register the ViewModel with a specific interface or abstract class, use the `ViewModelDefinition` generic attribute.
+In the `View` component, inherit the `MvvmComponentBase` type and set the generic argument to the `ViewModel`:
+
+```xml
+@page "/fetchdata"
+@inherits MvvmComponentBase<FetchDataViewModel>
+```
+
+##### Registering ViewModels with Interfaces or Abstract Classes
+
+To register the `ViewModel` with a specific interface or abstract class, use the `ViewModelDefinition` generic attribute:
 
 ```csharp
 [ViewModelDefinition<IFetchDataViewModel>]
@@ -232,25 +243,26 @@ public partial class FetchDataViewModel : ViewModelBase, IFetchDataViewModel
 }
 ```
 
-In the `View` component, use the `ViewModelDefinition` attribute to specify the key of the ViewModel and the `MvvmComponentBase` type set to `IFetchDataViewModel`:
+In the `View` component, inherit the `MvvmComponentBase` type and set the generic argument to the interface or abstract class:
 
 ```xml
 @page "/fetchdata"
-@attribute [ViewModelDefinition(Key = "FetchDataViewModel")]
 @inherits MvvmComponentBase<IFetchDataViewModel>
 ```
 
-To register the ViewModel as a keyed service, use the `ViewModelDefinition` attribute type set to `IFetchDataViewModel` with the `Key` property:
+##### Registering Keyed ViewModels
+
+To register the `ViewModel` as a keyed service, use the `ViewModelDefinition` attribute (this also applies to generic variant) and set the `Key` property:
 
 ```csharp
-[ViewModelDefinition<IFetchDataViewModel>(Key = "FetchDataViewModel")]
-public partial class FetchDataViewModel : ViewModelBase, IFetchDataViewModel
+[ViewModelDefinition(Key = "FetchDataViewModel")]
+public partial class FetchDataViewModel : ViewModelBase
 {
     // ViewModel code
 }
 ```
 
-In the `View` component, use the `ViewModelKey` attribute to specify the key of the ViewModel:
+In the `View` component, use the `ViewModelKey` attribute to specify the key of the `ViewModel`:
 
 ```xml
 @page "/fetchdata"
@@ -570,6 +582,7 @@ This is a major release with breaking changes, migration notes can be found [her
 - Documentation updates. [@mishael-o](https://github.com/mishael-o) & [@gragra33](https://github.com/gragra33)
 
 **BREAKING CHANGES:**
+
 - Renamed `BlazorHostingModel` to `BlazorHostingModelType` to avoid confusion
 
 The full history can be found in the [Version Tracking](https://github.com/gragra33/Blazing.Mvvm/HISTORY.md) documentation.
