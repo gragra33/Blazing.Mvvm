@@ -18,9 +18,10 @@ public class HexTranslateTests : ComponentTestBase
 
     public HexTranslateTests()
     {
-        // Add services to the DI container. AutoMocker will not resolve these services.
         Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
         Services.AddKeyedSingleton<HexTranslateViewModel>(nameof(HexTranslateViewModel));
+        Services.AddSingleton<HexEntryViewModel>();
+        Services.AddSingleton<TextEntryViewModel>();
     }
 
     [Theory]

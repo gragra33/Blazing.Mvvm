@@ -258,7 +258,7 @@ In the `View` component, use the `ViewModelDefinition` attribute to specify the 
 
 ```xml
 @page "/fetchdata"
-@attribute [ViewModelDefinition(Key = "FetchDataViewModel")]
+@attribute [ViewModelKey("FetchDataViewModel")]
 @inherits MvvmComponentBase<FetchDataViewModel>
 ```
 

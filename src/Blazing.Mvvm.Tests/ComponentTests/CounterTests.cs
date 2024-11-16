@@ -1,6 +1,7 @@
 ﻿using Blazing.Mvvm.Sample.WebApp.Client.Pages;
 using Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
 using Bunit;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Blazing.Mvvm.Tests.ComponentTests;
@@ -8,6 +9,11 @@ namespace Blazing.Mvvm.Tests.ComponentTests;
 public class CounterTests : ComponentTestBase
 {
     private const string ParagraphSelector = "p";
+
+    public CounterTests()
+    {
+        Services.AddSingleton(_ => CreateInstance<CounterViewModel>(true));
+    }
 
     [Theory]
     [InlineData("CounterViewModel => Life-cycle event: OnInitialized.")]

@@ -3,12 +3,18 @@ using Blazing.Mvvm.Sample.WebApp.Client.Pages;
 using Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
 using Bunit;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Blazing.Mvvm.Tests.ComponentTests;
 
 public class FormTests : ComponentTestBase
 {
+    public FormTests()
+    {
+        Services.AddSingleton<EditContactViewModel>();
+    }
+
     private const string SubmitButtonSelector = "button[type=\"submit\"]";
     private const string ClearButtonSelector = "button[type=\"button\"]";
 
@@ -131,6 +137,7 @@ public class FormTests : ComponentTestBase
     {
         // Arrange
         const string expectedLogMessage = "Form is valid and submitted!";
+        Services.AddSingleton(_ => GetMock<ILogger<EditContactViewModel>>().Object);
 
         var cut = RenderComponent<Form>();
         cut.FindByLabelText(NameInputAriaLabel).Change(new ChangeEventArgs { Value = "Lorem Ipsum" });

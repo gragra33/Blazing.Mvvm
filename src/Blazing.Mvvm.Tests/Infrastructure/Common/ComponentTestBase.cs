@@ -66,11 +66,11 @@ public abstract class ComponentTestBase : TestContext
     /// <typeparam name="T">The type of service object to get.</typeparam>
     /// <param name="key">The key for the view model.</param>
     /// <returns>A view model object of type <typeparamref name="T"/>.</returns>
-    protected T GetViewModel<T>(string? key = null)
+    protected T GetViewModel<T>(object? key = null)
         where T : IViewModelBase
     {
-        return !string.IsNullOrWhiteSpace(key)
-            ? Services.GetRequiredKeyedService<T>(key)
-            : Services.GetRequiredService<T>();
+        return key is null
+            ? Services.GetRequiredService<T>()
+            : Services.GetRequiredKeyedService<T>(key);
     }
 }

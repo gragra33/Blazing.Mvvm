@@ -1,7 +1,7 @@
 ﻿@page "/keyedtest"
 @page "/keyedtest/{echo}"
 
-@attribute [ViewModelDefinition(Key = nameof(TestKeyedNavigationViewModel))]
+@attribute [ViewModelKey(nameof(TestKeyedNavigationViewModel))]
 @inherits MvvmComponentBase<TestKeyedNavigationViewModel>
 
 <h3>Test Keyed Navigation</h3>
