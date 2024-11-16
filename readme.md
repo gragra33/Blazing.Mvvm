@@ -232,23 +232,19 @@ public partial class FetchDataViewModel : ViewModelBase, IFetchDataViewModel
 }
 ```
 
-In the `View` component, use the `Inject` attribute to specify the key of the ViewModel:
+In the `View` component, use the `ViewModelDefinition` attribute to specify the key of the ViewModel and the `MvvmComponentBase` type set to `IFetchDataViewModel`:
 
 ```xml
 @page "/fetchdata"
+@attribute [ViewModelDefinition(Key = "FetchDataViewModel")]
 @inherits MvvmComponentBase<IFetchDataViewModel>
-
-@code {
-    [Inject(Key = "FetchDataViewModel")]
-    protected override FetchDataViewModel ViewModel { get; set; }
-}
 ```
 
-To register the ViewModel as a keyed service, use the `ViewModelDefinition` attribute with the `Key` property:
+To register the ViewModel as a keyed service, use the `ViewModelDefinition` attribute type set to `IFetchDataViewModel` with the `Key` property:
 
 ```csharp
-[ViewModelDefinition(Key = "FetchDataViewModel")]
-public partial class FetchDataViewModel : ViewModelBase
+[ViewModelDefinition<IFetchDataViewModel>(Key = "FetchDataViewModel")]
+public partial class FetchDataViewModel : ViewModelBase, IFetchDataViewModel
 {
     // ViewModel code
 }

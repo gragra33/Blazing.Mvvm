@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Components;
 
 namespace Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
 
-[ViewModelDefinition(Key = nameof(TestKeyedNavigationViewModel))]
+[ViewModelDefinition<ITestKeyedNavigationViewModel>(Key = nameof(TestKeyedNavigationViewModel))]
 public sealed class TestKeyedNavigationViewModel(IMvvmNavigationManager mvvmNavigationManager, NavigationManager navigationManager)
-    : TestNavigationBaseViewModel(mvvmNavigationManager, navigationManager)
+    : TestNavigationBaseViewModel(mvvmNavigationManager, navigationManager), ITestKeyedNavigationViewModel
 {
     public override RelayCommand<string> TestNavigateCommand
         => TestNavigateCommandImpl ??= new RelayCommand<string>(s => Navigate(nameof(TestKeyedNavigationViewModel), s));
