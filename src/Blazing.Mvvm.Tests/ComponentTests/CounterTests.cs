@@ -8,12 +8,6 @@ namespace Blazing.Mvvm.Tests.ComponentTests;
 
 public class CounterTests : ComponentTestBase
 {
-    public CounterTests()
-    {
-        // Add a view model to Services because the IScopedFactory created by BUnit does not fall back to AutoMocker.
-        Services.AddScoped(_ => CreateInstance<CounterViewModel>(true));
-    }
-
     private const string ParagraphSelector = "p";
 
     public CounterTests()
