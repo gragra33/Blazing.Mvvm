@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazing.Mvvm.Sample.WebApp"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazing.Mvvm.Base", "Blazing.Mvvm.Base\Blazing.Mvvm.Base.csproj", "{DA37F56E-C733-44F6-BB9B-C8E389C30A2A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazing.Mvvm.Sample.HybridMaui", "Blazing.Mvvm.Sample.HybridMaui\Blazing.Mvvm.Sample.HybridMaui.csproj", "{95F965D8-4439-4A3E-873E-9213E56A4E20}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,12 @@ Global
 		{DA37F56E-C733-44F6-BB9B-C8E389C30A2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA37F56E-C733-44F6-BB9B-C8E389C30A2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA37F56E-C733-44F6-BB9B-C8E389C30A2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95F965D8-4439-4A3E-873E-9213E56A4E20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95F965D8-4439-4A3E-873E-9213E56A4E20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95F965D8-4439-4A3E-873E-9213E56A4E20}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{95F965D8-4439-4A3E-873E-9213E56A4E20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95F965D8-4439-4A3E-873E-9213E56A4E20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95F965D8-4439-4A3E-873E-9213E56A4E20}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

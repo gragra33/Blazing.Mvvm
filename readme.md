@@ -34,7 +34,10 @@ builder.Services.AddMvvmNavigation(options =>
 2-2. Blazor WebAssembly App:
 
 ```csharp
-builder.Services.AddMvvmNavigation();
+builder.Services.AddMvvmNavigation(options =>
+{ 
+    options.HostingModel = BlazorHostingModel.WebAssembly;
+});
 ```
 
 2-3. Blazor WebApp:
@@ -43,6 +46,15 @@ builder.Services.AddMvvmNavigation();
 builder.Services.AddMvvmNavigation(options =>
 { 
     options.HostingModel = BlazorHostingModel.WebApp;
+});
+```
+
+2-4. MAUI Hybrid:
+
+```csharp
+builder.Services.AddMvvmNavigation(options =>
+{ 
+    options.HostingModel = BlazorHostingModel.HybridMaui;
 });
 ```
 
