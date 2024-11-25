@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Blazing.Mvvm.Components;
 
-public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TViewModel> where TViewModel : IViewModelBase
+public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TViewModel>, IDisposable  where TViewModel : IViewModelBase
 {
     [Inject]
     protected TViewModel? ViewModel { get; set; }
@@ -13,6 +13,16 @@ public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TView
         // Cause changes to the ViewModel to make Blazor re-render
         ViewModel!.PropertyChanged += (_, _) => InvokeAsync(StateHasChanged);
         base.OnInitialized();
+    }
+
+     public virtual void Dispose()
+     {
+        GC.SuppressFinalize(this);
+        ObservableRecipient? observableRecipient  = (base.ViewModel as ObservableRecipient);
+        if(observableRecipient != null)
+        {
+            observableRecipient.IsActive = false;
+        }
     }
 
     protected override Task OnInitializedAsync()
