@@ -129,7 +129,7 @@ public partial class FetchDataViewModel : ViewModelBase
 
 ```xml
 @page "/fetchdata"
-@inherits MvvmComponentBase<FetchDataViewModel>
+@inherits MvvmOwningComponentBase<FetchDataViewModel>
 
 <PageTitle>@ViewModel.Title</PageTitle>
 
@@ -184,7 +184,7 @@ The library package includes:
 
 - `MvvmComponentBase`, `MvvmOwningComponentBase` (Scoped service support), & `MvvmLayoutComponentBase` for quick and easy wiring up ViewModels.
 - `ViewModelBase`, `RecipientViewModelBase`, & `ValidatorViewModelBase` wrappers for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/).
-- `MvvmNavigationManager` class and `MvvmNavLink` component for MVVM-style navigation, no more hard-coded paths.
+- `MvvmNavigationManager` class, `MvvmNavLink`, and `MvvmKeyNavLink` component for MVVM-style navigation, no more hard-coded paths.
 - Sample applications for getting started quickly with all hosting models.
 
 There are two additional sample projects in separate GitHub repositories:
@@ -578,6 +578,7 @@ This is a major release with breaking changes, migration notes can be found [her
 - Added parameter resolution in the ViewModel. [@mishael-o](https://github.com/mishael-o)
 - Added new `TestKeyedNavigation` samples for Keyed Navigation. [@gragra33](https://github.com/gragra33)
 - Added & Updated tests for all changes made. [@mishael-o](https://github.com/mishael-o) & [@gragra33](https://github.com/gragra33)
+- Added support for .NET 9. [@gragra33](https://github.com/gragra33)
 - Dropped support for .NET 7. [@mishael-o](https://github.com/mishael-o)
 - Documentation updates. [@mishael-o](https://github.com/mishael-o) & [@gragra33](https://github.com/gragra33)
 

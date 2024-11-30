@@ -11,6 +11,7 @@ This is a major release with breaking changes, migration notes can be found [her
 - Added parameter resolution in the ViewModel. [@mishael-o](https://github.com/mishael-o)
 - Added new `TestKeyedNavigation` samples for Keyed Navigation. [@gragra33](https://github.com/gragra33)
 - Added & Updated tests for all changes made. [@mishael-o](https://github.com/mishael-o) & [@gragra33](https://github.com/gragra33)
+- Added support for .NET 9. [@gragra33](https://github.com/gragra33)
 - Dropped support for .NET 7. [@mishael-o](https://github.com/mishael-o)
 - Documentation updates. [@mishael-o](https://github.com/mishael-o) & [@gragra33](https://github.com/gragra33)
 
