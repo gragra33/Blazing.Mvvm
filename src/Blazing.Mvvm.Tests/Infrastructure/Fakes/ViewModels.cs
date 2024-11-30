@@ -20,17 +20,17 @@ internal sealed class TransientTestViewModel : ViewModelBase, ITransientTestView
 internal sealed class ScopedTestViewModel : ViewModelBase, IScopedTestViewModel;
 
 [ViewModelDefinition<ISingletonTestViewModel>(Lifetime = ServiceLifetime.Singleton)]
-[ViewModelDefinition<ISingletonTestViewModel>(Key = "ISingleton", Lifetime = ServiceLifetime.Singleton)]
+[ViewModelDefinition<ISingletonTestViewModel>(Key = nameof(SingletonTestViewModel), Lifetime = ServiceLifetime.Singleton)]
 [ViewModelDefinition(Lifetime = ServiceLifetime.Singleton)]
 internal sealed class SingletonTestViewModel : ViewModelBase, ISingletonTestViewModel;
 
-[ViewModelDefinition(Key = "Transient", Lifetime = ServiceLifetime.Transient)]
+[ViewModelDefinition(Key = nameof(TransientKeyedTestViewModel), Lifetime = ServiceLifetime.Transient)]
 internal sealed class TransientKeyedTestViewModel : ViewModelBase;
 
-[ViewModelDefinition(Key = "Scoped", Lifetime = ServiceLifetime.Scoped)]
+[ViewModelDefinition(Key = nameof(ScopedKeyedTestViewModel), Lifetime = ServiceLifetime.Scoped)]
 internal sealed class ScopedKeyedTestViewModel : ViewModelBase;
 
-[ViewModelDefinition(Key = "Singleton", Lifetime = ServiceLifetime.Singleton)]
+[ViewModelDefinition(Key = nameof(SingletonKeyedTestViewModel), Lifetime = ServiceLifetime.Singleton)]
 internal sealed class SingletonKeyedTestViewModel : ViewModelBase;
 
 internal abstract class AbstractBaseViewModel : ViewModelBase;
