@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Components.Routing;
 
 namespace Blazing.Mvvm.Sample.HybridMaui.ViewModels;
 
+// By default in HybridMaui hosting model, ViewModels are
+// registered with Lifetime = ServiceLifetime.Scoped
 [ViewModelDefinition(Lifetime = ServiceLifetime.Scoped)]
 public sealed partial class MainLayoutViewModel : ViewModelBase, IDisposable
 {

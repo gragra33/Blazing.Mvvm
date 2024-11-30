@@ -17,14 +17,14 @@ namespace Blazing.Mvvm.Sample.HybridMaui
                 });
 
 
+            builder.Services.AddMauiBlazorWebView();
+
             builder.Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
             builder.Services.AddMvvm(options =>
-            {
+            { 
                 options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
                 options.HostingModelType = BlazorHostingModelType.HybridMaui;
-            });
-            
-            builder.Services.AddMauiBlazorWebView();
+            });            
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
