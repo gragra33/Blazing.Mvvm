@@ -1,16 +1,11 @@
 ﻿@page "/counter"
+@inherits MvvmComponentBase<CounterViewModel>
+
+<PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
 
-<p role="status">Current count: @currentCount</p>
+<p role="status">Current count: @ViewModel.CurrentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-
-@code {
-    private int currentCount = 0;
-
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
-}
+<button id="click-me" class="btn btn-primary" @onclick="ViewModel.IncrementCount">Click Me</button>
+<button id="reset" class="btn btn-secondary ml-2" @onclick="ViewModel.ResetCount">Reset</button>

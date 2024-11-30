@@ -29,6 +29,7 @@ public class ServicesExtensionTests
     [InlineData(BlazorHostingModelType.Hybrid, ServiceLifetime.Singleton)]
     [InlineData(BlazorHostingModelType.WebApp, ServiceLifetime.Scoped)]
     [InlineData(BlazorHostingModelType.Server, ServiceLifetime.Scoped)]
+    [InlineData(BlazorHostingModelType.HybridMaui, ServiceLifetime.Scoped)]
     public void GivenAddMvvm_WhenHostingModelTypeConfigured_ThenShouldContainRequiredServices(BlazorHostingModelType blazorHostingModel, ServiceLifetime serviceLifetime)
     {
         // Arrange

@@ -20,5 +20,4 @@ public partial class WeatherForecast : ObservableObject
 
     [ObservableProperty]
     private int _temperatureF;
-
 }

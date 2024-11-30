@@ -10,7 +10,7 @@ public partial class WeatherViewModel : ViewModelBase
     [ObservableProperty]
     private ObservableCollection<WeatherForecast> _weatherForecasts = new();
 
-    public override async Task Loaded()
+    public override void OnInitialized()
         => WeatherForecasts = new ObservableCollection<WeatherForecast>(Get());
 
     private static readonly string[] Summaries =

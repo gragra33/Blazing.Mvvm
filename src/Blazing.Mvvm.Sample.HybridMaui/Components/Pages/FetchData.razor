@@ -1,13 +1,15 @@
 ﻿@page "/fetchdata"
-@inherits MvvmComponentBase<FetchDataViewModel>
+@inherits MvvmOwningComponentBase<FetchDataViewModel>
+
+<PageTitle>Weather forecast</PageTitle>
 
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from the server.</p>
 
-@if (!ViewModel.WeatherForecasts.Any())
+@if (ViewModel.WeatherForecasts is null)
 {
-    <p><em>Loading...</em></p>
+    <p aria-label="loading"><em>Loading...</em></p>
 }
 else
 {
@@ -21,7 +23,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (WeatherForecast? forecast in ViewModel.WeatherForecasts)
+            @foreach (var forecast in ViewModel.WeatherForecasts)
             {
                 <tr>
                     <td>@forecast.Date.ToShortDateString()</td>

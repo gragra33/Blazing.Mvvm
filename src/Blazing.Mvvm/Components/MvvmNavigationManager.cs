@@ -43,7 +43,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     }
 
     /// <inheritdoc/>
-    public void NavigateTo<TViewModel>(NavigationOptions options)
+    public void NavigateTo<TViewModel>(BrowserNavigationOptions options)
         where TViewModel : IViewModelBase
     {
         if (!_references.TryGetValue(typeof(TViewModel), out string? uri))
@@ -52,7 +52,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         }
 
         LogNavigationEvent(typeof(TViewModel).FullName, uri);
-        _navigationManager.NavigateTo(uri, options);
+        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -73,7 +73,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     }
 
     /// <inheritdoc/>
-    public void NavigateTo<TViewModel>(string relativeUri, NavigationOptions options)
+    public void NavigateTo<TViewModel>(string relativeUri, BrowserNavigationOptions options)
         where TViewModel : IViewModelBase
     {
         ArgumentNullException.ThrowIfNull(relativeUri);
@@ -86,7 +86,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
 
         LogNavigationEvent(typeof(TViewModel).FullName, uri);
-        _navigationManager.NavigateTo(uri, options);
+        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -104,7 +104,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     }
 
     /// <inheritdoc/>
-    public void NavigateTo(object key, NavigationOptions options)
+    public void NavigateTo(object key, BrowserNavigationOptions options)
     {
         ArgumentNullException.ThrowIfNull(key);
 
@@ -114,7 +114,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         }
 
         LogKeyedNavigationEvent(key, uri);
-        _navigationManager.NavigateTo(uri, options);
+        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -135,7 +135,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     }
 
     /// <inheritdoc/>
-    public void NavigateTo(object key, string relativeUri, NavigationOptions options)
+    public void NavigateTo(object key, string relativeUri, BrowserNavigationOptions options)
     {
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(relativeUri);
@@ -148,7 +148,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
 
         LogKeyedNavigationEvent(key, uri);
-        _navigationManager.NavigateTo(uri, options);
+        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -344,6 +344,16 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
 
         // all checks passed, so return the type with the argument type declared
         return (type, typeArgument);
+    }
+
+    private NavigationOptions CloneNavigationOptions(BrowserNavigationOptions options)
+    {
+        return new NavigationOptions()
+        {
+            ForceLoad = options.ForceLoad,
+            HistoryEntryState = options.HistoryEntryState,
+            ReplaceHistoryEntry = options.ReplaceHistoryEntry
+        };
     }
 
     #endregion Internals

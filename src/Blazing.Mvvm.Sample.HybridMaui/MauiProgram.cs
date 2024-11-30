@@ -1,5 +1,5 @@
 ﻿using Blazing.Mvvm.ComponentModel;
-using Blazing.Mvvm.Infrastructure;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 
 namespace Blazing.Mvvm.Sample.HybridMaui
@@ -16,19 +16,19 @@ namespace Blazing.Mvvm.Sample.HybridMaui
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
 
-            builder.Services.AddMauiBlazorWebView();
 
-            // register ViewModels
-            builder.Services.AddViewModels();
-
-            builder.Services.AddMvvmNavigation(new LibraryConfiguration()
+            builder.Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
+            builder.Services.AddMvvm(options =>
             {
-                HostingModel = BlazorHostingModel.HybridMaui,
-            });            
+                options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
+                options.HostingModelType = BlazorHostingModelType.HybridMaui;
+            });
+            
+            builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();
