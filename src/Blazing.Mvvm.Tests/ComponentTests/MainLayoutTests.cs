@@ -10,7 +10,6 @@ public class MainLayoutTests : ComponentTestBase
 {
     public MainLayoutTests()
     {
-        // Add services to the DI container. AutoMocker will not resolve these services.
         Services.AddSingleton<MainLayoutViewModel>();
     }
 

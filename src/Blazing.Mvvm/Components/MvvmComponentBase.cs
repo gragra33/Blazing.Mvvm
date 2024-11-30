@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel;
-using System.Reflection;
 using Blazing.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazing.Mvvm.Components;
 
@@ -21,25 +19,22 @@ public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TView
     protected bool IsDisposed { get; private set; }
 
     /// <summary>
-    /// The service provider for resolving services.
+    /// Resolves parameters in the <c>View</c> and <c>ViewModel</c>.
     /// </summary>
     [Inject]
-    protected IServiceProvider Services { get; set; } = default!;
+    protected IParameterResolver ParameterResolver { get; set; } = default!;
+
+    [Inject]
+    private IServiceProvider Services { get; set; } = default!;
 
     /// <summary>
     /// The <c>ViewModel</c> associated with this component, resolved from the dependency injection container.
     /// </summary>
     protected virtual TViewModel ViewModel
     {
-        get => SetViewModel();
+        get => _viewModel ??= ViewModelResolver.Resolve(this, Services);
         set => _viewModel = value;
     }
-
-    /// <summary>
-    /// Resolves parameters in the <c>View</c> and <c>ViewModel</c>.
-    /// </summary>
-    [Inject]
-    protected IParameterResolver ParameterResolver { get; set; } = default!;
 
     /// <inheritdoc/>
     public void Dispose()
@@ -104,20 +99,6 @@ public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TView
         }
 
         IsDisposed = true;
-    }
-
-    private TViewModel SetViewModel()
-    {
-        if (_viewModel != null) return
-            _viewModel;
-
-        ViewModelDefinitionAttribute? viewModelDefinition = GetType().GetCustomAttribute<ViewModelDefinitionAttribute>();
-
-        _viewModel = viewModelDefinition != null
-            ? Services.GetRequiredKeyedService<TViewModel>(viewModelDefinition.Key)
-            : Services.GetRequiredService<TViewModel>();
-
-        return _viewModel;
     }
 
     private void OnPropertyChanged(object? o, PropertyChangedEventArgs propertyChangedEventArgs)

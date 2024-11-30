@@ -1,4 +1,6 @@
 ﻿@page "/hextranslate"
+
+@attribute [ViewModelKey(nameof(HexTranslateViewModel))]
 @inherits MvvmComponentBase<HexTranslateViewModel>
 
 <div class="container text-center">
@@ -13,8 +15,3 @@
 
     <button id="reset-child-inputs" class="btn btn-secondary mt-2" @onclick="ViewModel.ResetChildInputs">Clear</button>
 </div>
-
-@code {
-    [Inject(Key = nameof(HexTranslateViewModel))]
-    protected override HexTranslateViewModel ViewModel { get; set; } = default!;
-}

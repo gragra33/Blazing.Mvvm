@@ -23,6 +23,7 @@ public partial class ParameterResolverTests : ComponentTestBase
     public void GivenSetParameters_WhenParameterResolutionModeIsNone_ShouldSetViewProperties()
     {
         // Arrange
+        Services.AddSingleton<TestParameterViewModel>();
         Services.AddSingleton<IParameterResolver>(_ => new ParameterResolver(ParameterResolutionMode.None));
         var viewModel = GetViewModel<TestParameterViewModel>();
 
@@ -39,6 +40,7 @@ public partial class ParameterResolverTests : ComponentTestBase
     public void GivenSetParameters_WhenParameterResolutionModeIsViewModel_ShouldSetViewModelPropertiesOnly()
     {
         // Arrange
+        Services.AddSingleton<TestParameterViewModel>();
         Services.AddSingleton<IParameterResolver>(_ => new ParameterResolver(ParameterResolutionMode.ViewModel));
         var viewModel = GetViewModel<TestParameterViewModel>();
 
@@ -55,6 +57,7 @@ public partial class ParameterResolverTests : ComponentTestBase
     public void GivenSetParameters_WhenParameterResolutionModeIsViewAndViewModel_ShouldSetViewAndViewModelProperties()
     {
         // Arrange
+        Services.AddSingleton<TestParameterViewModel>();
         Services.AddSingleton<IParameterResolver>(_ => new ParameterResolver(ParameterResolutionMode.ViewAndViewModel));
         var viewModel = GetViewModel<TestParameterViewModel>();
 
@@ -71,6 +74,7 @@ public partial class ParameterResolverTests : ComponentTestBase
     public void GivenSetParameters_WhenParameterResolutionModeIsNoneAndComponentInheritsLayoutComponentBase_ShouldSetViewProperties()
     {
         // Arrange
+        Services.AddSingleton<TestParameterViewModel>();
         Services.AddSingleton<IParameterResolver>(_ => new ParameterResolver(ParameterResolutionMode.None));
         var viewModel = GetViewModel<TestParameterViewModel>();
 
@@ -87,6 +91,7 @@ public partial class ParameterResolverTests : ComponentTestBase
     public void GivenSetParameters_WhenParameterResolutionModeIsSetViewModelAndComponentInheritsLayoutComponentBase_ShouldSetViewModelPropertiesOnly()
     {
         // Arrange
+        Services.AddSingleton<TestParameterViewModel>();
         Services.AddSingleton<IParameterResolver>(_ => new ParameterResolver(ParameterResolutionMode.ViewModel));
         var viewModel = GetViewModel<TestParameterViewModel>();
 
@@ -103,6 +108,7 @@ public partial class ParameterResolverTests : ComponentTestBase
     public void GivenSetParameters_WhenParameterResolutionModeIsSetViewAndViewModelAndComponentInheritsLayoutComponentBase_ShouldSetViewAndViewModelProperties()
     {
         // Arrange
+        Services.AddSingleton<TestParameterViewModel>();
         Services.AddSingleton<IParameterResolver>(_ => new ParameterResolver(ParameterResolutionMode.ViewAndViewModel));
         var viewModel = GetViewModel<TestParameterViewModel>();
 
@@ -170,6 +176,7 @@ public partial class ParameterResolverTests : ComponentTestBase
     public void GivenSetParameters_WhenDuplicateViewParameterKeysOnViewModel_ShouldThrowInvalidOperationException()
     {
         // Arrange
+        Services.AddSingleton<TestParameterDuplicateKeyViewModel>();
         Services.AddSingleton<IParameterResolver>(_ => new ParameterResolver(ParameterResolutionMode.ViewModel));
 
         // Act
@@ -184,6 +191,7 @@ public partial class ParameterResolverTests : ComponentTestBase
     public void GivenSetParameters_WhenPropertyDoesNotHaveASetter_ShouldThrowInvalidOperationException()
     {
         // Arrange
+        Services.AddSingleton<TestParameterNoSetterViewModel>();
         Services.AddSingleton<IParameterResolver>(_ => new ParameterResolver(ParameterResolutionMode.ViewModel));
 
         // Act

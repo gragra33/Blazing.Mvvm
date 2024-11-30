@@ -17,7 +17,7 @@ public class ViewParameterAttribute : Attribute
     /// Initializes a new instance of the <see cref="ViewParameterAttribute"/> class with a specified name.
     /// </summary>
     /// <param name="name">The name of the parameter to be resolved from.</param>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is <see langword="null"/> or white-space.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is <see langword="null"/>, empty or white-space.</exception>
     public ViewParameterAttribute(string name)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);

@@ -14,7 +14,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     private readonly ILogger<MvvmNavigationManager> _logger;
 
     private readonly Dictionary<Type, string> _references = [];
-    private readonly Dictionary<string, string> _keyedReferences = [];
+    private readonly Dictionary<object, string> _keyedReferences = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MvvmNavigationManager"/> class.
@@ -90,32 +90,37 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     }
 
     /// <inheritdoc/>
-    public void NavigateTo(string key, bool forceLoad = false, bool replace = false)
+    public void NavigateTo(object key, bool forceLoad = false, bool replace = false)
     {
+        ArgumentNullException.ThrowIfNull(key);
+
         if (!_keyedReferences.TryGetValue(key, out string? uri))
         {
             throw new ArgumentException($"No associated page for key '{key}'");
         }
 
-        LogNavigationEvent(key, uri);
+        LogKeyedNavigationEvent(key, uri);
         _navigationManager.NavigateTo(uri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
-    public void NavigateTo(string key, NavigationOptions options)
+    public void NavigateTo(object key, NavigationOptions options)
     {
+        ArgumentNullException.ThrowIfNull(key);
+
         if (!_keyedReferences.TryGetValue(key, out string? uri))
         {
             throw new ArgumentException($"No associated page for key '{key}'");
         }
 
-        LogNavigationEvent(key, uri);
+        LogKeyedNavigationEvent(key, uri);
         _navigationManager.NavigateTo(uri, options);
     }
 
     /// <inheritdoc/>
-    public void NavigateTo(string key, string relativeUri, bool forceLoad = false, bool replace = false)
+    public void NavigateTo(object key, string relativeUri, bool forceLoad = false, bool replace = false)
     {
+        ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(relativeUri);
 
         if (!_keyedReferences.TryGetValue(key, out string? uri))
@@ -125,13 +130,14 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
 
         uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
 
-        LogNavigationEvent(key, uri);
+        LogKeyedNavigationEvent(key, uri);
         _navigationManager.NavigateTo(uri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
-    public void NavigateTo(string key, string relativeUri, NavigationOptions options)
+    public void NavigateTo(object key, string relativeUri, NavigationOptions options)
     {
+        ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(relativeUri);
 
         if (!_keyedReferences.TryGetValue(key, out string? uri))
@@ -141,7 +147,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
 
         uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
 
-        LogNavigationEvent(key, uri);
+        LogKeyedNavigationEvent(key, uri);
         _navigationManager.NavigateTo(uri, options);
     }
 
@@ -158,7 +164,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     }
 
     /// <inheritdoc/>
-    public string GetUri(string key)
+    public string GetUri(object key)
     {
         if (!_keyedReferences.TryGetValue(key, out string? uri))
         {
@@ -239,48 +245,29 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
 
             foreach ((Type Type, Type? Argument) item in items)
             {
-                IEnumerable<ViewModelDefinitionAttribute> vmDefinitionAttributes = item.Type.GetCustomAttributes<ViewModelDefinitionAttribute>();
-                ViewModelDefinitionAttribute[] viewModelDefinitionAttributes = vmDefinitionAttributes as ViewModelDefinitionAttribute[] ?? vmDefinitionAttributes.ToArray();
+                var routeAttribute = item.Type.GetCustomAttributes<RouteAttribute>().FirstOrDefault();
 
-                if (viewModelDefinitionAttributes.Length == 0)
+                // is this a page or a component?
+                if (routeAttribute is null)
                 {
-                    Attribute? routeAttribute = item.Type.GetCustomAttributes().FirstOrDefault(a => a is RouteAttribute);
-                    if (routeAttribute is null)
-                    {
-                        continue;
-                    }
-
-                    string uri = ((RouteAttribute)routeAttribute).Template;
-                    _references.Add(item.Argument!, uri);
-                    _logger.LogDebug("Caching navigation reference '{Argument}' with uri '{Uri}' for '{FullName}'", item.Argument, uri, item.Type.FullName);
                     continue;
                 }
 
-                foreach (ViewModelDefinitionAttribute vmDefinitionAttribute in viewModelDefinitionAttributes)
+                // we have a page, let's reference it!
+                string uri = routeAttribute.Template;
+                _references.Add(item.Argument!, uri);
+                _logger.LogDebug("Caching navigation reference '{Argument}' with uri '{Uri}' for '{FullName}'", item.Argument, uri, item.Type.FullName);
+
+                var vmKeyAttribute = item.Type.GetCustomAttribute<ViewModelKeyAttribute>();
+
+                if (vmKeyAttribute is null)
                 {
-                    Attribute? routeAttribute = item.Type.GetCustomAttributes().FirstOrDefault(a => a is RouteAttribute);
- 
-                    // is this a page or a component?
-                    if (routeAttribute is null)
-                    {
-                        continue;
-                    }
-
-                    // we have a page, let's reference it!
-                    string uri = ((RouteAttribute)routeAttribute).Template;
-
-                    if (vmDefinitionAttribute.Key is not null)
-                    {
-                        _keyedReferences.Add(vmDefinitionAttribute.Key!.ToString()!, uri);
-                        _logger.LogDebug("Caching keyed navigation reference '{Key}' with uri '{Uri}' for '{FullName}'", vmDefinitionAttribute.Key, uri, item.Type.FullName);
-                    }
-                    else
-                    {
-                        _references.Add(item.Argument!, uri);
-                        _logger.LogDebug("Caching navigation reference '{Argument}' with uri '{Uri}' for '{FullName}'", item.Argument, uri, item.Type.FullName);
-                    }
-
+                    continue;
                 }
+
+                // If page has a view model key, we cache it, so we can navigate to it using the key also
+                _keyedReferences.Add(vmKeyAttribute.Key, uri);
+                _logger.LogDebug("Caching keyed navigation reference '{Key}' with uri '{Uri}' for '{FullName}'", vmKeyAttribute.Key, uri, item.Type.FullName);
             }
         }
 
@@ -292,8 +279,11 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     /// </summary>
     /// <param name="viewModel">The ViewModel being navigated to.</param>
     /// <param name="uri">The URI being navigated to.</param>
-    [LoggerMessage(LogLevel.Debug, Message = "Navigating '{ViewModel}' to uri '{Uri}'")]
+    [LoggerMessage(LogLevel.Debug, Message = "Navigating to '{ViewModel}' with uri '{Uri}'")]
     private partial void LogNavigationEvent(string? viewModel, string uri);
+
+    [LoggerMessage(LogLevel.Debug, Message = "Navigating to key '{Key}' with uri '{Uri}'")]
+    private partial void LogKeyedNavigationEvent(object key, string uri);
 
     /// <summary>
     /// Gets the ViewModel argument type for a given type.

@@ -12,8 +12,7 @@ public class FormTests : ComponentTestBase
 {
     public FormTests()
     {
-        // Add a view model to Services because the IScopedFactory created by BUnit does not fall back to AutoMocker.
-        Services.AddScoped(_ => CreateInstance<EditContactViewModel>(true));
+        Services.AddSingleton<EditContactViewModel>();
     }
 
     private const string SubmitButtonSelector = "button[type=\"submit\"]";
@@ -138,6 +137,7 @@ public class FormTests : ComponentTestBase
     {
         // Arrange
         const string expectedLogMessage = "Form is valid and submitted!";
+        Services.AddSingleton(_ => GetMock<ILogger<EditContactViewModel>>().Object);
 
         var cut = RenderComponent<Form>();
         cut.FindByLabelText(NameInputAriaLabel).Change(new ChangeEventArgs { Value = "Lorem Ipsum" });
