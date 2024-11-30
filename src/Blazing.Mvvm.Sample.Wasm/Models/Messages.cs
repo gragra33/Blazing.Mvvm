@@ -1,4 +1,5 @@
 ﻿namespace Blazing.Mvvm.Sample.Wasm.Models;
 
-public record class ConvertHexToAsciiMessage(string HexToConvert);
-public record class ConvertAsciiToHexMessage(string AsciiToConvert);
+public record ConvertHexToAsciiMessage(string HexToConvert);
+public record ConvertAsciiToHexMessage(string AsciiToConvert);
+public record ResetHexAsciiInputsMessage();

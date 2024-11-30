@@ -1,9 +1,9 @@
-﻿namespace Blazing.Mvvm.Infrastructure;
+﻿namespace Blazing.Mvvm;
 
 /// <summary>
 /// The ASP.NET Core Blazor hosing models
 /// </summary>
-public enum BlazorHostingModel
+public enum BlazorHostingModelType
 {
     /// <summary>
     /// No hosting model is specified
@@ -11,7 +11,7 @@ public enum BlazorHostingModel
     NotSpecified,
 
     /// <summary>
-    /// Blazor Server 
+    /// Blazor Server
     /// </summary>
     Server,
 
