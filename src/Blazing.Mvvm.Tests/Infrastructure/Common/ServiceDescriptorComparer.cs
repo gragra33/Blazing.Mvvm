@@ -31,15 +31,26 @@ internal sealed class ServiceDescriptorComparer : IEqualityComparer<ServiceDescr
             return false;
         }
 
-        return x.IsKeyedService
-            ? x.ServiceType == y.ServiceType && x.KeyedImplementationType == y.KeyedImplementationType && x.Lifetime == y.Lifetime
-            : x.ServiceType == y.ServiceType && x.ImplementationType == y.ImplementationType && x.Lifetime == y.Lifetime && x.ServiceKey == y.ServiceKey;
+        if (x.IsKeyedService)
+        {
+            return CheckEquality(x.ServiceKey, y.ServiceKey)
+                && CheckEquality(x.ServiceType, y.ServiceType)
+                && CheckEquality(x.KeyedImplementationType, y.KeyedImplementationType)
+                && CheckEquality(x.Lifetime, y.Lifetime);
+        }
+
+        return CheckEquality(x.ServiceType, y.ServiceType)
+            && CheckEquality(x.ImplementationType, y.ImplementationType)
+            && CheckEquality(x.Lifetime, y.Lifetime);
+
+        static bool CheckEquality<T>(T first, T second)
+            => EqualityComparer<T>.Default.Equals(first, second);
     }
 
     public int GetHashCode(ServiceDescriptor serviceDescriptor)
     {
         return serviceDescriptor.IsKeyedService
-            ? HashCode.Combine(serviceDescriptor.ServiceType, serviceDescriptor.KeyedImplementationType, serviceDescriptor.Lifetime)
-            : HashCode.Combine(serviceDescriptor.ServiceType, serviceDescriptor.ImplementationType, serviceDescriptor.Lifetime, serviceDescriptor.ServiceKey);
+            ? HashCode.Combine(serviceDescriptor.ServiceKey, serviceDescriptor.ServiceType, serviceDescriptor.KeyedImplementationType, serviceDescriptor.Lifetime)
+            : HashCode.Combine(serviceDescriptor.ServiceType, serviceDescriptor.ImplementationType, serviceDescriptor.Lifetime);
     }
 }

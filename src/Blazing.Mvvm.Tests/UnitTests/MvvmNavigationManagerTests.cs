@@ -117,8 +117,10 @@ public class MvvmNavigationManagerTests
             .WithMessage("No associated page for key 'InvalidKey'");
     }
 
-    [Fact]
-    public void GetUri_GivenValidKey_ShouldReturnUri()
+    [Theory]
+    [InlineData(nameof(SingletonTestViewModel), "/singleton")]
+    [InlineData(nameof(SingletonKeyedTestViewModel), "/singleton-keyed")]
+    public void GetUri_GivenValidKey_ShouldReturnUri(string key, string expectedRoute)
     {
         // Arrange
         Mock<NavigationManager> navigationManagerMock = new();
@@ -126,9 +128,9 @@ public class MvvmNavigationManagerTests
         MvvmNavigationManager mvvmNavigationManager = new(navigationManagerMock.Object, loggerMock.Object);
 
         // Act
-        string uri = mvvmNavigationManager.GetUri(nameof(TestKeyedNavigationViewModel));
+        string uri = mvvmNavigationManager.GetUri(key);
 
         // Assert
-        uri.Should().Be("/keyedtest");
+        uri.Should().Be(expectedRoute);
     }
 }

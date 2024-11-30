@@ -136,16 +136,16 @@ public class ServicesExtensionTests
             { ServiceDescriptor.Transient<TransientTestViewModel, TransientTestViewModel>() },
             { ServiceDescriptor.Transient<ITransientTestViewModel, TransientTestViewModel>() },
             { ServiceDescriptor.Transient<AbstractBaseViewModel, ConcreteViewModel>() },
-            { ServiceDescriptor.KeyedTransient<TransientKeyedTestViewModel, TransientKeyedTestViewModel>("Transient") },
+            { ServiceDescriptor.KeyedTransient<TransientKeyedTestViewModel, TransientKeyedTestViewModel>(nameof(TransientKeyedTestViewModel)) },
 
             { ServiceDescriptor.Scoped<ScopedTestViewModel, ScopedTestViewModel>() },
             { ServiceDescriptor.Scoped<IScopedTestViewModel, ScopedTestViewModel>() },
-            { ServiceDescriptor.KeyedScoped<ScopedKeyedTestViewModel, ScopedKeyedTestViewModel>("Scoped") },
+            { ServiceDescriptor.KeyedScoped<ScopedKeyedTestViewModel, ScopedKeyedTestViewModel>(nameof(ScopedKeyedTestViewModel)) },
 
             { ServiceDescriptor.Singleton<SingletonTestViewModel, SingletonTestViewModel>() },
             { ServiceDescriptor.Singleton<ISingletonTestViewModel, SingletonTestViewModel>() },
-            { ServiceDescriptor.KeyedSingleton<ISingletonTestViewModel, SingletonTestViewModel>("ISingleton") },
-            { ServiceDescriptor.KeyedSingleton<SingletonKeyedTestViewModel, SingletonKeyedTestViewModel>("Singleton") }
+            { ServiceDescriptor.KeyedSingleton<ISingletonTestViewModel, SingletonTestViewModel>(nameof(SingletonTestViewModel)) },
+            { ServiceDescriptor.KeyedSingleton<SingletonKeyedTestViewModel, SingletonKeyedTestViewModel>(nameof(SingletonKeyedTestViewModel)) }
         };
 
         public static TheoryData<ServiceDescriptor> ViewModelsInDependentAssembly = new()
