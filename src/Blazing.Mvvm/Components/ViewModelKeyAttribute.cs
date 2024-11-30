@@ -1,4 +1,4 @@
-﻿namespace Blazing.Mvvm.ComponentModel;
+﻿namespace Blazing.Mvvm.Components;
 
 /// <summary>
 /// An attribute used to specify the key for a <c>ViewModel</c> on a <c>View</c>.
