@@ -70,6 +70,7 @@ If you are using a different hosting model, set the `HostingModelType` property 
 - `BlazorHostingModelType.Server`
 - `BlazorHostingModelType.WebApp`
 - `BlazorHostingModelType.WebAssembly`
+- `BlazorHostingModelType.HybridMaui`
 
 #### Registering ViewModels in a Different Assembly
 
