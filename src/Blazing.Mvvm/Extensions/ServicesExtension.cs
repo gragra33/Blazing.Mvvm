@@ -48,8 +48,8 @@ public static class ServicesExtension
     {
         var serviceDescriptor = configuration.HostingModelType switch
         {
-            BlazorHostingModelType.WebAssembly or BlazorHostingModelType.Hybrid or BlazorHostingModelType.NotSpecified => ServiceDescriptor.Singleton<IMvvmNavigationManager, MvvmNavigationManager>(),
-            BlazorHostingModelType.Server or BlazorHostingModelType.WebApp => ServiceDescriptor.Scoped<IMvvmNavigationManager, MvvmNavigationManager>(),
+            BlazorHostingModelType.WebAssembly or BlazorHostingModelType.Hybrid  or BlazorHostingModelType.NotSpecified => ServiceDescriptor.Singleton<IMvvmNavigationManager, MvvmNavigationManager>(),
+            BlazorHostingModelType.Server or BlazorHostingModelType.WebApp or BlazorHostingModelType.HybridMaui => ServiceDescriptor.Scoped<IMvvmNavigationManager, MvvmNavigationManager>(),
             _ => throw new ArgumentOutOfRangeException(nameof(configuration), $"Invalid hosting model type: {configuration.HostingModelType}")
         };
 

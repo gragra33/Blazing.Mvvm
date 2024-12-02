@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
@@ -7,14 +7,13 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<LangVersion>12</LangVersion>
-		<PackageId>Blazing.Mvvm</PackageId>
-		<Title>MVVM for Blazor using CommunityToolkit.Mvvm</Title>
+		<PackageId>Blazing.Mvvm.Base</PackageId>
+		<Title>MVVM for Blazor using CommunityToolkit.Mvvm Base Classes</Title>
 		<Authors>Graeme Grant (@gragra33)</Authors>
 		<Description>A simple, and easy-to-use implementation of Mvvm for Blazor wrapping the CommunityToolkit.Mvvm</Description>
 		<Description>MVVM for Blazor using CommunityToolkit.Mvvm</Description>
 		<PackageProjectUrl>https://github.com/gragra33/Blazing.Mvvm</PackageProjectUrl>
 		<Copyright>MIT Licence</Copyright>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/gragra33/Blazing.Mvvm</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>Blazor,Wasm,Web Assembly,Blazor Server,Blazor Web App,Blazor Hybid MAUI,Mvvm,CommunityToolkit</PackageTags>
@@ -24,33 +23,14 @@
 		<Version>2.0.0</Version>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<None Include="..\..\readme.md">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-		<SupportedPlatform Include="browser" />
-	</ItemGroup>
-
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.10" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<InternalsVisibleTo Include="Blazing.Mvvm.Tests" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Blazing.Mvvm.Base\Blazing.Mvvm.Base.csproj" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
 	</ItemGroup>
 
 </Project>
