@@ -86,7 +86,8 @@ public abstract class MvvmNavLinkBase : ComponentBase, IDisposable
     /// <inheritdoc/>
     protected override void OnParametersSet()
     {
-        _hrefAbsolute = BuildUri(ResolveHref(), RelativeUri);
+        _hrefAbsolute = StripPort(BuildUri(ResolveHref(), RelativeUri));
+
         AdditionalAttributes?.Add("href", _hrefAbsolute ?? string.Empty);
         _isActive = ShouldMatch(NavigationManager.Uri);
         _class = null;
@@ -97,6 +98,13 @@ public abstract class MvvmNavLinkBase : ComponentBase, IDisposable
         }
 
         UpdateCssClass();
+    }
+
+    private static string StripPort(string uri)
+    {
+        UriBuilder builder = new(uri);
+        builder.Port = -1; // This will remove the port
+        return builder.ToString();
     }
 
     /// <inheritdoc/>
@@ -196,13 +204,14 @@ public abstract class MvvmNavLinkBase : ComponentBase, IDisposable
             return false;
         }
 
-        if (EqualsHrefExactlyOrIfTrailingSlashAdded(currentUriAbsolute))
+        string uriAbsolute = StripPort(currentUriAbsolute);
+        if (EqualsHrefExactlyOrIfTrailingSlashAdded(uriAbsolute))
         {
             return true;
         }
 
         return Match == NavLinkMatch.Prefix
-               && IsStrictlyPrefixWithSeparator(currentUriAbsolute, _hrefAbsolute);
+               && IsStrictlyPrefixWithSeparator(uriAbsolute, _hrefAbsolute);
     }
 
     /// <summary>
@@ -214,12 +223,13 @@ public abstract class MvvmNavLinkBase : ComponentBase, IDisposable
     {
         Debug.Assert(_hrefAbsolute != null);
 
-        if (string.Equals(currentUriAbsolute, _hrefAbsolute, StringComparison.OrdinalIgnoreCase))
+        string uriAbsolute = StripPort(currentUriAbsolute);
+        if (string.Equals(uriAbsolute, _hrefAbsolute, StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
 
-        if (currentUriAbsolute.Length == _hrefAbsolute.Length - 1)
+        if (uriAbsolute.Length == _hrefAbsolute.Length - 1)
         {
             // Special case: highlight links to http://host/path/ even if you're
             // at http://host/path (with no trailing slash)
@@ -230,7 +240,7 @@ public abstract class MvvmNavLinkBase : ComponentBase, IDisposable
             // for http://host/vdir as they do for host://host/vdir/ as it's no
             // good to display a blank page in that case.
             if (_hrefAbsolute[^1] == '/'
-                && _hrefAbsolute.StartsWith(currentUriAbsolute, StringComparison.OrdinalIgnoreCase))
+                && _hrefAbsolute.StartsWith(uriAbsolute, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
