@@ -49,4 +49,4 @@ app.MapRazorComponents<App>()
 app.MapGet("/api/weatherforecast", (IWeatherService weatherService, CancellationToken cancellationToken)
     => weatherService.GetForecastAsync(cancellationToken));
 
-app.Run();
+await app.RunAsync();

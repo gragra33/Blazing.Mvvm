@@ -1,10 +1,9 @@
-﻿namespace Blazing.Mvvm.Sample.HybridMaui
+﻿namespace Blazing.Mvvm.Sample.HybridMaui;
+
+public partial class MainPage
 {
-    public partial class MainPage : ContentPage
+    public MainPage()
     {
-        public MainPage()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

@@ -337,13 +337,10 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             .GetInterfaces();
 
         // Check if the type argument of IView<> implements IViewModel
-        if (interfaces.FirstOrDefault(i => i.Name == $"{viewModelType.Name}") is null)
-        {
-            return default;
-        }
-
-        // all checks passed, so return the type with the argument type declared
-        return (type, typeArgument);
+        return Array.Find(interfaces, i => i.Name == $"{viewModelType.Name}") is null
+            ? default
+            // all checks passed, so return the type with the argument type declared
+            : (type, typeArgument);
     }
 
     private NavigationOptions CloneNavigationOptions(BrowserNavigationOptions options)

@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Json;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Blazing.Mvvm.ComponentModel;
 using Blazing.Mvvm.Sample.HybridMaui.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
