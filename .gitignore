@@ -313,6 +313,7 @@ paket-files/
 .fake/
 
 # CodeRush personal settings
+.cr
 .cr/personal
 
 # Python Tools for Visual Studio (PTVS)

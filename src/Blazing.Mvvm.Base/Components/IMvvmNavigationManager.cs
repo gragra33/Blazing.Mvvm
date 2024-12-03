@@ -1,5 +1,5 @@
 ﻿using Blazing.Mvvm.ComponentModel;
-using Microsoft.AspNetCore.Components;
+
 
 namespace Blazing.Mvvm.Components;
 
@@ -21,8 +21,8 @@ public interface IMvvmNavigationManager
     /// Navigates to the specified associated URI.
     /// </summary>
     /// <typeparam name="TViewModel">The type <see cref="IViewModelBase"/> to use to determine the URI to navigate to.</typeparam>
-    /// <param name="options">Provides additional <see cref="NavigationOptions"/>.</param>
-    void NavigateTo<TViewModel>(NavigationOptions options)
+    /// <param name="options">Provides additional <see cref="BrowserNavigationOptions"/>.</param>
+    void NavigateTo<TViewModel>(BrowserNavigationOptions options)
         where TViewModel : IViewModelBase;
 
     /// <summary>
@@ -41,9 +41,9 @@ public interface IMvvmNavigationManager
     /// </summary>
     /// <typeparam name="TViewModel">The type <see cref="IViewModelBase"/> to use to determine the URI to navigate to.</typeparam>
     /// <param name="relativeUri">relative URI or QueryString appended to the navigation Uri.</param>
-    /// <param name="options">Provides additional <see cref="NavigationOptions"/>.</param>
+    /// <param name="options">Provides additional <see cref="BrowserNavigationOptions"/>.</param>
     /// <exception cref="ArgumentNullException">Thrown when the <paramref name="relativeUri"/> is <see langword="null"/>.</exception>
-    void NavigateTo<TViewModel>(string relativeUri, NavigationOptions options)
+    void NavigateTo<TViewModel>(string relativeUri, BrowserNavigationOptions options)
         where TViewModel : IViewModelBase;
 
     /// <summary>
@@ -59,9 +59,9 @@ public interface IMvvmNavigationManager
     /// Navigates to the specified associated URI using a key.
     /// </summary>
     /// <param name="key">The key to use to determine the URI to navigate to.</param>
-    /// <param name="options">Provides additional <see cref="NavigationOptions"/>.</param>
+    /// <param name="options">Provides additional <see cref="BrowserNavigationOptions"/>.</param>
     /// <exception cref="ArgumentNullException">Thrown when the <paramref name="key"/> is <see langword="null"/>.</exception>
-    public void NavigateTo(object key, NavigationOptions options);
+    public void NavigateTo(object key, BrowserNavigationOptions options);
 
     /// <summary>
     /// Navigates to the specified associated URI using a key.
@@ -78,9 +78,9 @@ public interface IMvvmNavigationManager
     /// </summary>
     /// <param name="key">The key to use to determine the URI to navigate to.</param>
     /// <param name="relativeUri">relative URI or QueryString appended to the navigation Uri.</param>
-    /// <param name="options">Provides additional <see cref="NavigationOptions"/>.</param>
+    /// <param name="options">Provides additional <see cref="BrowserNavigationOptions"/>.</param>
     /// <exception cref="ArgumentNullException">Thrown when the <paramref name="key"/> or <paramref name="relativeUri"/> is <see langword="null"/>.</exception>
-    void NavigateTo(object key, string relativeUri, NavigationOptions options);
+    void NavigateTo(object key, string relativeUri, BrowserNavigationOptions options);
 
     /// <summary>
     /// Get the <see cref="IViewModelBase"/> associated URI.

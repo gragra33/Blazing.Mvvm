@@ -1,4 +1,5 @@
-﻿using Blazing.Mvvm.ComponentModel;
+﻿using System.Text;
+using Blazing.Mvvm.ComponentModel;
 using Blazing.Mvvm.Sample.Server.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -15,13 +16,13 @@ public sealed partial class HexEntryViewModel : RecipientViewModelBase<ConvertAs
     public override void Receive(ConvertAsciiToHexMessage message)
     {
         char[] charArray = message.AsciiToConvert.ToCharArray();
-        string hexOutput = string.Empty;
+        var hexOutput = new StringBuilder();
         foreach (char @char in charArray)
         {
-            hexOutput += $"{Convert.ToInt32(@char):X}";
+            hexOutput.AppendFormat("{0:X}", Convert.ToInt32(@char));
         }
 
-        HexText = hexOutput;
+        HexText = hexOutput.ToString();
     }
 
     public void Receive(ResetHexAsciiInputsMessage _)
