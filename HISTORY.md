@@ -1,6 +1,10 @@
 ﻿# Version History
 
-### V2.0.0
+### V2.1.0 3 December, 2024
+
+- Added MAUI Blazor Hybrid App support + sample HybridMaui app. [@hakakou](https://github.com/hakakou)
+
+### V2.0.0 30 November, 2024
 
 This is a major release with breaking changes, migration notes can be found [here](docs/migration-notes/v1.4_to_v2.md).
 
