@@ -86,7 +86,7 @@ public abstract class MvvmNavLinkBase : ComponentBase, IDisposable
     /// <inheritdoc/>
     protected override void OnParametersSet()
     {
-        _hrefAbsolute = StripPort(BuildUri(ResolveHref(), RelativeUri));
+        _hrefAbsolute = BuildUri(ResolveHref(), RelativeUri);
 
         AdditionalAttributes?.Add("href", _hrefAbsolute ?? string.Empty);
         _isActive = ShouldMatch(NavigationManager.Uri);
@@ -204,6 +204,7 @@ public abstract class MvvmNavLinkBase : ComponentBase, IDisposable
             return false;
         }
 
+        string hrefAbsolute = StripPort(_hrefAbsolute);
         string uriAbsolute = StripPort(currentUriAbsolute);
         if (EqualsHrefExactlyOrIfTrailingSlashAdded(uriAbsolute))
         {
@@ -211,7 +212,7 @@ public abstract class MvvmNavLinkBase : ComponentBase, IDisposable
         }
 
         return Match == NavLinkMatch.Prefix
-               && IsStrictlyPrefixWithSeparator(uriAbsolute, _hrefAbsolute);
+               && IsStrictlyPrefixWithSeparator(uriAbsolute, hrefAbsolute);
     }
 
     /// <summary>
@@ -223,13 +224,14 @@ public abstract class MvvmNavLinkBase : ComponentBase, IDisposable
     {
         Debug.Assert(_hrefAbsolute != null);
 
+        string hrefAbsolute = StripPort(_hrefAbsolute);
         string uriAbsolute = StripPort(currentUriAbsolute);
-        if (string.Equals(uriAbsolute, _hrefAbsolute, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(uriAbsolute, hrefAbsolute, StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
 
-        if (uriAbsolute.Length == _hrefAbsolute.Length - 1)
+        if (uriAbsolute.Length == hrefAbsolute.Length - 1)
         {
             // Special case: highlight links to http://host/path/ even if you're
             // at http://host/path (with no trailing slash)
@@ -239,11 +241,7 @@ public abstract class MvvmNavLinkBase : ComponentBase, IDisposable
             // which in turn is because it's common for servers to return the same page
             // for http://host/vdir as they do for host://host/vdir/ as it's no
             // good to display a blank page in that case.
-            if (_hrefAbsolute[^1] == '/'
-                && _hrefAbsolute.StartsWith(uriAbsolute, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
+            return _hrefAbsolute[^1] == '/' && hrefAbsolute.StartsWith(uriAbsolute, StringComparison.OrdinalIgnoreCase);
         }
 
         return false;
