@@ -1,8 +1,18 @@
 {
   "profiles": {
-    "Windows Machine": {
+    "Windows Machine (Debug)": {
       "commandName": "Project",
-      "nativeDebugging": false
+      "nativeDebugging": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "Windows Machine (Release)": {
+      "commandName": "MsixPackage",
+      "nativeDebugging": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      }
     }
   }
 }
