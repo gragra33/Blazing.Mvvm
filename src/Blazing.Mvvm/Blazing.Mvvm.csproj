@@ -19,9 +19,9 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>Blazor,Wasm,Web Assembly,Blazor Server,Blazor Web App,Blazor Hybid MAUI,Mvvm,CommunityToolkit</PackageTags>
 		<PackageReleaseNotes>Support for Blazor Web App, Blazor Server, Blazor WebAssembly, Blazor Hybrid, Blazor Hybid MAUI</PackageReleaseNotes>
-		<AssemblyVersion>2.1.0.0</AssemblyVersion>
-		<FileVersion>2.1.0.0</FileVersion>
-		<Version>2.1.0</Version>
+		<AssemblyVersion>2.1.1.0</AssemblyVersion>
+		<FileVersion>2.1.1.0</FileVersion>
+		<Version>2.1.1</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
