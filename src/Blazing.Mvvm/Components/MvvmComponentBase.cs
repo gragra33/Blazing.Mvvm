@@ -96,6 +96,11 @@ public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TView
         if (disposing)
         {
             ViewModel.PropertyChanged -= OnPropertyChanged;
+            ObservableRecipient? observableRecipient  = (base.ViewModel as ObservableRecipient);
+            if(observableRecipient != null)
+            {
+                observableRecipient.IsActive = false;
+            }
         }
 
         IsDisposed = true;
