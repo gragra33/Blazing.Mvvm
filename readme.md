@@ -568,6 +568,10 @@ public sealed partial class EditContactViewModel : ViewModelBase, IDisposable
 
 ## History
 
+### V2.2.0 7 December, 2024
+
+- Added support for `ObservableRecipient` being set to inactive when disposing the `MvvmComponentBase`, `MvvmOwningComponentBase`, `MvvmLayoutComponentBase`, and `RecipientViewModelBase`. [@gragra33](https://github.com/gragra33) & [@teunlielu](https://github.com/teunlielu)
+
 ### V2.1.0 3 December, 2024
 
 - Added MAUI Blazor Hybrid App support + sample HybridMaui app. [@hakakou](https://github.com/hakakou)
