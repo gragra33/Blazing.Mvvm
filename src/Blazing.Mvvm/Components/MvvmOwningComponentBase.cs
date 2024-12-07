@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using Blazing.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 
 namespace Blazing.Mvvm.Components;
@@ -100,6 +101,10 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
         if (disposing)
         {
             ViewModel.PropertyChanged -= OnPropertyChanged;
+            if (ViewModel is ObservableRecipient observableRecipient)
+            {
+                observableRecipient.IsActive = false;
+            }
         }
 
         base.Dispose(disposing);

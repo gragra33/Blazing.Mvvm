@@ -568,10 +568,6 @@ public sealed partial class EditContactViewModel : ViewModelBase, IDisposable
 
 ## History
 
-### V2.1.1 4 December, 2024
-
-- Version bump to fix a nuget release issue
-
 ### V2.1.0 3 December, 2024
 
 - Added MAUI Blazor Hybrid App support + sample HybridMaui app. [@hakakou](https://github.com/hakakou)

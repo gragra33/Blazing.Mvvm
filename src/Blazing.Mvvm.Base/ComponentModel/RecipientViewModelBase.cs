@@ -5,8 +5,10 @@ namespace Blazing.Mvvm.ComponentModel;
 /// <summary>
 /// A base class for a <c>ViewModel</c> that implements <see cref="ObservableRecipient"/> which provides support for receiving messages and access to the <see cref="CommunityToolkit.Mvvm.Messaging.IMessenger"/> type.
 /// </summary>
-public abstract class RecipientViewModelBase : ObservableRecipient, IViewModelBase
+public abstract class RecipientViewModelBase : ObservableRecipient, IViewModelBase, IDisposable
 {
+    private bool IsDisposed;
+
     /// <inheritdoc/>
     public virtual void OnAfterRender(bool firstRender)
     { }
@@ -41,4 +43,30 @@ public abstract class RecipientViewModelBase : ObservableRecipient, IViewModelBa
     /// <inheritdoc/>
     public virtual void NotifyStateChanged()
         => OnPropertyChanged();
+
+    /// <summary>
+    /// Releases the unmanaged resources used by the <see cref="RecipientViewModelBase"/> and optionally releases the managed resources.
+    /// </summary>
+    /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (IsDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            ObservableRecipient observableRecipient = this;
+            observableRecipient.IsActive = false;
+        }
+        IsDisposed = true;
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 }
