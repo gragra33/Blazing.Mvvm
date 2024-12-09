@@ -27,6 +27,7 @@ This project expands upon the [blazor-mvvm](https://github.com/IntelliTect-Sampl
     - [MVVM Navigation](#mvvm-navigation)
       - [Navigate by abstraction](#navigate-by-abstraction)
     - [MVVM Validation](#mvvm-validation)
+    - [Common Issues](#common-issues)
   - [History](#history)
     - [V2.0.0](#v200)
 <!-- TOC -->
@@ -564,6 +565,18 @@ public sealed partial class EditContactViewModel : ViewModelBase, IDisposable
         </button>
     </div>
 </EditForm>  
+```
+
+## Common Issues
+
+### System.InvalidOperationException: 'WebViewNavigationManager' has not been initialized.
+
+Ensure you have set your hosting model correctly:
+```
+ builder.Services.AddMvvm(options =>
+ {
+     options.HostingModelType = BlazorHostingModelType.HybridMaui;
+ });
 ```
 
 ## History
