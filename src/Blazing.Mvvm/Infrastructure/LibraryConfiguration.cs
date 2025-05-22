@@ -31,6 +31,11 @@ public class LibraryConfiguration
         => _viewModelAssemblies;
 
     /// <summary>
+    /// Optional base path for the Blazor application.
+    /// </summary>
+    public string? BasePath { get; set; }
+
+    /// <summary>
     /// Register the view models from the assembly containing the specified type.
     /// </summary>
     /// <typeparam name="T">The type whose assembly contains the view models.</typeparam>

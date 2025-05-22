@@ -1,7 +1,8 @@
-﻿using System.Reflection;
-using Blazing.Mvvm.ComponentModel;
+﻿using Blazing.Mvvm.ComponentModel;
+using Blazing.Mvvm.Components.Routing;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Blazing.Mvvm.Components;
 
@@ -11,48 +12,76 @@ namespace Blazing.Mvvm.Components;
 public partial class MvvmNavigationManager : IMvvmNavigationManager
 {
     private readonly NavigationManager _navigationManager;
+    private readonly IViewModelRouteCache _routeCache;
     private readonly ILogger<MvvmNavigationManager> _logger;
-
-    private readonly Dictionary<Type, string> _references = [];
-    private readonly Dictionary<object, string> _keyedReferences = [];
+    private readonly IOptions<LibraryConfiguration> _libraryConfiguration;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MvvmNavigationManager"/> class.
     /// </summary>
     /// <param name="navigationManager">The navigation manager.</param>
     /// <param name="logger">The logger.</param>
-    public MvvmNavigationManager(NavigationManager navigationManager, ILogger<MvvmNavigationManager> logger)
+    /// <param name="routeCache">The ViewModel route cache.</param>
+    /// <param name="libraryConfiguration">The library configuration options.</param>
+    public MvvmNavigationManager(NavigationManager navigationManager, ILogger<MvvmNavigationManager> logger, IViewModelRouteCache routeCache, IOptions<LibraryConfiguration> libraryConfiguration)
     {
         _navigationManager = navigationManager;
         _logger = logger;
+        _routeCache = routeCache;
+        _libraryConfiguration = libraryConfiguration;
+    }
 
-        GenerateReferenceCache();
+    private string AdjustUriFromCache(string cachedUri)
+    {
+        string? configuredBasePath = _libraryConfiguration.Value.BasePath;
+
+        if (!string.IsNullOrEmpty(configuredBasePath))
+        {
+            return cachedUri;
+        }
+
+        configuredBasePath = "/";
+
+        if (cachedUri.StartsWith(configuredBasePath, StringComparison.OrdinalIgnoreCase))
+        {
+            string relativePath = cachedUri.Substring(configuredBasePath.Length);
+            if (!relativePath.StartsWith("/"))
+            {
+                relativePath = "/" + relativePath;
+            }
+            return relativePath;
+        }
+
+        //_logger.LogWarning("Cached URI '{CachedUri}' did not start with configured BasePath '{ConfiguredBasePath}'. Returning URI as is. This might lead to incorrect navigation.", cachedUri, configuredBasePath);
+        return cachedUri;
     }
 
     /// <inheritdoc/>
     public void NavigateTo<TViewModel>(bool forceLoad = false, bool replace = false)
         where TViewModel : IViewModelBase
     {
-        if (!_references.TryGetValue(typeof(TViewModel), out string? uri))
+        if (!_routeCache.ViewModelRoutes.TryGetValue(typeof(TViewModel), out string? uriFromCache))
         {
             throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
         }
 
-        LogNavigationEvent(typeof(TViewModel).FullName, uri);
-        _navigationManager.NavigateTo(uri, forceLoad, replace);
+        string effectiveUri = AdjustUriFromCache(uriFromCache);
+        LogNavigationEvent(typeof(TViewModel).FullName, effectiveUri);
+        _navigationManager.NavigateTo(effectiveUri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
     public void NavigateTo<TViewModel>(BrowserNavigationOptions options)
         where TViewModel : IViewModelBase
     {
-        if (!_references.TryGetValue(typeof(TViewModel), out string? uri))
+        if (!_routeCache.ViewModelRoutes.TryGetValue(typeof(TViewModel), out string? uriFromCache))
         {
             throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
         }
-
-        LogNavigationEvent(typeof(TViewModel).FullName, uri);
-        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
+        
+        string effectiveUri = AdjustUriFromCache(uriFromCache);
+        LogNavigationEvent(typeof(TViewModel).FullName, effectiveUri);
+        _navigationManager.NavigateTo(effectiveUri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -61,15 +90,17 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     {
         ArgumentNullException.ThrowIfNull(relativeUri);
 
-        if (!_references.TryGetValue(typeof(TViewModel), out string? uri))
+        if (!_routeCache.ViewModelRoutes.TryGetValue(typeof(TViewModel), out string? uriFromCache))
         {
             throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
         }
 
-        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
+        string baseNavigationUri = AdjustUriFromCache(uriFromCache);
+        string absoluteBase = _navigationManager.ToAbsoluteUri(baseNavigationUri).AbsoluteUri;
+        string finalUri = BuildUri(absoluteBase, relativeUri);
 
-        LogNavigationEvent(typeof(TViewModel).FullName, uri);
-        _navigationManager.NavigateTo(uri, forceLoad, replace);
+        LogNavigationEvent(typeof(TViewModel).FullName, finalUri);
+        _navigationManager.NavigateTo(finalUri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
@@ -78,15 +109,17 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     {
         ArgumentNullException.ThrowIfNull(relativeUri);
 
-        if (!_references.TryGetValue(typeof(TViewModel), out string? uri))
+        if (!_routeCache.ViewModelRoutes.TryGetValue(typeof(TViewModel), out string? uriFromCache))
         {
             throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
         }
 
-        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
+        string baseNavigationUri = AdjustUriFromCache(uriFromCache);
+        string absoluteBase = _navigationManager.ToAbsoluteUri(baseNavigationUri).AbsoluteUri;
+        string finalUri = BuildUri(absoluteBase, relativeUri);
 
-        LogNavigationEvent(typeof(TViewModel).FullName, uri);
-        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
+        LogNavigationEvent(typeof(TViewModel).FullName, finalUri);
+        _navigationManager.NavigateTo(finalUri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -94,13 +127,14 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     {
         ArgumentNullException.ThrowIfNull(key);
 
-        if (!_keyedReferences.TryGetValue(key, out string? uri))
+        if (!_routeCache.KeyedViewModelRoutes.TryGetValue(key, out string? uriFromCache))
         {
             throw new ArgumentException($"No associated page for key '{key}'");
         }
 
-        LogKeyedNavigationEvent(key, uri);
-        _navigationManager.NavigateTo(uri, forceLoad, replace);
+        string effectiveUri = AdjustUriFromCache(uriFromCache);
+        LogKeyedNavigationEvent(key, effectiveUri);
+        _navigationManager.NavigateTo(effectiveUri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
@@ -108,13 +142,14 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     {
         ArgumentNullException.ThrowIfNull(key);
 
-        if (!_keyedReferences.TryGetValue(key, out string? uri))
+        if (!_routeCache.KeyedViewModelRoutes.TryGetValue(key, out string? uriFromCache))
         {
             throw new ArgumentException($"No associated page for key '{key}'");
         }
 
-        LogKeyedNavigationEvent(key, uri);
-        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
+        string effectiveUri = AdjustUriFromCache(uriFromCache);
+        LogKeyedNavigationEvent(key, effectiveUri);
+        _navigationManager.NavigateTo(effectiveUri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -123,15 +158,17 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(relativeUri);
 
-        if (!_keyedReferences.TryGetValue(key, out string? uri))
+        if (!_routeCache.KeyedViewModelRoutes.TryGetValue(key, out string? uriFromCache))
         {
             throw new ArgumentException($"No associated page for key '{key}'");
         }
+        
+        string baseNavigationUri = AdjustUriFromCache(uriFromCache);
+        string absoluteBase = _navigationManager.ToAbsoluteUri(baseNavigationUri).AbsoluteUri;
+        string finalUri = BuildUri(absoluteBase, relativeUri);
 
-        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
-
-        LogKeyedNavigationEvent(key, uri);
-        _navigationManager.NavigateTo(uri, forceLoad, replace);
+        LogKeyedNavigationEvent(key, finalUri);
+        _navigationManager.NavigateTo(finalUri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
@@ -140,38 +177,40 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(relativeUri);
 
-        if (!_keyedReferences.TryGetValue(key, out string? uri))
+        if (!_routeCache.KeyedViewModelRoutes.TryGetValue(key, out string? uriFromCache))
         {
             throw new ArgumentException($"No associated page for key '{key}'");
         }
 
-        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
-
-        LogKeyedNavigationEvent(key, uri);
-        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
+        string baseNavigationUri = AdjustUriFromCache(uriFromCache);
+        string absoluteBase = _navigationManager.ToAbsoluteUri(baseNavigationUri).AbsoluteUri;
+        string finalUri = BuildUri(absoluteBase, relativeUri);
+        
+        LogKeyedNavigationEvent(key, finalUri);
+        _navigationManager.NavigateTo(finalUri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
     public string GetUri<TViewModel>()
         where TViewModel : IViewModelBase
     {
-        if (!_references.TryGetValue(typeof(TViewModel), out string? uri))
+        if (!_routeCache.ViewModelRoutes.TryGetValue(typeof(TViewModel), out string? uriFromCache))
         {
             throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
         }
 
-        return uri;
+        return AdjustUriFromCache(uriFromCache);
     }
 
     /// <inheritdoc/>
     public string GetUri(object key)
     {
-        if (!_keyedReferences.TryGetValue(key, out string? uri))
+        if (!_routeCache.KeyedViewModelRoutes.TryGetValue(key, out string? uriFromCache))
         {
             throw new ArgumentException($"No associated page for key '{key}'");
         }
 
-        return uri;
+        return AdjustUriFromCache(uriFromCache);
     }
 
     #region Internals
@@ -211,70 +250,6 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     }
 
     /// <summary>
-    /// Generates a cache of references for navigation.
-    /// </summary>
-    private void GenerateReferenceCache()
-    {
-        Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-        _logger.LogDebug("Starting generation of a new Reference Cache");
-
-        foreach (Assembly assembly in assemblies)
-        {
-            List<(Type Type, Type? Argument)> items;
-
-            try
-            {
-                items = assembly
-                    .GetTypes()
-                    .Select(GetViewArgumentType)
-                    .Where(t => t.Argument is not null)
-                    .ToList();
-            }
-            catch (Exception)
-            {
-                // avoid issue with unit tests
-                continue;
-            }
-
-            // does the assembly contain the required types?
-            if (items.Count == 0)
-            {
-                continue;
-            }
-
-            foreach ((Type Type, Type? Argument) item in items)
-            {
-                var routeAttribute = item.Type.GetCustomAttributes<RouteAttribute>().FirstOrDefault();
-
-                // is this a page or a component?
-                if (routeAttribute is null)
-                {
-                    continue;
-                }
-
-                // we have a page, let's reference it!
-                string uri = routeAttribute.Template;
-                _references.Add(item.Argument!, uri);
-                _logger.LogDebug("Caching navigation reference '{Argument}' with uri '{Uri}' for '{FullName}'", item.Argument, uri, item.Type.FullName);
-
-                var vmKeyAttribute = item.Type.GetCustomAttribute<ViewModelKeyAttribute>();
-
-                if (vmKeyAttribute is null)
-                {
-                    continue;
-                }
-
-                // If page has a view model key, we cache it, so we can navigate to it using the key also
-                _keyedReferences.Add(vmKeyAttribute.Key, uri);
-                _logger.LogDebug("Caching keyed navigation reference '{Key}' with uri '{Uri}' for '{FullName}'", vmKeyAttribute.Key, uri, item.Type.FullName);
-            }
-        }
-
-        _logger.LogDebug("Completed generating the Reference Cache");
-    }
-
-    /// <summary>
     /// Logs a navigation event.
     /// </summary>
     /// <param name="viewModel">The ViewModel being navigated to.</param>
@@ -284,64 +259,6 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
 
     [LoggerMessage(LogLevel.Debug, Message = "Navigating to key '{Key}' with uri '{Uri}'")]
     private partial void LogKeyedNavigationEvent(object key, string uri);
-
-    /// <summary>
-    /// Gets the ViewModel argument type for a given type.
-    /// </summary>
-    /// <param name="type">The type to get the ViewModel argument type for.</param>
-    /// <returns>A tuple containing the type and its ViewModel argument type.</returns>
-    private static (Type Type, Type? Argument) GetViewArgumentType(Type type)
-    {
-        Type viewInterfaceType = typeof(IView<>);
-        Type viewModelType = typeof(IViewModelBase);
-        Type componentBaseGenericType = typeof(MvvmComponentBase<>);
-        Type owingComponentBaseGenericType = typeof(MvvmOwningComponentBase<>);
-        Type? componentBaseType = null;
-        Type? typeArgument = null;
-
-        foreach (Type interfaceType in type.GetInterfaces())
-        {
-            if (!interfaceType.IsGenericType || interfaceType.GetGenericTypeDefinition() != viewInterfaceType)
-            {
-                continue;
-            }
-
-            typeArgument = interfaceType.GetGenericArguments()[0];
-            componentBaseType = componentBaseGenericType.MakeGenericType(typeArgument);
-
-            // Check if the type constraint is a subtype of MvvmComponentBase<>
-            if (componentBaseType.IsAssignableFrom(type))
-            {
-                break;
-            }
-
-            // Check if the type constraint is a subtype of MvvmOwningComponentBase<>
-            componentBaseType = owingComponentBaseGenericType.MakeGenericType(typeArgument);
-
-            if (componentBaseType.IsAssignableFrom(type))
-            {
-                break;
-            }
-
-            return default;
-        }
-
-        if (componentBaseType is null)
-        {
-            return default;
-        }
-
-        // get all interfaces
-        Type[] interfaces = componentBaseType
-            .GetGenericArguments()[0]
-            .GetInterfaces();
-
-        // Check if the type argument of IView<> implements IViewModel
-        return Array.Find(interfaces, i => i.Name == $"{viewModelType.Name}") is null
-            ? default
-            // all checks passed, so return the type with the argument type declared
-            : (type, typeArgument);
-    }
 
     private NavigationOptions CloneNavigationOptions(BrowserNavigationOptions options)
     {

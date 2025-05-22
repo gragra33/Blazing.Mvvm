@@ -2,8 +2,11 @@
 using Blazing.Mvvm.ComponentModel;
 using Blazing.Mvvm.Components;
 using Blazing.Mvvm.Components.Parameter;
+using Blazing.Mvvm.Components.Routing; // Added for ViewModelRouteCache
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options; // Added for Options.Create
 
 namespace Blazing.Mvvm;
 
@@ -39,8 +42,19 @@ public static class ServicesExtension
             configuration.RegisterViewModelsFromAssembly(callingAssembly);
         }
 
+        // Register LibraryConfiguration for IOptions<LibraryConfiguration>
+        services.TryAddSingleton(Options.Create(configuration));
+
         services.TryAddSingleton<IParameterResolver>(_ => new ParameterResolver(configuration.ParameterResolutionMode));
-        AddMvvmNavigationManager(services, configuration);
+        // Register ViewModelRouteCache as a singleton, ensuring assemblies are captured here.
+        services.TryAddSingleton<IViewModelRouteCache>(sp => 
+            new ViewModelRouteCache(
+                sp.GetRequiredService<ILogger<ViewModelRouteCache>>(), 
+                configuration, 
+                configuration.ViewModelAssemblies
+            )
+        );
+        AddMvvmNavigationManager(services, configuration); // This now correctly registers MvvmNavigationManager as Scoped for Server/WebApp
         AddViewModels(services, configuration.ViewModelAssemblies);
     }
 
@@ -48,7 +62,7 @@ public static class ServicesExtension
     {
         var serviceDescriptor = configuration.HostingModelType switch
         {
-            BlazorHostingModelType.WebAssembly or BlazorHostingModelType.Hybrid  or BlazorHostingModelType.NotSpecified => ServiceDescriptor.Singleton<IMvvmNavigationManager, MvvmNavigationManager>(),
+            BlazorHostingModelType.WebAssembly or BlazorHostingModelType.Hybrid or BlazorHostingModelType.NotSpecified => ServiceDescriptor.Singleton<IMvvmNavigationManager, MvvmNavigationManager>(),
             BlazorHostingModelType.Server or BlazorHostingModelType.WebApp or BlazorHostingModelType.HybridMaui => ServiceDescriptor.Scoped<IMvvmNavigationManager, MvvmNavigationManager>(),
             _ => throw new ArgumentOutOfRangeException(nameof(configuration), $"Invalid hosting model type: {configuration.HostingModelType}")
         };
