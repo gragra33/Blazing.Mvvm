@@ -50,8 +50,7 @@ public static class ServicesExtension
         services.TryAddSingleton<IViewModelRouteCache>(sp => 
             new ViewModelRouteCache(
                 sp.GetRequiredService<ILogger<ViewModelRouteCache>>(), 
-                configuration, 
-                configuration.ViewModelAssemblies
+                configuration
             )
         );
         AddMvvmNavigationManager(services, configuration); // This now correctly registers MvvmNavigationManager as Scoped for Server/WebApp

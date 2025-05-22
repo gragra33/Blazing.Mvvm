@@ -2,7 +2,6 @@ using System.Reflection;
 using Blazing.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
-using Blazing.Mvvm; // Corrected namespace
 
 namespace Blazing.Mvvm.Components.Routing;
 
@@ -24,16 +23,15 @@ public class ViewModelRouteCache : IViewModelRouteCache
 
     
     /// <summary>
-    /// 
+    /// The constructor for ViewModelRouteCache, initializes the logger and configuration, and generates the reference cache.
     /// </summary>
     /// <param name="logger"></param>
     /// <param name="configuration"></param>
-    /// <param name="viewModelAssemblies"></param>
-    public ViewModelRouteCache(ILogger<ViewModelRouteCache> logger, LibraryConfiguration configuration, IEnumerable<Assembly> viewModelAssemblies) 
+    public ViewModelRouteCache(ILogger<ViewModelRouteCache> logger, LibraryConfiguration configuration) 
     {
         _logger = logger;
         _configuration = configuration; 
-        GenerateReferenceCache(viewModelAssemblies);
+        GenerateReferenceCache(configuration.ViewModelAssemblies);
     }
 
     private void GenerateReferenceCache(IEnumerable<Assembly> assemblies)
