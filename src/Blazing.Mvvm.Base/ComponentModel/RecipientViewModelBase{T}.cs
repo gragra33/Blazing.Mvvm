@@ -9,6 +9,16 @@ namespace Blazing.Mvvm.ComponentModel;
 public abstract class RecipientViewModelBase<TMessage> : RecipientViewModelBase, IRecipient<TMessage>
     where TMessage : class
 {
+    
+    /// <inheritdoc/>
+     protected RecipientViewModelBase()
+    : base()
+     {}
+
+     /// <inheritdoc/>
+    protected RecipientViewModelBase(IMessenger messenger)
+    : base(messenger)
+     {}
     /// <inheritdoc/>
     public abstract void Receive(TMessage message);
 }
