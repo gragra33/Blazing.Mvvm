@@ -1,4 +1,7 @@
-﻿# Blazor Extension for the MVVM CommunityToolkit
+﻿# Blazor.Mvvm - An Extension for the MVVM CommunityToolkit
+
+[![NuGet Version](https://img.shields.io/nuget/v/Blazing.Mvvm.svg)](https://www.nuget.org/packages/Blazing.Mvvm)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/Blazing.Mvvm.svg)](https://www.nuget.org/packages/Blazing.Mvvm)
 
 This project expands upon the [blazor-mvvm](https://github.com/IntelliTect-Samples/blazor-mvvm) repository by [Kelly Adams](https://github.com/adamskt), implementing full MVVM support via the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/). Enhancements include preventing cross-thread exceptions, adding extra base class types, MVVM-style navigation, and converting the project into a usable library.
 
