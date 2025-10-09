@@ -255,6 +255,13 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
 
                 // we have a page, let's reference it!
                 string uri = routeAttribute.Template;
+                if(uri == "/")
+                {
+                       uri = new Uri(_navigationManager.BaseUri).LocalPath; // relative (root)LocalPath
+                } else if (uri.Length != 1 && uri.StartsWith("/"))
+                {
+                       uri = uri[1..]; // relative path
+                }
                 _references.Add(item.Argument!, uri);
                 _logger.LogDebug("Caching navigation reference '{Argument}' with uri '{Uri}' for '{FullName}'", item.Argument, uri, item.Type.FullName);
 
