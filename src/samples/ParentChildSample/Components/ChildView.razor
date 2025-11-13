@@ -1,0 +1,18 @@
+﻿@inherits MvvmComponentBase<ChildViewModel>
+
+<section>
+    <h3>@ViewModel!.Text</h3>
+
+    <button type="button" class="btn btn-secondary" @onclick="@(() => ViewModel!.CloseCommand.Execute(null))">Remove</button>
+</section>
+
+@code
+{
+    // pass parameter to ViewModel on DynamicComponent creation of this component...
+
+    [Parameter]
+    public string Text { get; set; } = "";
+
+    protected override void OnInitialized()
+        => ViewModel!.Text = Text;
+}
