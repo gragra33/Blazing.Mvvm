@@ -9,6 +9,10 @@
 	  <FileVersion>1.4.0.0</FileVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Models\ObservableObject.cs" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <SupportedPlatform Include="browser" />
@@ -21,10 +25,6 @@
   <ItemGroup>
     <Folder Include="Configuration\" />
     <Folder Include="Services\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Blazor.Common.csproj" />
   </ItemGroup>
 
 </Project>

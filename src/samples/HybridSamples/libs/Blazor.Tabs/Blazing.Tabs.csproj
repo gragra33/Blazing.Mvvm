@@ -13,10 +13,6 @@
 		<FileVersion>1.4.0.0</FileVersion>
 	</PropertyGroup>
 
-	<ItemGroup>
-	  <None Include="Blazor.Tabs.csproj" />
-	</ItemGroup>
-
   <ItemGroup>
     <SupportedPlatform Include="browser" />
   </ItemGroup>

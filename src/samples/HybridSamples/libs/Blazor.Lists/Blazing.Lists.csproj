@@ -26,8 +26,4 @@
     <Folder Include="Css\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="Blazor.Lists.csproj" />
-  </ItemGroup>
-
 </Project>

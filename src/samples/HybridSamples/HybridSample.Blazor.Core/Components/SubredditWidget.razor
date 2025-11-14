@@ -1,5 +1,4 @@
-﻿@using global::Blazing.Lists
-@inherits MvvmComponentBase<SubredditWidgetViewModel>
+﻿@inherits MvvmComponentBase<SubredditWidgetViewModel>
 
 <div class="subreddit__container">
     <h2>Subreddit:</h2>
@@ -18,7 +17,7 @@
 
     <h2>Posts:</h2>
     <div class="subreddit_posts">
-        <ListBox TItem=Post ItemSource="ViewModel!.Posts"
+        <ListBox TItem=Post ItemSource="ViewModel.Posts"
                  SelectedItem=@ViewModel.SelectedPost
                  SelectionChanged="@(e => InvokeAsync(() => ViewModel.SelectedPost = e.Item))">
             <ItemTemplate Context="post">
@@ -45,8 +44,6 @@
 
     private async Task GetPostsAsync()
     {
-        if (ViewModel is null) return;
-
         // manually flush
         ViewModel.SelectedPost = null;
         ViewModel.Posts.Clear();
@@ -63,8 +60,6 @@
 
     private async Task ChangeSubredditAsync(ListBoxEventArgs<string> e)
     {
-        if (ViewModel is null) return;
-
         ViewModel.SelectedSubreddit = e.Item;
         await GetPostsAsync();
     }

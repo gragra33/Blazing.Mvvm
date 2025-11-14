@@ -1,18 +1,20 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
 using Blazing.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using HybridSample.Core.Services;
 
 namespace HybridSample.Core.ViewModels;
 
+/// <summary>
+/// ViewModel for demonstrating usage of ObservableValidator in the sample app.
+/// </summary>
 [ViewModelDefinition(Lifetime = ServiceLifetime.Transient)]
-public partial class ObservableValidatorPageViewModel : SamplePageViewModel
+public class ObservableValidatorPageViewModel : SamplePageViewModel
 {
-    public ObservableValidatorPageViewModel(IFilesService filesService)
-        : base(filesService)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ObservableValidatorPageViewModel"/> class.
+    /// </summary>
+    /// <param name="filesService">The service for file operations.</param>
+    public ObservableValidatorPageViewModel(IFilesService filesService) : base(filesService)
     {
     }
 }

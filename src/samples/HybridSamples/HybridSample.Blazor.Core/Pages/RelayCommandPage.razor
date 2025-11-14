@@ -1,7 +1,7 @@
 ﻿@page "/RelayCommand"
 @inherits MvvmComponentBase<RelayCommandPageViewModel>
 
-@if (ViewModel?.Texts is null || !ViewModel.Texts.Any())
+@if (ViewModel.Texts is null || !ViewModel.Texts.Any())
 {
     <p>Loading...</p>
 }
@@ -37,6 +37,6 @@ else
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-            await ViewModel!.LoadDocsCommand.ExecuteAsync("RelayCommand");
+            await ViewModel.LoadDocsCommand.ExecuteAsync("RelayCommand");
     }
 }

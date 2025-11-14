@@ -6,62 +6,121 @@ using CSS = Blazing.Lists.Css.CssClass;
 
 namespace Blazing.Lists;
 
+/// <summary>
+/// Represents a Blazor ListBox component for displaying and selecting items.
+/// </summary>
+/// <typeparam name="TItem">The type of items in the list box.</typeparam>
 public partial class ListBox<TItem> : ComponentControlBase, IAsyncDisposable
 {
     #region Fields
 
+    /// <summary>
+    /// The currently selected item.
+    /// </summary>
     private TItem? _selectedItem;
+    /// <summary>
+    /// The index of the currently selected item.
+    /// </summary>
     private int _selectedIndex = -1;
 
-    // track request & wait for ui refresh
+    /// <summary>
+    /// Indicates whether the list should scroll the selected item into view after UI refresh.
+    /// </summary>
     private bool _scrollIntoViewRequired;
 
+    /// <summary>
+    /// Indicates whether the selection has changed and needs to trigger an event.
+    /// </summary>
     private bool _isSelectionChanged;
 
-    // cached reference
+    /// <summary>
+    /// Cached reference to the items collection.
+    /// </summary>
     private IList<TItem>? _items;
 
-    // safe get count
+    /// <summary>
+    /// Gets the count of items in the list.
+    /// </summary>
     private int _itemsCount => _items?.Count ?? 0;
 
+    /// <summary>
+    /// Reference to the component's root element.
+    /// </summary>
     private ElementReference? componentElement { get; set; }
+    /// <summary>
+    /// Reference to the selected item's element.
+    /// </summary>
     private ElementReference? SelectedItemElement { get; set; }
     
+    /// <summary>
+    /// Lazy-loaded JavaScript module for list operations.
+    /// </summary>
     private Lazy<Task<IJSObjectReference>>? _listModuleTask;
+    /// <summary>
+    /// Lazy-loaded JavaScript module for common operations.
+    /// </summary>
     private Lazy<Task<IJSObjectReference>>? _commonModuleTask;
-    
-    private DotNetObjectReference<ListBox<TItem>>? DotNetInstance;
 
+    /// <summary>
+    /// The path to the list JavaScript file.
+    /// </summary>
     private const string  ListScriptFile = "./_content/Blazing.Lists/scripts/lists.js";
 
     #endregion
 
     #region Properties
 
+    /// <summary>
+    /// The injected JavaScript runtime for interop operations.
+    /// </summary>
     [Inject]
     public IJSRuntime? jsRuntime { get; set; }
 
+    /// <summary>
+    /// The ARIA label for the list box.
+    /// </summary>
     [Parameter]
     public string AriaLabel { get; set; } = "List";
 
+    /// <summary>
+    /// The template for rendering each item.
+    /// </summary>
     [Parameter]
     public RenderFragment<TItem>? ItemTemplate { get; set; }
 
+    /// <summary>
+    /// The template for rendering the header.
+    /// </summary>
     [Parameter]
     public RenderFragment? HeaderTemplate { get; set; }
 
+    /// <summary>
+    /// The template for rendering the footer.
+    /// </summary>
     [Parameter]
     public RenderFragment? FooterTemplate { get; set; }
 
+    /// <summary>
+    /// The source collection of items to display.
+    /// </summary>
     [Parameter]
     public IEnumerable<TItem>? ItemSource { get; set; }
 
+    /// <summary>
+    /// Event callback triggered when the selection changes.
+    /// </summary>
     [Parameter]
     public EventCallback<ListBoxEventArgs<TItem>> SelectionChanged { get; set; }
 
+    /// <summary>
+    /// Indicates whether the list box is read-only.
+    /// </summary>
     [Parameter]
     public bool ReadOnly { get; set; }
 
+    /// <summary>
+    /// Gets or sets the selected item.
+    /// </summary>
     [Parameter]
 #pragma warning disable BL0007
     public TItem SelectedItem
@@ -71,6 +130,9 @@ public partial class ListBox<TItem> : ComponentControlBase, IAsyncDisposable
         set => _selectedItem = value;
     }
 
+    /// <summary>
+    /// Gets or sets the selected index.
+    /// </summary>
     [Parameter]
 #pragma warning disable BL0007
     public int SelectedIndex
@@ -80,6 +142,9 @@ public partial class ListBox<TItem> : ComponentControlBase, IAsyncDisposable
         set => _selectedIndex = value;
     }
 
+    /// <summary>
+    /// Event callback triggered when the selected index changes.
+    /// </summary>
     public EventCallback<int> SelectedIndexChanged { get; set; }
     
     #endregion
@@ -104,7 +169,7 @@ public partial class ListBox<TItem> : ComponentControlBase, IAsyncDisposable
     {
         base.OnInitialized();
 
-        DotNetInstance = DotNetObjectReference.Create(this);
+        DotNetObjectReference.Create(this);
         _listModuleTask = new(() => jsRuntime!.ModuleFactory(ListScriptFile));
         _commonModuleTask = new(() => jsRuntime!.ModuleFactory(jsRuntime!.GetCommonScriptPath()));
     }
@@ -189,19 +254,6 @@ public partial class ListBox<TItem> : ComponentControlBase, IAsyncDisposable
         ScrollIntoView();
     }
 
-    private void SetSelectedItem(TItem item)
-    {
-        if (_items is null || !_items.Contains(item) || ReadOnly)
-            return;
-
-        _selectedItem = item;
-        _selectedIndex = _items.IndexOf(item);
-
-       _isSelectionChanged = true;
-
-        ScrollIntoView();
-    }
-
     private async Task FocusNextElement(bool isReverse = false)
     {
         await (await GetModuleInstance(true))
@@ -273,7 +325,7 @@ public partial class ListBox<TItem> : ComponentControlBase, IAsyncDisposable
     public void MoveNext()
     {
         if (ReadOnly)
-        return;
+            return;
 
         if (_selectedIndex < 0)
         {

@@ -1,7 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
 using Blazing.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +11,15 @@ namespace HybridSample.Core.ViewModels.Widgets;
 [ViewModelDefinition(Lifetime = ServiceLifetime.Transient)]
 public sealed class PostWidgetViewModel : RecipientViewModelBase<PropertyChangedMessage<Post>>
 {
+    /// <summary>
+    /// Backing field for <see cref="Post"/>.
+    /// </summary>
     private Post? post;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PostWidgetViewModel"/> class.
+    /// </summary>
+    public PostWidgetViewModel() { /* skip */ }
 
     /// <summary>
     /// Gets the currently selected post, if any.

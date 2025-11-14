@@ -9,8 +9,14 @@ using Refit;
 
 namespace HybridSample.Wpf;
 
+/// <summary>
+/// Interaction logic for the WPF application.
+/// </summary>
 public partial class App
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="App"/> class and configures services.
+    /// </summary>
     public App()
     {
         HostApplicationBuilder builder = Host.CreateApplicationBuilder();

@@ -1,7 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
 using System.Text.RegularExpressions;
 using Blazing.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,7 +10,6 @@ namespace HybridSample.Core.ViewModels;
 /// <summary>
 /// A base class for viewmodels for sample pages in the app.
 /// </summary>
-
 [ViewModelDefinition<IIntroductionPageViewModel>(Lifetime = ServiceLifetime.Transient)]
 [ViewModelDefinition<ISettingUpTheViewModelsPageViewModel>(Lifetime = ServiceLifetime.Transient)]
 [ViewModelDefinition<ISettingsServicePageViewModel>(Lifetime = ServiceLifetime.Transient)]
@@ -34,6 +29,10 @@ public class SamplePageViewModel : ViewModelBase,
     /// </summary>
     private readonly IFilesService FilesServices;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SamplePageViewModel"/> class.
+    /// </summary>
+    /// <param name="filesService">The service for file operations.</param>
     public SamplePageViewModel(IFilesService filesService)
     {
         FilesServices = filesService;
@@ -48,13 +47,19 @@ public class SamplePageViewModel : ViewModelBase,
 
     private IReadOnlyDictionary<string, string>? texts;
 
+    /// <summary>
+    /// Gets or sets the loaded markdown paragraphs as a dictionary.
+    /// </summary>
     public IReadOnlyDictionary<string, string>? Texts 
     { 
         get => texts; 
         set => SetProperty(ref texts, value); 
     }
 
-    public IAsyncRelayCommand LoadedCommand { get; }
+    /// <summary>
+    /// Gets the command that is executed when the view is loaded.
+    /// </summary>
+    public IAsyncRelayCommand LoadedCommand { get; } = null!;
 
     /// <summary>
     /// Gets the markdown for a specified paragraph from the docs page.
@@ -77,10 +82,10 @@ public class SamplePageViewModel : ViewModelBase,
         // Skip if the loading has already started
         if (LoadDocsCommand.ExecutionTask is not null) return;
 
-        string directory = Path.GetDirectoryName(name);
+        string? directory = Path.GetDirectoryName(name);
         string filename = Path.GetFileName(name);
-        string path = Path.Combine("Assets", "docs", directory, $"{filename}.md");
-        using Stream stream = await FilesServices.OpenForReadAsync(path);
+        string path = Path.Combine("Assets", "docs", directory ?? string.Empty, $"{filename}.md");
+        await using Stream stream = await FilesServices.OpenForReadAsync(path)!;
         using StreamReader reader = new(stream);
         string text = await reader.ReadToEndAsync();
 

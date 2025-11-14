@@ -1,13 +1,9 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
-using System.ComponentModel.DataAnnotations;
 using Blazing.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
 using HybridSample.Core.Services;
+using Microsoft.Extensions.DependencyInjection;
+using System.ComponentModel.DataAnnotations;
 
 namespace HybridSample.Core.ViewModels.Widgets;
 
@@ -17,33 +13,56 @@ namespace HybridSample.Core.ViewModels.Widgets;
 [ViewModelDefinition(Lifetime = ServiceLifetime.Transient)]
 public partial class ValidationFormWidgetViewModel : ValidatorViewModelBase
 {
-    private readonly IDialogService DialogService;
+    private readonly IDialogService dialogService;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidationFormWidgetViewModel"/> class.
+    /// </summary>
+    /// <param name="dialogService">The dialog service for showing messages.</param>
     public ValidationFormWidgetViewModel(IDialogService dialogService)
     {
-        DialogService = dialogService;
+        this.dialogService = dialogService;
     }
 
+    /// <summary>
+    /// Occurs when the form submission is completed successfully.
+    /// </summary>
     public event EventHandler? FormSubmissionCompleted;
+
+    /// <summary>
+    /// Occurs when the form submission fails validation.
+    /// </summary>
     public event EventHandler? FormSubmissionFailed;
 
+    /// <summary>
+    /// Gets or sets the first name.
+    /// </summary>
     [ObservableProperty]
     [Required]
     [MinLength(2)]
     [MaxLength(100)]
     private string? firstName;
 
+    /// <summary>
+    /// Gets or sets the last name.
+    /// </summary>
     [ObservableProperty]
     [Required]
     [MinLength(2)]
     [MaxLength(100)]
     private string? lastName;
 
+    /// <summary>
+    /// Gets or sets the email address.
+    /// </summary>
     [ObservableProperty]
     [Required]
     [EmailAddress]
     private string? email;
 
+    /// <summary>
+    /// Gets or sets the phone number.
+    /// </summary>
     [ObservableProperty]
     [Required]
     [Phone]
@@ -69,6 +88,6 @@ public partial class ValidationFormWidgetViewModel : ValidatorViewModelBase
     {
         string message = string.Join(Environment.NewLine, GetErrors().Select(e => e.ErrorMessage));
 
-        _ = DialogService.ShowMessageDialogAsync("Validation errors", message);
+        _ = dialogService.ShowMessageDialogAsync("Validation errors", message);
     }
 }

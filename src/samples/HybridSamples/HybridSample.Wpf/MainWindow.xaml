@@ -8,6 +8,7 @@
 
         xmlns:blazor="clr-namespace:Microsoft.AspNetCore.Components.WebView.Wpf;assembly=Microsoft.AspNetCore.Components.WebView.Wpf"
         xmlns:shared="clr-namespace:HybridSample.Wpf.Shared"
+        xmlns:viewModels="clr-namespace:HybridSample.Wpf.ViewModels"
 
         Title="WPF MVVM Blazor Hybrid Sample Application"
         Height="800" Width="1000" WindowStartupLocation="CenterScreen">
@@ -28,7 +29,8 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Button Content="{Binding Value.Title}" Padding="10 5" Margin="0 0 0 10"
-                            Command="{Binding ElementName=ButtonsList, Path=DataContext.NavigateToCommand}" CommandParameter="{Binding Key}"/>
+                            Command="{Binding ElementName=ButtonsList, Path=DataContext.(viewModels:MainWindowViewModel.NavigateToCommand)}" CommandParameter="{Binding Key}"
+                            d:DataContext="{d:DesignData }" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
@@ -41,7 +43,7 @@
             </blazor:BlazorWebView.RootComponents>
         </blazor:BlazorWebView>
 
-        <TextBlock Grid.Row="1"  Grid.ColumnSpan="2"
+        <TextBlock Grid.Row="1"  Grid.ColumnSpan="2" Grid.Column="0"
                    HorizontalAlignment="Stretch"
                    TextAlignment="Center"
                    Padding="0 10"

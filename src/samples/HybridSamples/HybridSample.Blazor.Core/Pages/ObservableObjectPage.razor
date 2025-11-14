@@ -1,7 +1,7 @@
 ﻿@page "/ObservableObject"
 @inherits MvvmComponentBase<ObservableObjectPageViewModel>
 
-@if (ViewModel?.Texts is null || !ViewModel.Texts.Any())
+@if (ViewModel.Texts is null || !ViewModel.Texts.Any())
 {
     <p>Loading...</p>
 }
@@ -66,7 +66,7 @@ else
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-            await ViewModel!.LoadDocsCommand.ExecuteAsync("ObservableObject");
+            await ViewModel.LoadDocsCommand.ExecuteAsync("ObservableObject");
     }
 
 }

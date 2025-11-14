@@ -1,7 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
 using Blazing.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Collections;
 using CommunityToolkit.Mvvm.Input;
@@ -18,14 +14,18 @@ namespace HybridSample.Core.ViewModels.Widgets;
 public partial class ContactsListWidgetViewModel : ViewModelBase
 {
     /// <summary>
-    /// The <see cref="IContactsService"/> instance currently in use.
+    /// Initializes a new instance of the <see cref="ContactsListWidgetViewModel"/> class.
     /// </summary>
-    private readonly IContactsService ContactsService;
-
+    /// <param name="contactsService">The contacts service to use for retrieving contacts.</param>
     public ContactsListWidgetViewModel(IContactsService contactsService)
     {
         ContactsService = contactsService;
     }
+
+    /// <summary>
+    /// The <see cref="IContactsService"/> instance currently in use.
+    /// </summary>
+    private readonly IContactsService ContactsService;
 
     /// <summary>
     /// Gets the current collection of contacts

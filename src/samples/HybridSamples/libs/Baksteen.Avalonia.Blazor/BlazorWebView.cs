@@ -9,25 +9,41 @@ using Avalonia.Interactivity;
 
 namespace Baksteen.Avalonia.Blazor;
 
-// original: https://github.com/jpmikkers/Baksteen.Avalonia.Blazor
-// updated: to support latest support library versions
-
+/// <summary>
+/// Provides a Blazor WebView control for Avalonia, enabling Blazor content to be hosted in Avalonia applications.
+/// </summary>
 public class BlazorWebView : NativeControlHost
 {
+    /// <summary>
+    /// Represents a destroyable handle for the BlazorWebView native control.
+    /// </summary>
     private class DestroyableBlazorWebViewHandle : INativeControlHostDestroyableControlHandle
     {
         private readonly BlazorWebView _parent;
 
+        /// <summary>
+        /// Gets the native window handle.
+        /// </summary>
         public nint Handle { get; private set; }
 
+        /// <summary>
+        /// Gets the descriptor for the handle type.
+        /// </summary>
         public string HandleDescriptor => "HWND";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DestroyableBlazorWebViewHandle"/> class.
+        /// </summary>
+        /// <param name="parent">The parent <see cref="BlazorWebView"/> instance.</param>
         public DestroyableBlazorWebViewHandle(BlazorWebView parent)
         {
             _parent = parent;
             Handle = _parent._blazorWebView!.Handle;
         }
 
+        /// <summary>
+        /// Destroys the native control handle and disposes the BlazorWebView.
+        /// </summary>
         public void Destroy()
         {
             _parent._blazorWebView?.Dispose();
@@ -52,18 +68,27 @@ public class BlazorWebView : NativeControlHost
             x => x.ZoomFactor,
             (x, y) => x.ZoomFactor = y);
 
+    /// <summary>
+    /// The <see cref="AvaloniaProperty" /> which backs the <see cref="Services" /> property.
+    /// </summary>
     public static readonly DirectProperty<BlazorWebView, IServiceProvider> ServicesProperty
         = AvaloniaProperty.RegisterDirect<BlazorWebView, IServiceProvider>(
             nameof(Services),
             x => x.Services,
             (x, y) => x.Services = y);
 
+    /// <summary>
+    /// The <see cref="AvaloniaProperty" /> which backs the <see cref="RootComponents" /> property.
+    /// </summary>
     public static readonly DirectProperty<BlazorWebView, RootComponentsCollection> RootComponentsProperty
         = AvaloniaProperty.RegisterDirect<BlazorWebView, RootComponentsCollection>(
             nameof(RootComponents),
             x => x.RootComponents,
             (x, y) => x.RootComponents = y);
 
+    /// <summary>
+    /// Gets or sets the path to the host page for the Blazor WebView.
+    /// </summary>
     public string? HostPage
     {
         get
@@ -84,6 +109,9 @@ public class BlazorWebView : NativeControlHost
         }
     }
 
+    /// <summary>
+    /// Gets or sets the source URI for the Blazor WebView.
+    /// </summary>
     public Uri? Source
     {
         get
@@ -104,6 +132,9 @@ public class BlazorWebView : NativeControlHost
         }
     }
 
+    /// <summary>
+    /// Gets or sets the zoom factor for the Blazor WebView.
+    /// </summary>
     public double ZoomFactor
     {
         get
@@ -123,6 +154,9 @@ public class BlazorWebView : NativeControlHost
         }
     }
 
+    /// <summary>
+    /// Gets or sets the service provider for the Blazor WebView.
+    /// </summary>
     public IServiceProvider Services
     {
         get => _serviceProvider;
@@ -133,12 +167,20 @@ public class BlazorWebView : NativeControlHost
         }
     }
 
+    /// <summary>
+    /// Gets or sets the root components collection for the Blazor WebView.
+    /// </summary>
     public RootComponentsCollection RootComponents
     {
         get => _rootComponents;
         set => _rootComponents = value;
     }
 
+    /// <summary>
+    /// Creates the native control core for the Blazor WebView.
+    /// </summary>
+    /// <param name="parent">The parent platform handle.</param>
+    /// <returns>The platform handle for the native control.</returns>
     protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
     {
         if(OperatingSystem.IsWindows())
@@ -159,7 +201,10 @@ public class BlazorWebView : NativeControlHost
         return base.CreateNativeControlCore(parent);
     }
 
-    // DestroyNativeControlCore doesn't seem to get called when the app is shutting down, so lets dispose the blazorwebview earlier..
+    /// <summary>
+    /// Called when the control is unloaded. Destroys the native BlazorWebView control.
+    /// </summary>
+    /// <param name="e">The routed event arguments.</param>
     protected override void OnUnloaded(RoutedEventArgs e)
     {
         _destroyableBlazorWebViewHandle?.Destroy();

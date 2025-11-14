@@ -10,8 +10,15 @@ using HybridSample.Core.ViewModels;
 
 namespace HybridSample.Avalonia;
 
+/// <summary>
+/// Entry point and configuration logic for the Avalonia application.
+/// </summary>
 internal class Program
 {
+    /// <summary>
+    /// Main entry point for the Avalonia application.
+    /// </summary>
+    /// <param name="args">The command-line arguments.</param>
     [STAThread]
     public static void Main(string[] args)
     {
@@ -42,10 +49,16 @@ internal class Program
         }
         finally
         {
-            Task.Run(async () => await host.StopAsync()).Wait();
+            host.StopAsync().GetAwaiter().GetResult();
+            //Task.Run(async () => { await host.StopAsync(); }).Wait();
         }
     }
 
+    /// <summary>
+    /// Configures the Avalonia application with the provided service provider.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider for dependency injection.</param>
+    /// <returns>The configured Avalonia <see cref="AppBuilder"/>.</returns>
     private static AppBuilder BuildAvaloniaApp(IServiceProvider serviceProvider)
         => AppBuilder.Configure(() => new App(serviceProvider))
             .UsePlatformDetect()

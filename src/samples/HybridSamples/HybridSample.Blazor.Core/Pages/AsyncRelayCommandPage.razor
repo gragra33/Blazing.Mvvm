@@ -1,7 +1,7 @@
 ﻿@page "/AsyncRelayCommand"
 @inherits MvvmComponentBase<AsyncRelayCommandPageViewModel>
 
-@if (ViewModel?.Texts is null || !ViewModel.Texts.Any())
+@if (ViewModel.Texts is null || !ViewModel.Texts.Any())
 {
     <p>Loading...</p>
 }
@@ -20,9 +20,9 @@ else
                         string? GetResult(object? executionTask)
                         {
                             if (executionTask is Task<string> task)
-                                return task.Status == TaskStatus.RanToCompletion ? task.Result : default;
+                                return task.Status == TaskStatus.RanToCompletion ? task.Result : null;
 
-                            return default;
+                            return null;
                         }
                         <p class="sample--output">Result: @GetResult(ViewModel.DownloadTextCommand.ExecutionTask)</p>
                     }
@@ -51,6 +51,6 @@ else
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-            await ViewModel!.LoadDocsCommand.ExecuteAsync("AsyncRelayCommand");
+            await ViewModel.LoadDocsCommand.ExecuteAsync("AsyncRelayCommand");
     }
 }

@@ -15,8 +15,8 @@ public struct CssBuilder
     /// <param name="value"></param>
     public CssBuilder(string value)
     {
-        this._stringBuffer = value;
-        this._prefix = string.Empty;
+        _stringBuffer = value;
+        _prefix = string.Empty;
     }
 
     #endregion
@@ -56,7 +56,7 @@ public struct CssBuilder
     /// <returns>CssBuilder</returns>
     public CssBuilder SetPrefix(string value)
     {
-        this._prefix = value;
+        _prefix = value;
         return this;
     }
 
@@ -67,7 +67,7 @@ public struct CssBuilder
     /// <returns>CssBuilder</returns>
     public CssBuilder AddValue(string value)
     {
-        this._stringBuffer += value;
+        _stringBuffer += value;
         return this;
     }
 
@@ -86,7 +86,7 @@ public struct CssBuilder
 	/// <param name="when">Condition in which the CSS Class is added.</param>
 	/// <returns>CssBuilder</returns>
 	public CssBuilder AddClass(string value, bool when = true)
-		=> when ? this.AddClass(value) : this;
+		=> when ? AddClass(value) : this;
 
 	/// <summary>
 	/// Adds a conditional CSS Class to the builder with space separator.
@@ -95,7 +95,7 @@ public struct CssBuilder
 	/// <param name="when">Condition in which the CSS Class is added.</param>
 	/// <returns>CssBuilder</returns>
 	public CssBuilder AddClass(string value, Func<bool> when = null)
-		=> this.AddClass(value, when());
+		=> AddClass(value, when());
 
 	/// <summary>
 	/// Adds a conditional CSS Class to the builder with space separator.
@@ -104,7 +104,7 @@ public struct CssBuilder
 	/// <param name="when">Condition in which the CSS Class is added.</param>
 	/// <returns>CssBuilder</returns>
 	public CssBuilder AddClass(Func<string> value, bool when = true)
-		=> when ? this.AddClass(value()) : this;
+		=> when ? AddClass(value()) : this;
 
 	/// <summary>
 	/// Adds a conditional CSS Class to the builder with space separator.
@@ -113,7 +113,7 @@ public struct CssBuilder
 	/// <param name="when">Condition in which the CSS Class is added.</param>
 	/// <returns>CssBuilder</returns>
 	public CssBuilder AddClass(Func<string> value, Func<bool> when = null)
-		=> this.AddClass(value, when());
+		=> AddClass(value, when());
 
 	/// <summary>
 	/// Adds a conditional nested CssBuilder to the builder with space separator.
@@ -122,7 +122,7 @@ public struct CssBuilder
 	/// <param name="when">Condition in which the CSS Class is added.</param>
 	/// <returns>CssBuilder</returns>
 	public CssBuilder AddClass(CssBuilder builder, bool when = true)
-		=> when ? this.AddClass(builder.Build()) : this;
+		=> when ? AddClass(builder.Build()) : this;
 
 	/// <summary>
 	/// Adds a conditional CSS Class to the builder with space separator.
@@ -131,7 +131,7 @@ public struct CssBuilder
 	/// <param name="when">Condition in which the CSS Class is added.</param>
 	/// <returns>CssBuilder</returns>
 	public CssBuilder AddClass(CssBuilder builder, Func<bool> when = null)
-		=> this.AddClass(builder, when());
+		=> AddClass(builder, when());
 
 	/// <summary>
 	/// Adds a conditional CSS Class when it exists in a dictionary to the builder with space separator.
@@ -151,7 +151,7 @@ public struct CssBuilder
 	/// </summary>
 	/// <returns>string</returns>
     public string Build()
-        => this._stringBuffer != null ? this._stringBuffer.Trim() : string.Empty;
+        => _stringBuffer != null ? _stringBuffer.Trim() : string.Empty;
 
     #endregion
 

@@ -5,11 +5,19 @@ using FilesService = HybridSample.Wpf.Services.FilesService;
 
 namespace HybridSample.Wpf.Extensions;
 
+/// <summary>
+/// Extension methods for registering WPF services in the dependency injection container.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Adds WPF-specific services to the service collection.
+    /// </summary>
+    /// <param name="services">The service collection to add services to.</param>
+    /// <returns>The updated service collection.</returns>
     public static IServiceCollection AddServicesWpf(this IServiceCollection services)
     {
-        services.AddTransient<IFilesService>(sp => new FilesService());
+        services.AddTransient<IFilesService>(_ => new FilesService());
         services.AddSingleton<ISettingsService, SettingsService>();
 
         return services;

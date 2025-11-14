@@ -1,18 +1,20 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
 using Blazing.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using HybridSample.Core.Services;
 
 namespace HybridSample.Core.ViewModels;
 
+/// <summary>
+/// ViewModel for the collections page, providing logic and data for collections-related UI.
+/// </summary>
 [ViewModelDefinition(Lifetime = ServiceLifetime.Transient)]
-public partial class CollectionsPageViewModel : SamplePageViewModel
+public class CollectionsPageViewModel : SamplePageViewModel
 {
-    public CollectionsPageViewModel(IFilesService filesService) 
-        : base(filesService)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CollectionsPageViewModel"/> class.
+    /// </summary>
+    /// <param name="filesService">The service for file operations.</param>
+    public CollectionsPageViewModel(IFilesService filesService) : base(filesService)
     {
     }
 }

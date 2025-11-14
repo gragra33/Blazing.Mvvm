@@ -1,7 +1,7 @@
 ﻿@page "/RedditService"
 @inherits MvvmComponentBase<IRedditServicePageViewModel>
 
-@if (ViewModel?.Texts is null || !ViewModel.Texts.Any())
+@if (ViewModel.Texts is null || !ViewModel.Texts.Any())
 {
     <p>Loading...</p>
 }
@@ -15,6 +15,6 @@ else
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-            await ViewModel!.LoadDocsCommand.ExecuteAsync("PuttingThingsTogether");
+            await ViewModel.LoadDocsCommand.ExecuteAsync("PuttingThingsTogether");
     }
 }

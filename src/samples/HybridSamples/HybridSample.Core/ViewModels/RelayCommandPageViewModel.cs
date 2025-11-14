@@ -1,7 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
 using System.Windows.Input;
 using Blazing.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -10,9 +6,16 @@ using HybridSample.Core.Services;
 
 namespace HybridSample.Core.ViewModels;
 
+/// <summary>
+/// ViewModel for demonstrating usage of <see cref="RelayCommand"/> in the sample app.
+/// </summary>
 [ViewModelDefinition(Lifetime = ServiceLifetime.Transient)]
 public class RelayCommandPageViewModel : SamplePageViewModel
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RelayCommandPageViewModel"/> class.
+    /// </summary>
+    /// <param name="filesService">The service for file operations.</param>
     public RelayCommandPageViewModel(IFilesService filesService) 
         : base(filesService)
     {

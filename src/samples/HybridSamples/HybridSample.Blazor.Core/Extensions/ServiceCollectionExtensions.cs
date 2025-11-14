@@ -1,9 +1,5 @@
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using HybridSample.Core.Services;
-using HybridSample.Core.ViewModels;
-using HybridSample.Core.ViewModels.Widgets;
 using HybridSample.Blazor.Core.Services;
 
 namespace HybridSample.Blazor.Core.Extensions;

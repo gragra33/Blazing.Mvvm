@@ -1,7 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
 using System.Text.RegularExpressions;
 
 namespace HybridSample.Core.Helpers;
@@ -20,9 +16,10 @@ public static class MarkdownHelper
     {
         return
            Regex.Matches(text, @"(?<=\W)#+ ([^\n]+).+?(?=\W#|$)", RegexOptions.Singleline)
-           .OfType<Match>()
+               // ReSharper disable once RedundantEnumerableCastCall
+               .OfType<Match>()
             .ToDictionary(
-                m => Regex.Replace(m.Groups[1].Value.Trim().Replace("&lt;", "<"), @"\[([^]]+)\]\([^)]+\)", m => m.Groups[1].Value),
+                m => Regex.Replace(m.Groups[1].Value.Trim().Replace("&lt;", "<"), @"\[([^]]+)\]\([^)]+\)", match => match.Groups[1].Value),
                 m => m.Groups[0].Value.Trim().Replace("&lt;", "<").Replace("[!WARNING]", "**WARNING:**").Replace("[!NOTE]", "**NOTE:**"));
     }
 }

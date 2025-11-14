@@ -1,7 +1,7 @@
 ﻿@page "/MessengerSend"
 @inherits MvvmComponentBase<MessengerSendPageViewModel>
 
-@if (ViewModel?.Texts is null || !ViewModel.Texts.Any())
+@if (ViewModel.Texts is null || !ViewModel.Texts.Any())
 {
     <p>Loading...</p>
 }
@@ -42,7 +42,7 @@ else
     {
         if (firstRender)
         {
-            await ViewModel!.LoadDocsCommand.ExecuteAsync("Messenger");
+            await ViewModel.LoadDocsCommand.ExecuteAsync("Messenger");
             ViewModel.ReceiverViewModel.IsActive = true; // enable
         }
     }

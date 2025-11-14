@@ -7,6 +7,9 @@ using HybridSample.Blazor;
 using HybridSample.Blazor.Core.Extensions;
 using Refit;
 
+/// <summary>
+/// Configures and starts the Blazor WebAssembly application.
+/// </summary>
 WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
@@ -25,4 +28,7 @@ builder.Services
 builder.Logging.SetMinimumLevel(LogLevel.Trace);
 #endif
 
+/// <summary>
+/// Builds and runs the Blazor WebAssembly host.
+/// </summary>
 await builder.Build().RunAsync();
