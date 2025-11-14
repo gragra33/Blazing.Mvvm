@@ -1,0 +1,89 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        @*<a class="navbar-brand" href="">Blazor Mvvm Sample</a>*@
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <i class="bi bi-play" aria-hidden="true"></i> Introduction
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link" TViewModel=ObservableObjectPageViewModel>
+                <i class="bi bi-arrow-down-up" aria-hidden="true"></i> ObservableObject
+            </MvvmNavLink>
+        </div>
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link" TViewModel=RelayCommandPageViewModel>
+                <i class="bi bi-layer-backward" aria-hidden="true"></i> Relay Commands
+            </MvvmNavLink>
+        </div>
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link" TViewModel=AsyncRelayCommandPageViewModel>
+                <i class="bi bi-flag" aria-hidden="true"></i> Async Commands
+            </MvvmNavLink>
+        </div>
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link" TViewModel=MessengerPageViewModel>
+                <i class="bi bi-chat-left" aria-hidden="true"></i> Messenger
+            </MvvmNavLink>
+        </div>
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link" TViewModel=MessengerSendPageViewModel>
+                <i class="bi bi-send" aria-hidden="true"></i> Sending Messages
+            </MvvmNavLink>
+        </div>
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link" TViewModel=MessengerRequestPageViewModel>
+                <i class="bi bi-arrow-left-right" aria-hidden="true"></i> Request Messages
+            </MvvmNavLink>
+        </div>
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link" TViewModel=IocPageViewModel>
+                <i class="bi bi-box-arrow-in-down-right" aria-hidden="true"></i> Inversion of Control
+            </MvvmNavLink>
+        </div>
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link" TViewModel=ISettingUpTheViewModelsPageViewModel>
+                <i class="bi bi-bounding-box" aria-hidden="true"></i> ViewModel Setup
+            </MvvmNavLink>
+        </div>
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link" TViewModel=ISettingsServicePageViewModel>
+                <i class="bi bi-wrench" aria-hidden="true"></i> Settings Service
+            </MvvmNavLink>
+        </div>
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link" TViewModel=IRedditServicePageViewModel>
+                <i class="bi bi-globe-americas" aria-hidden="true"></i> Reddit Service
+            </MvvmNavLink>
+        </div>
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link" TViewModel=IBuildingTheUIPageViewModel>
+                <i class="bi bi-rulers" aria-hidden="true"></i> Building the UI
+            </MvvmNavLink>
+        </div>
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link" TViewModel=IRedditBrowserPageViewModel>
+        <i class="bi bi-reddit" aria-hidden="true"></i> The Final Result
+            </MvvmNavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

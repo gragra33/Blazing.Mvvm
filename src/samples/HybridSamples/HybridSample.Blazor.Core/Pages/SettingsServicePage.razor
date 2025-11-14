@@ -1,0 +1,20 @@
+﻿@page "/SettingsService"
+@inherits MvvmComponentBase<ISettingsServicePageViewModel>
+
+@if (ViewModel?.Texts is null || !ViewModel.Texts.Any())
+{
+    <p>Loading...</p>
+}
+else
+{
+    @ViewModel.Texts["Building the settings service"].MarkDownToMarkUp()
+}
+
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await ViewModel!.LoadDocsCommand.ExecuteAsync("PuttingThingsTogether");
+    }
+}

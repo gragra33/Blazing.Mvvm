@@ -1,0 +1,22 @@
+﻿@page "/IoC"
+@inherits MvvmComponentBase<IocPageViewModel>
+
+@if (ViewModel?.Texts is null || !ViewModel.Texts.Any())
+{
+    <p>Loading...</p>
+}
+else
+{
+    @ViewModel.Texts["Ioc (Inversion of control)"].MarkDownToMarkUp()
+    @ViewModel.Texts["Configure and resolve services"].MarkDownToMarkUp()
+    @ViewModel.Texts["Constructor injection"].MarkDownToMarkUp()
+}
+
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await ViewModel!.LoadDocsCommand.ExecuteAsync("IoC");
+    }
+}

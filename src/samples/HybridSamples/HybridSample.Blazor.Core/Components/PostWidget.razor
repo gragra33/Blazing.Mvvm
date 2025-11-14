@@ -1,0 +1,32 @@
+﻿@inherits MvvmComponentBase<PostWidgetViewModel>
+
+<div class="card__container">
+    <h2>Selected Post:</h2>
+    <div class="card-post">
+    @if (ViewModel is null || ViewModel.Post is null)
+    {
+        <p>No selection</p>
+    }
+    else
+    {
+        Post post = ViewModel!.Post;
+        string title = post?.Title ?? "No Title";
+        
+        <h3 class="card-post__title">@title</h3>
+        @if (post!.Thumbnail is not null && post.Thumbnail != "self")
+        {
+            <img src="@post!.Thumbnail"
+                     onerror="this.onerror=null; this.style='display:none';"
+                 alt="@post.Title" class="card-post__image" />
+        }
+        <p class="card-post__body">@(new MarkupString(post.SelfText.Replace("laborum.", "laborum.<br /><br />")))</p>
+    }
+    </div>
+</div>
+@code {
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            ViewModel!.IsActive = true;
+    }
+}

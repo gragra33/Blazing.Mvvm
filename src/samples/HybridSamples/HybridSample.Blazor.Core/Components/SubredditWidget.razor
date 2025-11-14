@@ -1,0 +1,71 @@
+﻿@using global::Blazing.Lists
+@inherits MvvmComponentBase<SubredditWidgetViewModel>
+
+<div class="subreddit__container">
+    <h2>Subreddit:</h2>
+    <div class="subreddit__filter">
+        <ListBox TItem=String ItemSource="ViewModel?.Subreddits"
+                 SelectedItem=@ViewModel?.SelectedSubreddit
+                 SelectionChanged="@ChangeSubredditAsync">
+            <ItemTemplate>
+                @context
+            </ItemTemplate>
+        </ListBox>
+        <div class="button-refresh__container">
+            <button class="btn btn-primary" onclick="@(async() => await GetPostsAsync())">REFRESH</button>
+        </div>
+    </div>
+
+    <h2>Posts:</h2>
+    <div class="subreddit_posts">
+        <ListBox TItem=Post ItemSource="ViewModel!.Posts"
+                 SelectedItem=@ViewModel.SelectedPost
+                 SelectionChanged="@(e => InvokeAsync(() => ViewModel.SelectedPost = e.Item))">
+            <ItemTemplate Context="post">
+                <div class="list-post">
+                    <h3 class="list-post__title">@post.Title</h3>
+                    @if (post.Thumbnail is not null && post.Thumbnail != "self")
+                    {
+                        <img src="@post.Thumbnail"
+                             onerror="this.onerror=null; this.style='display:none';"
+                             alt="@post.Title" class="list-post__image" />
+                    }
+                </div>
+            </ItemTemplate>
+        </ListBox>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await GetPostsAsync();
+    }
+
+    private async Task GetPostsAsync()
+    {
+        if (ViewModel is null) return;
+
+        // manually flush
+        ViewModel.SelectedPost = null;
+        ViewModel.Posts.Clear();
+
+        // update UI
+        await InvokeAsync(StateHasChanged);
+
+        // get posts
+        await ViewModel.LoadPostsCommand.ExecuteAsync(null);
+
+        // ObservableCollection change events not tracked, so we need to manually indicate binding update
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ChangeSubredditAsync(ListBoxEventArgs<string> e)
+    {
+        if (ViewModel is null) return;
+
+        ViewModel.SelectedSubreddit = e.Item;
+        await GetPostsAsync();
+    }
+}

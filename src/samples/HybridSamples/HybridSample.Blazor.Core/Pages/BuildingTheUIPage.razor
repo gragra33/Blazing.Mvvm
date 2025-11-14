@@ -1,0 +1,21 @@
+﻿@page "/BuildingTheUI"
+@inherits MvvmComponentBase<IBuildingTheUIPageViewModel>
+
+@if (ViewModel?.Texts is null || !ViewModel.Texts.Any())
+{
+    <p>Loading...</p>
+}
+else
+{
+    @ViewModel.Texts["Building the UI"].MarkDownToMarkUp()
+    @ViewModel.Texts["Good to go! 🚀"].MarkDownToMarkUp()
+}
+
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await ViewModel!.LoadDocsCommand.ExecuteAsync("PuttingThingsTogether");
+    }
+}

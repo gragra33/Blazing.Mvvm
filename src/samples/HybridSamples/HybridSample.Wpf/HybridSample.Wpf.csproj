@@ -1,0 +1,60 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+	  <ApplicationManifest>app.manifest</ApplicationManifest>
+	  <Version>1.4.0</Version>
+	  <AssemblyVersion>1.4.0.0</AssemblyVersion>
+	  <FileVersion>1.4.0.0</FileVersion>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+		<PackageReference Include="Microsoft.Extensions.Logging" />
+		<PackageReference Include="Refit" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\HybridSample.Core\HybridSample.Core.csproj" />
+	  <ProjectReference Include="..\HybridSample.Blazor.Core\HybridSample.Blazor.Core.csproj" />
+	  <ProjectReference Include="..\..\..\Blazing.Mvvm\Blazing.Mvvm.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="wwwroot\index.html">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\AsyncRelayCommand.md" Link="Assets\docs\AsyncRelayCommand.md">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\Introduction.md" Link="Assets\docs\Introduction.md">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\Ioc.md" Link="Assets\docs\Ioc.md">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\Messenger.md" Link="Assets\docs\Messenger.md">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\ObservableObject.md" Link="Assets\docs\ObservableObject.md">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\PuttingThingsTogether.md" Link="Assets\docs\PuttingThingsTogether.md">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\RelayCommand.md" Link="Assets\docs\RelayCommand.md">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+</Project>
