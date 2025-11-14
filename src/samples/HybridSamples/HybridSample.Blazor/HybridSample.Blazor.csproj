@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+	  <Version>1.4.0</Version>
+	  <AssemblyVersion>1.4.0.0</AssemblyVersion>
+	  <FileVersion>1.4.0.0</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HybridSample.Core\HybridSample.Core.csproj" />
+    <ProjectReference Include="..\HybridSample.Blazor.Core\HybridSample.Blazor.Core.csproj" />
+  </ItemGroup>
+
+</Project>

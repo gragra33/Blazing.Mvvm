@@ -1,0 +1,55 @@
+﻿.c-listbox {
+    --core-list-bk: #fff;
+    --core-list-bdr: #0d47a1;
+    --core-list-clr: inherited;
+    --core-list-item-hover-bdr: #81d4fa;
+    --core-list-item-seleced-bdr: #e1f5fe;
+    --core-list-item-seleced-bk: #e1f5fe;
+    --core-list-item-seleced-clr: #0d47a1;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    align-content: start;
+    margin: 0;
+    padding: 0;
+    color: var(--core-list-clr);
+    background-color: var(--core-list-bk);
+    border: 2px solid var(--core-list-bdr);
+}
+
+    .c-listbox:focus-visible,
+    .c-listbox:focus-within {
+        box-shadow: var(--neutral-focus-visual, 0 0 0 0.25rem rgba(13, 110, 253, 0.25));
+        outline: 0;
+        border: 2px solid var(--core-list-bdr);
+    }
+
+.c-listbox__header, .c-listbox__footer, .c-listbox__content {
+    margin: 0;
+    padding: 0;
+}
+
+.c-listbox__content {
+    grid-column: 1/2;
+    overflow-y: auto;
+    overflow-x: hidden;
+    list-style: none;
+    background-color: #F3F5F6;
+}
+
+.c-listbox__item {
+    padding: 0.5em 1em;
+    width: 100%;
+    height: fit-content;
+    border: 2px solid var(--core-list-bk);
+    cursor: pointer;
+}
+
+.c-listbox .c-listbox__item--selected {
+    color: var(--core-list-item-seleced-clr);
+    background-color: var(--core-list-item-seleced-bk);
+    border: 2px solid var(--core-list-item-seleced-bdr);
+}
+
+.c-listbox .c-listbox__item:hover {
+    border: 2px solid var(--core-list-item-hover-bdr);
+}
