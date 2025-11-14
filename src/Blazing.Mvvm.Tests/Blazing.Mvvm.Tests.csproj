@@ -2,13 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-	  <AssemblyVersion>2.1.0.0</AssemblyVersion>
-	  <FileVersion>2.1.0.0</FileVersion>
-	  <Version>2.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
