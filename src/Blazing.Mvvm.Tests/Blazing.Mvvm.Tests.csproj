@@ -29,7 +29,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Blazing.Mvvm.Sample.WebApp\Blazing.Mvvm.Sample.WebApp\Blazing.Mvvm.Sample.WebApp.csproj" />
+    <ProjectReference Include="..\Blazing.Mvvm\Blazing.Mvvm.csproj" />
+    <ProjectReference Include="..\samples\Blazing.Mvvm.Sample.WebApp\Blazing.Mvvm.Sample.WebApp.Client\Blazing.Mvvm.Sample.WebApp.Client.csproj" />
   </ItemGroup>
 
 </Project>
