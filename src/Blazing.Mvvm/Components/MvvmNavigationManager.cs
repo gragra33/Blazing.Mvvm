@@ -38,9 +38,8 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
         }
 
-        string resolvedUri = ResolveNavigationUri(uri);
-        LogNavigationEvent(typeof(TViewModel).FullName, resolvedUri);
-        _navigationManager.NavigateTo(resolvedUri, forceLoad, replace);
+        LogNavigationEvent(typeof(TViewModel).FullName, uri);
+        _navigationManager.NavigateTo(uri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
@@ -52,9 +51,8 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
         }
 
-        string resolvedUri = ResolveNavigationUri(uri);
-        LogNavigationEvent(typeof(TViewModel).FullName, resolvedUri);
-        _navigationManager.NavigateTo(resolvedUri, CloneNavigationOptions(options));
+        LogNavigationEvent(typeof(TViewModel).FullName, uri);
+        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -68,11 +66,10 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
         }
 
-        string resolvedUri = ResolveNavigationUri(uri);
-        string finalUri = BuildUri(_navigationManager.ToAbsoluteUri(resolvedUri).AbsoluteUri, relativeUri);
+        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
 
-        LogNavigationEvent(typeof(TViewModel).FullName, finalUri);
-        _navigationManager.NavigateTo(finalUri, forceLoad, replace);
+        LogNavigationEvent(typeof(TViewModel).FullName, uri);
+        _navigationManager.NavigateTo(uri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
@@ -86,11 +83,10 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
         }
 
-        string resolvedUri = ResolveNavigationUri(uri);
-        string finalUri = BuildUri(_navigationManager.ToAbsoluteUri(resolvedUri).AbsoluteUri, relativeUri);
+        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
 
-        LogNavigationEvent(typeof(TViewModel).FullName, finalUri);
-        _navigationManager.NavigateTo(finalUri, CloneNavigationOptions(options));
+        LogNavigationEvent(typeof(TViewModel).FullName, uri);
+        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -103,9 +99,8 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             throw new ArgumentException($"No associated page for key '{key}'");
         }
 
-        string resolvedUri = ResolveNavigationUri(uri);
-        LogKeyedNavigationEvent(key, resolvedUri);
-        _navigationManager.NavigateTo(resolvedUri, forceLoad, replace);
+        LogKeyedNavigationEvent(key, uri);
+        _navigationManager.NavigateTo(uri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
@@ -118,9 +113,8 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             throw new ArgumentException($"No associated page for key '{key}'");
         }
 
-        string resolvedUri = ResolveNavigationUri(uri);
-        LogKeyedNavigationEvent(key, resolvedUri);
-        _navigationManager.NavigateTo(resolvedUri, CloneNavigationOptions(options));
+        LogKeyedNavigationEvent(key, uri);
+        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -134,11 +128,10 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             throw new ArgumentException($"No associated page for key '{key}'");
         }
 
-        string resolvedUri = ResolveNavigationUri(uri);
-        string finalUri = BuildUri(_navigationManager.ToAbsoluteUri(resolvedUri).AbsoluteUri, relativeUri);
+        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
 
-        LogKeyedNavigationEvent(key, finalUri);
-        _navigationManager.NavigateTo(finalUri, forceLoad, replace);
+        LogKeyedNavigationEvent(key, uri);
+        _navigationManager.NavigateTo(uri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
@@ -152,11 +145,10 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             throw new ArgumentException($"No associated page for key '{key}'");
         }
 
-        string resolvedUri = ResolveNavigationUri(uri);
-        string finalUri = BuildUri(_navigationManager.ToAbsoluteUri(resolvedUri).AbsoluteUri, relativeUri);
+        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
 
-        LogKeyedNavigationEvent(key, finalUri);
-        _navigationManager.NavigateTo(finalUri, CloneNavigationOptions(options));
+        LogKeyedNavigationEvent(key, uri);
+        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -183,25 +175,6 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     }
 
     #region Internals
-
-    /// <summary>
-    /// Resolves a route template to a navigation URI at runtime.
-    /// </summary>
-    /// <param name="routeTemplate">The route template to resolve.</param>
-    /// <returns>The resolved navigation URI.</returns>
-    private string ResolveNavigationUri(string routeTemplate)
-    {
-        if (routeTemplate == "/")
-        {
-            return new Uri(_navigationManager.BaseUri).LocalPath; // relative (root) LocalPath
-        }
-        else if (routeTemplate.Length != 1 && routeTemplate.StartsWith("/"))
-        {
-            return routeTemplate[1..]; // relative path
-        }
-        
-        return routeTemplate;
-    }
 
     /// <summary>
     /// Builds a complete URI from a base URI and a relative URI.
@@ -281,7 +254,6 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
                 }
 
                 // we have a page, let's reference it!
-                // Store the original route template for backward compatibility with GetUri
                 string uri = routeAttribute.Template;
                 _references.Add(item.Argument!, uri);
                 _logger.LogDebug("Caching navigation reference '{Argument}' with uri '{Uri}' for '{FullName}'", item.Argument, uri, item.Type.FullName);

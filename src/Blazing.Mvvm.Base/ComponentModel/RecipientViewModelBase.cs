@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Messaging;
 
 namespace Blazing.Mvvm.ComponentModel;
 
@@ -8,16 +7,6 @@ namespace Blazing.Mvvm.ComponentModel;
 /// </summary>
 public abstract class RecipientViewModelBase : ObservableRecipient, IViewModelBase, IDisposable
 {
-
-     /// <inheritdoc/>
-     protected RecipientViewModelBase()
-        : base()
-     {}
-    
-     /// <inheritdoc/>
-     protected RecipientViewModelBase(IMessenger messenger)
-        : base(messenger)
-    {}
     private bool IsDisposed;
 
     /// <inheritdoc/>
