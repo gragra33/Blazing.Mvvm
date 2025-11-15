@@ -32,7 +32,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UsePathBase("/fu/bar");
+app.UsePathBase("/fu/bar/");
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
