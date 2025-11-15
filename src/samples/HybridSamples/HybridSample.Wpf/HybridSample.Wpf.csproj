@@ -20,9 +20,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\HybridSample.Core\HybridSample.Core.csproj" />
-	  <ProjectReference Include="..\HybridSample.Blazor.Core\HybridSample.Blazor.Core.csproj" />
 	  <ProjectReference Include="..\..\..\Blazing.Mvvm\Blazing.Mvvm.csproj" />
+	  <ProjectReference Include="..\core\HybridSample.Blazor.Core\HybridSample.Blazor.Core.csproj" />
+	  <ProjectReference Include="..\core\HybridSample.Core\HybridSample.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -34,25 +34,25 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\AsyncRelayCommand.md" Link="Assets\docs\AsyncRelayCommand.md">
+		<Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\AsyncRelayCommand.md" Link="Assets\docs\AsyncRelayCommand.md">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\Introduction.md" Link="Assets\docs\Introduction.md">
+		<Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\Introduction.md" Link="Assets\docs\Introduction.md">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\Ioc.md" Link="Assets\docs\Ioc.md">
+		<Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\Ioc.md" Link="Assets\docs\Ioc.md">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\Messenger.md" Link="Assets\docs\Messenger.md">
+		<Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\Messenger.md" Link="Assets\docs\Messenger.md">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\ObservableObject.md" Link="Assets\docs\ObservableObject.md">
+		<Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\ObservableObject.md" Link="Assets\docs\ObservableObject.md">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\PuttingThingsTogether.md" Link="Assets\docs\PuttingThingsTogether.md">
+		<Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\PuttingThingsTogether.md" Link="Assets\docs\PuttingThingsTogether.md">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Include="..\HybridSample.Blazor\wwwroot\Assets\docs\RelayCommand.md" Link="Assets\docs\RelayCommand.md">
+		<Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\RelayCommand.md" Link="Assets\docs\RelayCommand.md">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>

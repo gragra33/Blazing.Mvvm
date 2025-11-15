@@ -35,7 +35,10 @@ internal class Program
             .AddServicesWpf()
             .AddMvvm(options =>
             { 
+                // Register ViewModels from HybridSample.Core assembly
                 options.RegisterViewModelsFromAssemblyContaining<SamplePageViewModel>();
+                // Register Views/Pages from HybridSample.Blazor.Core assembly for route mapping
+                options.RegisterViewModelsFromAssemblyContaining<HybridSample.Blazor.Core.Pages.IntroductionPage>();
             });
 
         using IHost host = appBuilder.Build();

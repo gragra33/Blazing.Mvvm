@@ -35,6 +35,7 @@ public partial class App
             .AddMvvm(options =>
             { 
                 options.RegisterViewModelsFromAssemblyContaining<SamplePageViewModel>();
+                options.RegisterViewModelsFromAssemblyContaining<HybridSample.Blazor.Core.Pages.IntroductionPage>();
             });
 
 #if DEBUG
