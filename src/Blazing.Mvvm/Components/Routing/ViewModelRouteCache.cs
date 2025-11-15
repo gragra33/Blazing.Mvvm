@@ -49,8 +49,16 @@ public class ViewModelRouteCache : IViewModelRouteCache
     private void GenerateReferenceCache(IEnumerable<Assembly> assemblies)
     {
         _logger.LogDebug("Starting generation of a new Reference Cache for ViewModelRouteCache");
+        
+        var assemblyList = assemblies.ToList();
+        _logger.LogDebug("Scanning {AssemblyCount} assemblies for ViewModel route mappings", assemblyList.Count);
+        
+        foreach (var assembly in assemblyList)
+        {
+            _logger.LogDebug("Scanning assembly: {AssemblyName}", assembly.FullName);
+        }
 
-        foreach (Assembly assembly in assemblies)
+        foreach (Assembly assembly in assemblyList)
         {
             List<(Type Type, Type? Argument)> items;
 
@@ -61,6 +69,8 @@ public class ViewModelRouteCache : IViewModelRouteCache
                     .Select(GetViewArgumentType)
                     .Where(t => t.Argument is not null)
                     .ToList();
+                    
+                _logger.LogDebug("Found {ViewCount} Views with ViewModels in assembly {AssemblyName}", items.Count, assembly.GetName().Name);
             }
             catch (Exception ex)
             {
@@ -71,6 +81,7 @@ public class ViewModelRouteCache : IViewModelRouteCache
 
             if (items.Count == 0)
             {
+                _logger.LogDebug("No Views with ViewModels found in assembly {AssemblyName}", assembly.GetName().Name);
                 continue;
             }
 
@@ -80,6 +91,7 @@ public class ViewModelRouteCache : IViewModelRouteCache
 
                 if (routeAttribute is null)
                 {
+                    _logger.LogDebug("View {ViewType} does not have a RouteAttribute", item.Type.FullName);
                     continue;
                 }
 
@@ -93,15 +105,27 @@ public class ViewModelRouteCache : IViewModelRouteCache
                 {
                     _logger.LogDebug("Caching navigation reference '{Argument}' with uri '{Uri}' for '{FullName}'", item.Argument, uri, item.Type.FullName);
                 }
+                else if (item.Argument != null && _viewModelRoutes.ContainsKey(item.Argument))
+                {
+                    _logger.LogWarning("Duplicate ViewModel type {ViewModelType} found. Existing route: '{ExistingRoute}', Ignored route: '{NewRoute}'", 
+                        item.Argument.FullName, _viewModelRoutes[item.Argument], uri);
+                }
 
                 ViewModelKeyAttribute? vmKeyAttribute = item.Type.GetCustomAttribute<ViewModelKeyAttribute>();
                 if (vmKeyAttribute?.Key != null && _keyedViewModelRoutes.TryAdd(vmKeyAttribute.Key, uri))
                 {
                     _logger.LogDebug("Caching keyed navigation reference '{Key}' with uri '{Uri}' for '{FullName}'", vmKeyAttribute.Key, uri, item.Type.FullName);
                 }
+                else if (vmKeyAttribute?.Key != null && _keyedViewModelRoutes.ContainsKey(vmKeyAttribute.Key))
+                {
+                    _logger.LogWarning("Duplicate ViewModel key {ViewModelKey} found. Existing route: '{ExistingRoute}', Ignored route: '{NewRoute}'", 
+                        vmKeyAttribute.Key, _keyedViewModelRoutes[vmKeyAttribute.Key], uri);
+                }
             }
         }
-        _logger.LogDebug("Completed generating the Reference Cache for ViewModelRouteCache");
+        
+        _logger.LogDebug("Completed generating the Reference Cache for ViewModelRouteCache. Total ViewModels cached: {ViewModelCount}, Total keyed ViewModels cached: {KeyedViewModelCount}", 
+            _viewModelRoutes.Count, _keyedViewModelRoutes.Count);
     }
 
     /// <summary>

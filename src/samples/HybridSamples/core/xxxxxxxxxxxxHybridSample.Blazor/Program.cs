@@ -20,8 +20,11 @@ builder.Services
     //.AddViewModels() // obsolete - now uses the ViewModelDefinition attribute & auto registration
     .AddServices()
     .AddMvvm(options =>
-    { 
+    {
+        // Register ViewModels from HybridSample.Core assembly
         options.RegisterViewModelsFromAssemblyContaining<SamplePageViewModel>();
+        // Register Views/Pages from HybridSample.Blazor.Core assembly for route mapping
+        options.RegisterViewModelsFromAssemblyContaining<HybridSample.Blazor.Core.Pages.IntroductionPage>();
     });
 
 #if DEBUG

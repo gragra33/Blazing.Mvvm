@@ -17,6 +17,6 @@
     <PackageReference Include="Refit" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Blazing.Mvvm\Blazing.Mvvm.csproj" />
+    <ProjectReference Include="..\..\..\..\Blazing.Mvvm\Blazing.Mvvm.csproj" />
   </ItemGroup>
 </Project>

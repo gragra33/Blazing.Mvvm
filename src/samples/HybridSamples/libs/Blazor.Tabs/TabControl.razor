@@ -1,16 +1,16 @@
 ﻿@inherits ComponentControlBase
 
-@if (_panels != null)
+@if (Panels != null)
 {
     <CascadingValue Value=this>
-        @_panels
+        @Panels
     </CascadingValue>
 }
 
 <div @attributes="AdditionalAttributes"
-     class ="@GetTabsClass()" style="@GetTabsStyle()">
+     class="@GetTabsClass()" style="@GetTabsStyle()">
     <div class="@GetHeaderClass()" style="@GetHeaderStyle()" role="tablist">
-        @foreach (TabPanel tabPanel in _panels!)
+        @foreach (TabPanel tabPanel in _panels)
         {
             <button type="button" role="tab"
                     id="@tabPanel.HeaderUniqueId"
@@ -23,7 +23,7 @@
                     @onkeydown:stopPropagation="true">
                 @if (tabPanel.HeaderTemplate == null)
                 {
-                    <span class="@GetButtonTitleClass()" style="@GetButtonTitleStyle()">
+                    <span class="@GetButtonTitleClass(tabPanel)" style="@GetButtonTitleStyle(tabPanel)">
                         @((MarkupString)tabPanel.Title!)
                     </span>
                 }
@@ -35,14 +35,14 @@
         }
     </div>
 
-    @if (_activePanel != null)
+    @if (ActivePanel != null)
     {
-        <div @attributes="_activePanel.AdditionalAttributes"
-             id="@_activePanel.UniqueId" 
-             class="@GetTabPanelClass(_activePanel)" style="@GetTabPanelStyle(_activePanel)"
+        <div @attributes="this.ActivePanel.AdditionalAttributes"
+             id="@ActivePanel.UniqueId"
+             class="@GetTabPanelClass(ActivePanel)" style="@GetTabPanelStyle(ActivePanel)"
              tabindex="0" role="tabpanel"
-             aria-labelledby="@_activePanel.HeaderUniqueId">
-            @_activePanel!.ChildContent
+             aria-labelledby="@ActivePanel.HeaderUniqueId">
+            @ActivePanel.ChildContent
         </div>
     }
 </div>

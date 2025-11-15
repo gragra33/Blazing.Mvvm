@@ -117,8 +117,9 @@ public sealed class SubredditWidgetViewModel : RecipientViewModelBase
                     Posts.Add(item.Data);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 Debugger.Break();
                 // Whoops!
             }
