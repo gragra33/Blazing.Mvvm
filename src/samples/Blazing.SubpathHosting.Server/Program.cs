@@ -1,5 +1,5 @@
 using Blazing.Mvvm;
-using Blazing.Mvvm.Sample.Server.Data;
+using Blazing.SubpathHosting.Server.Data;
 using CommunityToolkit.Mvvm.Messaging;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -15,6 +15,7 @@ builder.Services.AddMvvm(options =>
 {
     options.HostingModelType = BlazorHostingModelType.Server;
     options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
+    options.BasePath = "/test/"; // Set the base path for the application
 });
 
 #if DEBUG
@@ -31,13 +32,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UsePathBase("/test");
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
 app.UseRouting();
 
-app.MapBlazorHub();
+app.MapBlazorHub("/_blazor"); 
 app.MapFallbackToPage("/_Host");
 
 await app.RunAsync();
