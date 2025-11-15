@@ -6,14 +6,14 @@ using Microsoft.AspNetCore.Components;
 namespace Blazing.Mvvm.Components;
 
 /// <summary>
-/// A base class that creates a service provider scope, and resolves a ViewModel of type <typeparamref name="TViewModel"/>.
+/// A base class for Blazor components that create a service provider scope and resolve a ViewModel of type <typeparamref name="TViewModel"/>.
 /// </summary>
-/// <typeparam name="TViewModel">The ViewModel.</typeparam>
+/// <typeparam name="TViewModel">The type of the ViewModel associated with this component. Must implement <see cref="IViewModelBase"/>.</typeparam>
 /// <remarks>
-/// Use the <see cref="MvvmComponentBase{TViewModel}" /> class as a base class to author components that control
-/// the lifetime of a ViewModel and of a service provider scope. This is useful when using a transient or scoped service that
-/// requires disposal such as a repository or database abstraction. Using <see cref="MvvmComponentBase{TViewModel}" />
-/// as a base class ensures that the ViewModel and service and relates services that share its scope are disposed with the component.
+/// Use <see cref="MvvmOwningComponentBase{TViewModel}" /> as a base class to author components that control
+/// the lifetime of a ViewModel and a service provider scope. This is useful when using a transient or scoped service that
+/// requires disposal, such as a repository or database abstraction. Using <see cref="MvvmOwningComponentBase{TViewModel}" />
+/// ensures that the ViewModel and related services sharing its scope are disposed with the component.
 /// </remarks>
 public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase, IView<TViewModel>, IAsyncDisposable
     where TViewModel : IViewModelBase
@@ -21,13 +21,13 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     private TViewModel? _viewModel;
 
     /// <summary>
-    /// Resolves parameters in the <c>View</c> and <c>ViewModel</c>.
+    /// Gets or sets the parameter resolver used to set parameters on the View and ViewModel.
     /// </summary>
     [Inject]
-    protected IParameterResolver ParameterResolver { get; set; } = default!;
+    protected IParameterResolver ParameterResolver { get; set; } = null!;
 
     /// <summary>
-    /// The <c>ViewModel</c> associated with this component, resolved from the <see cref="OwningComponentBase.ScopedServices"/>.
+    /// Gets or sets the <c>ViewModel</c> associated with this component, resolved from the <see cref="OwningComponentBase.ScopedServices"/>.
     /// </summary>
     protected virtual TViewModel ViewModel
     {
@@ -35,7 +35,10 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
         set => _viewModel = value;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Disposes the component asynchronously and releases unmanaged resources.
+    /// </summary>
+    /// <returns>A <see cref="ValueTask"/> representing the asynchronous dispose operation.</returns>
     public async ValueTask DisposeAsync()
     {
         await DisposeAsyncCore();
@@ -48,34 +51,55 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
         GC.SuppressFinalize(this);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Invoked after the component has rendered.
+    /// </summary>
+    /// <param name="firstRender">True if this is the first time <see cref="OnAfterRender(bool)"/> is called; otherwise, false.</param>
     protected override void OnAfterRender(bool firstRender)
         => ViewModel.OnAfterRender(firstRender);
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Asynchronously invoked after the component has rendered.
+    /// </summary>
+    /// <param name="firstRender">True if this is the first time <see cref="OnAfterRenderAsync(bool)"/> is called; otherwise, false.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected override Task OnAfterRenderAsync(bool firstRender)
         => ViewModel.OnAfterRenderAsync(firstRender);
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Initializes the component and subscribes to ViewModel property changes.
+    /// </summary>
     protected override void OnInitialized()
     {
         ViewModel.PropertyChanged += OnPropertyChanged;
         ViewModel.OnInitialized();
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Asynchronously initializes the component.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected override Task OnInitializedAsync()
         => ViewModel.OnInitializedAsync();
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Sets parameters on the component and ViewModel.
+    /// </summary>
     protected override void OnParametersSet()
         => ViewModel.OnParametersSet();
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Asynchronously sets parameters on the component and ViewModel.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected override Task OnParametersSetAsync()
         => ViewModel.OnParametersSetAsync();
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Sets parameters from the given <see cref="ParameterView"/> on both the View and its ViewModel using the <see cref="ParameterResolver"/>.
+    /// </summary>
+    /// <param name="parameters">The parameters to set.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public override Task SetParametersAsync(ParameterView parameters)
     {
         return ParameterResolver.SetParameters(this, ViewModel, parameters)
@@ -83,14 +107,17 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
             : base.SetParametersAsync(parameters);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Determines whether the component should render.
+    /// </summary>
+    /// <returns><c>true</c> if the component should render; otherwise, <c>false</c>.</returns>
     protected override bool ShouldRender()
         => ViewModel.ShouldRender();
 
     /// <summary>
     /// Disposes the component and releases unmanaged resources.
     /// </summary>
-    /// <param name="disposing">A boolean value indicating whether the method was called from the dispose method or from a finalizer.</param>
+    /// <param name="disposing">True if called from the public Dispose method; false if called from a finalizer.</param>
     protected override void Dispose(bool disposing)
     {
         if (IsDisposed)
@@ -111,8 +138,9 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     }
 
     /// <summary>
-    /// Disposes the component asynchronously and releases unmanaged resources.
+    /// Disposes the component asynchronously and releases unmanaged resources for the scoped services.
     /// </summary>
+    /// <returns>A <see cref="ValueTask"/> representing the asynchronous dispose operation.</returns>
     protected virtual async ValueTask DisposeAsyncCore()
     {
         if (ScopedServices is not IAsyncDisposable asyncDisposable)
@@ -123,6 +151,11 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
         await asyncDisposable.DisposeAsync();
     }
 
+    /// <summary>
+    /// Handles property change notifications from the ViewModel and triggers a UI update.
+    /// </summary>
+    /// <param name="o">The sender object.</param>
+    /// <param name="propertyChangedEventArgs">The event data.</param>
     private void OnPropertyChanged(object? o, PropertyChangedEventArgs propertyChangedEventArgs)
         => InvokeAsync(StateHasChanged);
 }

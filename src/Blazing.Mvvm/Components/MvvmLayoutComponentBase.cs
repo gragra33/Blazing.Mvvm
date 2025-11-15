@@ -23,10 +23,10 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
     /// Resolves parameters in the <c>View</c> and <c>ViewModel</c>.
     /// </summary>
     [Inject]
-    protected IParameterResolver ParameterResolver { get; set; } = default!;
+    protected IParameterResolver ParameterResolver { get; set; } = null!;
 
     [Inject]
-    private IServiceProvider Services { get; set; } = default!;
+    private IServiceProvider Services { get; set; } = null!;
 
     /// <summary>
     /// The <c>ViewModel</c> associated with this component, resolved from the dependency injection container.

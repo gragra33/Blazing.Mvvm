@@ -2,35 +2,26 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<LangVersion>12</LangVersion>
 		<PackageId>Blazing.Mvvm.Base</PackageId>
 		<Title>MVVM for Blazor using CommunityToolkit.Mvvm Base Classes</Title>
-		<Authors>Graeme Grant (@gragra33)</Authors>
 		<Description>A simple, and easy-to-use implementation of Mvvm for Blazor wrapping the CommunityToolkit.Mvvm</Description>
 		<Description>MVVM for Blazor using CommunityToolkit.Mvvm</Description>
 		<PackageProjectUrl>https://github.com/gragra33/Blazing.Mvvm</PackageProjectUrl>
-		<Copyright>MIT Licence</Copyright>
-		<RepositoryUrl>https://github.com/gragra33/Blazing.Mvvm</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
 		<PackageTags>Blazor,Wasm,Web Assembly,Blazor Server,Blazor Web App,Blazor Hybid MAUI,Mvvm,CommunityToolkit</PackageTags>
 		<PackageReleaseNotes>Support for Blazor Web App, Blazor Server, Blazor WebAssembly, Blazor Hybrid, Blazor Hybid MAUI</PackageReleaseNotes>
-		<AssemblyVersion>2.2.0.0</AssemblyVersion>
-		<FileVersion>2.2.0.0</FileVersion>
-		<Version>2.2.0</Version>
 	</PropertyGroup>
 
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
 	</ItemGroup>
 
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+	<ItemGroup>
+	  <None Include="..\..\LICENSE" Link="LICENSE">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

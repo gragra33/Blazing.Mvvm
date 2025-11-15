@@ -11,19 +11,19 @@ using Microsoft.Extensions.Options; // Added for Options.Create
 namespace Blazing.Mvvm;
 
 /// <summary>
-/// An extension class for <see cref="IServiceCollection"/> to add the required services for Blazing.Mvvm.
+/// Provides extension methods for <see cref="IServiceCollection"/> to add the required services for Blazing.Mvvm.
 /// </summary>
 public static class ServicesExtension
 {
     /// <summary>
-    /// Adds the required services for Blazing.Mvvm.
+    /// Adds the required services for Blazing.Mvvm to the specified <see cref="IServiceCollection"/>.
     /// </summary>
-    /// <param name="services">The <see cref="IServiceCollection"/> instance.</param>
-    /// <param name="configuration">An action that configures the <see cref="LibraryConfiguration"/>.</param>
-    /// <returns>The <see cref="IServiceCollection"/> instance.</returns>
-    /// <exception cref="ArgumentNullException">Throws when <paramref name="services"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">Throws when <see cref="LibraryConfiguration.HostingModelType"/> is not within the defined range.</exception>
-    /// <exception cref="InvalidOperationException">Throws an when a <c>view model</c> has a generic <see cref="ViewModelDefinitionAttribute{TViewModel}"/> attribute but does not implement the generic type.</exception>
+    /// <param name="services">The <see cref="IServiceCollection"/> instance to add services to.</param>
+    /// <param name="configuration">An optional action to configure the <see cref="LibraryConfiguration"/>.</param>
+    /// <returns>The <see cref="IServiceCollection"/> instance for chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="services"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <see cref="LibraryConfiguration.HostingModelType"/> is not within the defined range.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when a view model has a generic <see cref="ViewModelDefinitionAttribute{TViewModel}"/> attribute but does not implement the generic type.</exception>
     public static IServiceCollection AddMvvm(this IServiceCollection services, Action<LibraryConfiguration>? configuration = null)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -35,6 +35,12 @@ public static class ServicesExtension
         return services;
     }
 
+    /// <summary>
+    /// Adds core Blazing.Mvvm dependencies to the service collection, including configuration, navigation manager, route cache, and view models.
+    /// </summary>
+    /// <param name="services">The service collection to add dependencies to.</param>
+    /// <param name="configuration">The library configuration.</param>
+    /// <param name="callingAssembly">The calling assembly for view model registration.</param>
     private static void AddDependencies(IServiceCollection services, LibraryConfiguration configuration, Assembly callingAssembly)
     {
         if (configuration.ViewModelAssemblies.Count == 0)
@@ -57,6 +63,12 @@ public static class ServicesExtension
         AddViewModels(services, configuration.ViewModelAssemblies);
     }
 
+    /// <summary>
+    /// Registers the MVVM navigation manager service according to the hosting model type.
+    /// </summary>
+    /// <param name="services">The service collection to add the navigation manager to.</param>
+    /// <param name="configuration">The library configuration containing the hosting model type.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the hosting model type is invalid.</exception>
     private static void AddMvvmNavigationManager(this IServiceCollection services, LibraryConfiguration configuration)
     {
         var serviceDescriptor = configuration.HostingModelType switch
@@ -69,6 +81,13 @@ public static class ServicesExtension
         services.TryAdd(serviceDescriptor);
     }
 
+    /// <summary>
+    /// Registers all non-abstract types implementing <see cref="IViewModelBase"/> from the specified assemblies as services.
+    /// Handles generic and keyed view model definitions via <see cref="ViewModelDefinitionAttribute"/>.
+    /// </summary>
+    /// <param name="services">The service collection to add view models to.</param>
+    /// <param name="assemblies">The assemblies to scan for view model types.</param>
+    /// <exception cref="InvalidOperationException">Thrown when a view model does not implement its generic type as required by <see cref="ViewModelDefinitionAttribute{TViewModel}"/>.</exception>
     private static void AddViewModels(IServiceCollection services, IEnumerable<Assembly> assemblies)
     {
         foreach (var vmImplementationType in assemblies.SelectMany(a => a.GetTypes().Where(t => !t.IsAbstract && t.IsAssignableTo(typeof(IViewModelBase)))))

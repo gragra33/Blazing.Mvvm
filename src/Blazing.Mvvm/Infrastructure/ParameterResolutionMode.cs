@@ -3,22 +3,23 @@
 namespace Blazing.Mvvm;
 
 /// <summary>
-/// Specifies the mode for resolving parameters.
+/// Specifies the mode for resolving parameters in Blazing.Mvvm components and view models.
 /// </summary>
 public enum ParameterResolutionMode
 {
     /// <summary>
-    /// This disables parameter resolution via the <see cref="IParameterResolver"/> service.
+    /// Disables parameter resolution via the <see cref="IParameterResolver"/> service.
+    /// Parameters are not set on the View or ViewModel and default Blazor behavior is used.
     /// </summary>
     None,
 
     /// <summary>
-    /// Resolve parameters in the <c>ViewModel</c> only and skips parameter resolution for the <c>View</c>.
+    /// Resolves parameters in the <c>ViewModel</c> only and skips parameter resolution for the <c>View</c>.
     /// </summary>
     ViewModel,
 
     /// <summary>
-    /// Resolve parameters in both the <c>View</c> and the <c>ViewModel</c>.
+    /// Resolves parameters in both the <c>View</c> and the <c>ViewModel</c>.
     /// </summary>
     ViewAndViewModel
 }

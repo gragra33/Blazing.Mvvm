@@ -15,7 +15,7 @@ builder.Services.AddMvvm(options =>
 {
     options.HostingModelType = BlazorHostingModelType.Server;
     options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
-    options.BasePath = "/test/"; // Set the base path for the application
+    options.BasePath = "/fu/bar/"; // Set the base path for the application
 });
 
 #if DEBUG
@@ -32,7 +32,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UsePathBase("/test");
+app.UsePathBase("/fu/bar");
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();

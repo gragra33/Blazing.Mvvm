@@ -6,8 +6,11 @@ using Microsoft.Extensions.Logging;
 namespace Blazing.Mvvm.Components.Routing;
 
 /// <summary>
-/// Singleton store for ViewModel to route mappings.
+/// Provides a singleton cache for mapping ViewModel types and keys to their associated route URIs in a Blazor MVVM application.
 /// </summary>
+/// <remarks>
+/// This cache is used to efficiently resolve navigation routes for ViewModels and keyed ViewModels, supporting both type-based and key-based navigation.
+/// </remarks>
 public class ViewModelRouteCache : IViewModelRouteCache
 {
     private readonly ILogger<ViewModelRouteCache> _logger;
@@ -16,17 +19,22 @@ public class ViewModelRouteCache : IViewModelRouteCache
     private readonly Dictionary<object, string> _keyedViewModelRoutes = [];
 
     /// <inheritdoc />
+    /// <summary>
+    /// Gets the cached routes for ViewModels, mapping ViewModel types to route URIs.
+    /// </summary>
     public IReadOnlyDictionary<Type, string> ViewModelRoutes => _viewModelRoutes;
 
     /// <inheritdoc />
+    /// <summary>
+    /// Gets the cached routes for keyed ViewModels, mapping keys to route URIs.
+    /// </summary>
     public IReadOnlyDictionary<object, string> KeyedViewModelRoutes => _keyedViewModelRoutes;
 
-    
     /// <summary>
-    /// The constructor for ViewModelRouteCache, initializes the logger and configuration, and generates the reference cache.
+    /// Initializes a new instance of the <see cref="ViewModelRouteCache"/> class, sets up logging and configuration, and generates the reference cache.
     /// </summary>
-    /// <param name="logger"></param>
-    /// <param name="configuration"></param>
+    /// <param name="logger">The logger used for diagnostic messages.</param>
+    /// <param name="configuration">The library configuration containing assemblies and base path.</param>
     public ViewModelRouteCache(ILogger<ViewModelRouteCache> logger, LibraryConfiguration configuration) 
     {
         _logger = logger;
@@ -34,6 +42,10 @@ public class ViewModelRouteCache : IViewModelRouteCache
         GenerateReferenceCache(configuration.ViewModelAssemblies);
     }
 
+    /// <summary>
+    /// Generates the cache of ViewModel to route mappings by scanning the provided assemblies for Views and their associated route attributes.
+    /// </summary>
+    /// <param name="assemblies">The assemblies to scan for ViewModel route mappings.</param>
     private void GenerateReferenceCache(IEnumerable<Assembly> assemblies)
     {
         _logger.LogDebug("Starting generation of a new Reference Cache for ViewModelRouteCache");
@@ -92,6 +104,13 @@ public class ViewModelRouteCache : IViewModelRouteCache
         _logger.LogDebug("Completed generating the Reference Cache for ViewModelRouteCache");
     }
 
+    /// <summary>
+    /// Gets the ViewModel type argument from a View type if it implements <see cref="IView{TViewModel}"/> and is assignable to a supported component base type.
+    /// </summary>
+    /// <param name="type">The type to inspect for ViewModel argument.</param>
+    /// <returns>
+    /// A tuple containing the View type and its ViewModel type argument, or <c>default</c> if not applicable.
+    /// </returns>
     private (Type Type, Type? Argument) GetViewArgumentType(Type type)
     {
         Type viewInterfaceType = typeof(IView<>);
@@ -124,14 +143,13 @@ public class ViewModelRouteCache : IViewModelRouteCache
             return default;
         }
 
-        if (componentBaseType is null || typeArgument is null) // Added null check for typeArgument
+        if (componentBaseType is null || typeArgument is null)
         {
             return default;
         }
 
-        Type[] interfaces = typeArgument // Changed from componentBaseType to typeArgument
+        Type[] interfaces = typeArgument
             .GetInterfaces();
-
 
         return interfaces.FirstOrDefault(i => viewModelType.IsAssignableFrom(i)) is null
             ? default
