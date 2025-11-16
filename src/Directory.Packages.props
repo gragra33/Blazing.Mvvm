@@ -18,9 +18,9 @@
     
     <!-- MAUI packages with proper conditions for multi-platform support -->
     <!-- .NET 8.0 MAUI packages -->
-    <PackageVersion Include="Microsoft.Maui.Controls" Version="8.0.90" Condition="'$(TargetFramework)' == 'net8.0'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.90" Condition="'$(TargetFramework)' == 'net8.0'" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="8.0.90" Condition="'$(TargetFramework)' == 'net8.0' or $(TargetFramework.StartsWith('net8.0-'))" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.90" Condition="'$(TargetFramework)' == 'net8.0' or $(TargetFramework.StartsWith('net8.0-'))" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0' or $(TargetFramework.StartsWith('net8.0-'))" />
     
     <!-- .NET 9.0 MAUI packages -->
     <PackageVersion Include="Microsoft.Maui.Controls" Version="9.0.10" Condition="$(TargetFramework.StartsWith('net9.0'))" />
