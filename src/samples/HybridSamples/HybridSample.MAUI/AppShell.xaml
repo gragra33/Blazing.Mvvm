@@ -3,6 +3,7 @@
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:local="clr-namespace:HybridSample.MAUI"
        x:Class="HybridSample.MAUI.AppShell"
+       x:Name="AppShellRoot"
        FlyoutBehavior="{OnIdiom Phone=Flyout, Tablet=Locked, Desktop=Locked}"
        FlyoutBackgroundColor="#1b6ec2"
        FlyoutWidth="250"
@@ -22,28 +23,13 @@
 
     <!-- Menu Items for Navigation -->
     <Shell.FlyoutContent>
-        <CollectionView SelectionMode="Single" SelectionChanged="OnMenuItemSelected">
-            <CollectionView.ItemsSource>
-                <x:Array Type="{x:Type x:String}">
-                    <x:String>home</x:String>
-                    <x:String>observeObj</x:String>
-                    <x:String>relayCommand</x:String>
-                    <x:String>asyncCommand</x:String>
-                    <x:String>msg</x:String>
-                    <x:String>sendMsg</x:String>
-                    <x:String>ReqMsg</x:String>
-                    <x:String>ioc</x:String>
-                    <x:String>vmSetup</x:String>
-                    <x:String>SettingsSvc</x:String>
-                    <x:String>redditSvc</x:String>
-                    <x:String>buildUI</x:String>
-                    <x:String>reddit</x:String>
-                </x:Array>
-            </CollectionView.ItemsSource>
+        <CollectionView SelectionMode="Single" 
+                        SelectionChanged="OnMenuItemSelected"
+                        ItemsSource="{Binding Source={x:Reference AppShellRoot}, Path=MenuItems}">
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="x:String">
+                <DataTemplate x:DataType="local:MenuItem">
                     <Grid Padding="15,10" BackgroundColor="Transparent">
-                        <Label Text="{Binding .}" TextColor="White" FontSize="16" VerticalOptions="Center" />
+                        <Label Text="{Binding Title}" TextColor="White" FontSize="16" VerticalOptions="Center" />
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

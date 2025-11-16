@@ -4,6 +4,22 @@ using Microsoft.Maui.Controls;
 namespace HybridSample.MAUI;
 
 /// <summary>
+/// Represents a menu item in the flyout.
+/// </summary>
+public class MenuItem
+{
+    /// <summary>
+    /// Gets or sets the navigation key.
+    /// </summary>
+    public string Key { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the display title.
+    /// </summary>
+    public string Title { get; set; } = string.Empty;
+}
+
+/// <summary>
 /// The Shell-based navigation for the MAUI application.
 /// </summary>
 public partial class AppShell : Shell
@@ -27,6 +43,11 @@ public partial class AppShell : Shell
     };
 
     /// <summary>
+    /// Gets the collection of menu items for the flyout.
+    /// </summary>
+    public List<MenuItem> MenuItems { get; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="AppShell"/> class.
     /// </summary>
     /// <param name="viewModel">The main page view model.</param>
@@ -34,6 +55,14 @@ public partial class AppShell : Shell
     public AppShell(MainPageViewModel viewModel, MainPage mainPage)
     {
         _viewModel = viewModel;
+        
+        // Create menu items from the dictionary
+        MenuItems = _menuTitles.Select(kvp => new MenuItem 
+        { 
+            Key = kvp.Key, 
+            Title = kvp.Value 
+        }).ToList();
+        
         InitializeComponent();
         
         // Set the MainPage as the content programmatically to maintain singleton instance
@@ -43,13 +72,13 @@ public partial class AppShell : Shell
 
     private void OnMenuItemSelected(object? sender, SelectionChangedEventArgs e)
     {
-        if (e.CurrentSelection.FirstOrDefault() is not string selectedKey)
+        if (e.CurrentSelection.FirstOrDefault() is not MenuItem selectedItem)
             return;
 
-        // Execute the navigation command in the ViewModel
-        if (_viewModel.NavigateToCommand.CanExecute(selectedKey))
+        // Execute the navigation command in the ViewModel using the key
+        if (_viewModel.NavigateToCommand.CanExecute(selectedItem.Key))
         {
-            _viewModel.NavigateToCommand.Execute(selectedKey);
+            _viewModel.NavigateToCommand.Execute(selectedItem.Key);
         }
 
         // Close the flyout on phones
