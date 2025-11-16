@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:local="clr-namespace:HybridSample.MAUI"
+       x:Class="HybridSample.MAUI.AppShell"
+       x:Name="AppShellRoot"
+       FlyoutBehavior="{OnIdiom Phone=Flyout, Tablet=Locked, Desktop=Locked}"
+       FlyoutBackgroundColor="#1b6ec2"
+       FlyoutWidth="250"
+       Title="Blazing MVVM"
+       Shell.NavBarIsVisible="{OnPlatform WinUI=False, MacCatalyst=False, Default=True}"
+       Shell.TabBarIsVisible="False">
+
+    <Shell.FlyoutHeader>
+        <Grid BackgroundColor="#512BD4" HeightRequest="120" Padding="20">
+            <Label Text="Blazing MVVM" TextColor="White" FontSize="24" FontAttributes="Bold" VerticalOptions="Center" />
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <!-- Single ShellContent that hosts the MainPage with BlazorWebView -->
+    <!-- Content is set programmatically in code-behind to maintain singleton instance -->
+    <ShellContent x:Name="MainShellContent" Title="Content" />
+
+    <!-- Menu Items for Navigation -->
+    <Shell.FlyoutContent>
+        <CollectionView SelectionMode="Single" 
+                        SelectionChanged="OnMenuItemSelected"
+                        ItemsSource="{Binding Source={x:Reference AppShellRoot}, Path=MenuItems}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="local:MenuItem">
+                    <Grid Padding="15,10" BackgroundColor="Transparent">
+                        <Label Text="{Binding Title}" TextColor="White" FontSize="16" VerticalOptions="Center" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Shell.FlyoutContent>
+
+</Shell>

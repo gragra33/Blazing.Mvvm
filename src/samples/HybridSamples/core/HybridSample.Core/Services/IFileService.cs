@@ -15,5 +15,5 @@ public interface IFilesService
     /// </summary>
     /// <param name="path">The path of the file to retrieve.</param>
     /// <returns>The <see cref="Stream"/> for the specified file.</returns>
-    Task<Stream>? OpenForReadAsync(string path);
+    Task<Stream?> OpenForReadAsync(string path);
 }

@@ -34,7 +34,7 @@ public partial class ListBox<TItem> : ComponentControlBase, IAsyncDisposable
     
     private DotNetObjectReference<ListBox<TItem>>? DotNetInstance;
 
-    private const string  ListScriptFile = "./_content/Blazor.Lists/scripts/lists.js";
+    private const string  ListScriptFile = "./_content/Blazing.Lists/scripts/lists.js";
 
     #endregion
 

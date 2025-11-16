@@ -16,7 +16,7 @@ public static class IJSObjectReferenceExtensions
     /// <param name="jsRuntime">The JavaScript runtime instance.</param>
     /// <returns>The path to the common script file.</returns>
     public static string GetCommonScriptPath (this IJSRuntime jsRuntime)
-        => "./_content/Blazor.Common/scripts/common.js";
+        => "./_content/Blazing.Common/scripts/common.js";
 
     /// <summary>
     /// Imports a JavaScript module from the specified file path.
