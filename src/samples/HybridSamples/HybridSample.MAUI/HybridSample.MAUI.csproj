@@ -90,6 +90,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="MainPage.xaml.cs">
+      <DependentUpon>MainPage.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiXaml Update="MainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Platforms\Windows\App.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>

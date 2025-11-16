@@ -84,9 +84,14 @@ public class SamplePageViewModel : ViewModelBase,
 
         string? directory = Path.GetDirectoryName(name);
         string filename = Path.GetFileName(name);
-        string path = Path.Combine("Assets", "docs", directory ?? string.Empty, $"{filename}.md");
-        await using Stream stream = await FilesServices.OpenForReadAsync(path)!;
-        using StreamReader reader = new(stream);
+        
+        // Build path using forward slashes for cross-platform compatibility (MAUI assets)
+        string path = string.IsNullOrEmpty(directory)
+            ? $"Assets/docs/{filename}.md"
+            : $"Assets/docs/{directory}/{filename}.md";
+        
+        await using Stream? stream = await FilesServices.OpenForReadAsync(path);
+        using StreamReader reader = new(stream!);
         string text = await reader.ReadToEndAsync();
 
         // Fixup image links

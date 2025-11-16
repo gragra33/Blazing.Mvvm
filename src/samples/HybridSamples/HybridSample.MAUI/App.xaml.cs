@@ -15,8 +15,8 @@ public partial class App : Application
     {
         InitializeComponent();
         
-        // Use the modern approach instead of deprecated MainPage property
-        MainPage = new MainPage(mainPageViewModel);
+        // Wrap MainPage in NavigationPage to enable push/pop navigation
+        MainPage = new NavigationPage(new MainPage(mainPageViewModel));
     }
 
     /// <summary>

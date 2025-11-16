@@ -21,14 +21,11 @@
     {
         AppState.Navigation = this;
         base.OnInitialized();
-
-        // force refresh to overcome Hybrid app not initializing WebNavigation
-        MvvmNavManager.ForceNavigationManagerUpdate(NavManager);
     }
 
     public void NavigateTo(string page)
         => NavManager.NavigateTo(page);
 
     public void NavigateTo<TViewModel>() where TViewModel : IViewModelBase
-        => MvvmNavManager.NavigateTo<TViewModel>(new BrowserNavigationOptions());
+        => MvvmNavManager.NavigateTo<TViewModel>();
 }

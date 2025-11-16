@@ -54,36 +54,38 @@ public class FilesService : IFilesService
     /// </summary>
     /// <param name="path">The path of the file to retrieve.</param>
     /// <returns>The <see cref="Stream"/> for the specified file.</returns>
-    public async Task<Stream>? OpenForReadAsync(string path)
+    public async Task<Stream?> OpenForReadAsync(string path)
     {
         Debug.WriteLine($"[FilesService] Attempting to open file: {path}");
+        Debug.WriteLine($"[FilesService] Path uses backslashes: {path.Contains('\\')}");
+        Debug.WriteLine($"[FilesService] Path uses forward slashes: {path.Contains('/')}");
+
+        // Normalize path separators - MAUI expects forward slashes
+        string normalizedPath = path.Replace('\\', '/');
+        Debug.WriteLine($"[FilesService] Normalized path: {normalizedPath}");
 
         try
         {
             // For MAUI, try to open from the app package
-            Debug.WriteLine($"[FilesService] Trying FileSystem.OpenAppPackageFileAsync...");
-            var stream = await FileSystem.OpenAppPackageFileAsync(path);
-            Debug.WriteLine($"[FilesService] Successfully opened: {path}");
+            // Files in Resources\Raw with MauiAsset build action can be opened directly
+            Debug.WriteLine($"[FilesService] Trying FileSystem.OpenAppPackageFileAsync with normalized path...");
+            var stream = await FileSystem.OpenAppPackageFileAsync(normalizedPath);
+            Debug.WriteLine($"[FilesService] Successfully opened: {normalizedPath}");
             return stream;
+        }
+        catch (FileNotFoundException ex)
+        {
+            Debug.WriteLine($"[FilesService] FileNotFoundException: {ex.Message}");
+            Debug.WriteLine($"[FilesService] File not found in app package: {normalizedPath}");
+            Debug.WriteLine($"[FilesService] Original path: {path}");
+            throw new FileNotFoundException($"Could not find file '{normalizedPath}' in app package. Original path: '{path}'. Ensure the file is in Resources\\Raw folder with MauiAsset build action.", normalizedPath, ex);
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[FilesService] FileSystem.OpenAppPackageFileAsync failed: {ex.Message}");
-
-            // If file not found in app package, try absolute path
-            try
-            {
-                Debug.WriteLine($"[FilesService] Trying File.OpenRead with absolute path...");
-                var absolutePath = Path.Combine(InstallationPath, path);
-                Debug.WriteLine($"[FilesService] Absolute path: {absolutePath}");
-                return File.OpenRead(absolutePath);
-            }
-            catch (Exception ex2)
-            {
-                Debug.WriteLine($"[FilesService] File.OpenRead failed: {ex2.Message}");
-                Debug.WriteLine($"[FilesService] All attempts failed for: {path}");
-                throw new FileNotFoundException($"Could not find file '{path}' in app package or file system.", path, ex2);
-            }
+            Debug.WriteLine($"[FilesService] Unexpected error: {ex.Message}");
+            Debug.WriteLine($"[FilesService] Exception type: {ex.GetType().Name}");
+            Debug.WriteLine($"[FilesService] Stack trace: {ex.StackTrace}");
+            throw;
         }
     }
 }
