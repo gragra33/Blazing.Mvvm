@@ -51,7 +51,6 @@ The sample projects in this solution support multi-targeting across the followin
   - **.NET 9.0**: `net9.0-android`, `net9.0-ios`, `net9.0-maccatalyst`, `net9.0-windows10.0.19041.0`
   - **.NET 10.0**: `net10.0-android`, `net10.0-ios`, `net10.0-maccatalyst`, `net10.0-windows10.0.19041.0`
 - **HybridSample.MAUI**: Multi-platform hybrid sample including:
-  - **.NET 8.0**: `net8.0-android`, `net8.0-ios`, `net8.0-maccatalyst`, `net8.0-windows10.0.19041.0`
   - **.NET 9.0**: `net9.0-android`, `net9.0-ios`, `net9.0-maccatalyst`, `net9.0-windows10.0.19041.0`
   - **.NET 10.0**: `net10.0-android`, `net10.0-ios`, `net10.0-maccatalyst`, `net10.0-windows10.0.19041.0`
 
@@ -347,17 +346,16 @@ dotnet run -f net10.0-windows10.0.19041.0
 
 **Project**: `HybridSample.MAUI`  
 **Target Frameworks**: 
-- **.NET 8.0**: `net8.0-android`, `net8.0-ios`, `net8.0-maccatalyst`, `net8.0-windows10.0.19041.0`
 - **.NET 9.0**: `net9.0-android`, `net9.0-ios`, `net9.0-maccatalyst`, `net9.0-windows10.0.19041.0`
 - **.NET 10.0**: `net10.0-android`, `net10.0-ios`, `net10.0-maccatalyst`, `net10.0-windows10.0.19041.0`
 
 ##### Visual Studio:
 1. Set `HybridSample.MAUI` as startup project
 2. Select platform and framework from toolbar dropdown:
-   - **Android**: `net8.0-android`, `net9.0-android`, `net10.0-android`
-   - **iOS**: `net8.0-ios`, `net9.0-ios`, `net10.0-ios` (macOS only)
-   - **macOS**: `net8.0-maccatalyst`, `net9.0-maccatalyst`, `net10.0-maccatalyst` (macOS only)
-   - **Windows**: `net8.0-windows10.0.19041.0`, `net9.0-windows10.0.19041.0`, `net10.0-windows10.0.19041.0`
+   - **Android**: `net9.0-android`, `net10.0-android`
+   - **iOS**: `net9.0-ios`, `net10.0-ios` (macOS only)
+   - **macOS**: `net9.0-maccatalyst`, `net10.0-maccatalyst` (macOS only)
+   - **Windows**: `net9.0-windows10.0.19041.0`, `net10.0-windows10.0.19041.0`
 3. Press F5 to run (will deploy to selected platform)
 
 ##### CLI:
@@ -365,9 +363,6 @@ dotnet run -f net10.0-windows10.0.19041.0
 **Android:**
 ```bash
 cd samples/HybridSamples/HybridSample.MAUI
-
-# Build for .NET 8.0 Android
-dotnet build -f net8.0-android
 
 # Build for .NET 9.0 Android
 dotnet build -f net9.0-android
@@ -380,9 +375,6 @@ dotnet build -f net10.0-android
 ```bash
 cd samples/HybridSamples/HybridSample.MAUI
 
-# Build for .NET 8.0 iOS
-dotnet build -f net8.0-ios
-
 # Build for .NET 9.0 iOS
 dotnet build -f net9.0-ios
 
@@ -394,9 +386,6 @@ dotnet build -f net10.0-ios
 ```bash
 cd samples/HybridSamples/HybridSample.MAUI
 
-# Build for .NET 8.0 macOS
-dotnet build -f net8.0-maccatalyst
-
 # Build for .NET 9.0 macOS
 dotnet build -f net9.0-maccatalyst
 
@@ -407,9 +396,6 @@ dotnet build -f net10.0-maccatalyst
 **Windows:**
 ```bash
 cd samples/HybridSamples/HybridSample.MAUI
-
-# Run .NET 8.0 Windows
-dotnet run -f net8.0-windows10.0.19041.0
 
 # Run .NET 9.0 Windows
 dotnet run -f net9.0-windows10.0.19041.0
@@ -607,7 +593,6 @@ dotnet restore
 dotnet build samples/Blazing.Mvvm.Sample.HybridMaui -f net9.0-android
 
 # Build and deploy to Android (HybridSample)
-dotnet build samples/HybridSamples/HybridSample.MAUI -f net8.0-android
 dotnet build samples/HybridSamples/HybridSample.MAUI -f net9.0-android
 dotnet build samples/HybridSamples/HybridSample.MAUI -f net10.0-android
 
@@ -620,7 +605,6 @@ dotnet build samples/HybridSamples/HybridSample.MAUI -f net10.0-android
 dotnet run --project samples/Blazing.Mvvm.Sample.HybridMaui -f net9.0-windows10.0.19041.0
 
 # Run on Windows (HybridSample)
-dotnet run --project samples/HybridSamples/HybridSample.MAUI -f net8.0-windows10.0.19041.0
 dotnet run --project samples/HybridSamples/HybridSample.MAUI -f net9.0-windows10.0.19041.0
 dotnet run --project samples/HybridSamples/HybridSample.MAUI -f net10.0-windows10.0.19041.0
 ```
@@ -631,9 +615,7 @@ dotnet run --project samples/HybridSamples/HybridSample.MAUI -f net10.0-windows1
 dotnet build samples/Blazing.Mvvm.Sample.HybridMaui -f net9.0-ios
 
 # Build for iOS (HybridSample)
-dotnet build samples/HybridSamples/HybridSample.MAUI -f net8.0-ios
 dotnet build samples/HybridSamples/HybridSample.MAUI -f net9.0-ios
 dotnet build samples/HybridSamples/HybridSample.MAUI -f net10.0-ios
 
 # Deploy via Visual Studio for Mac or Xcode
-```
