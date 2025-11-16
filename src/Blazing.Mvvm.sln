@@ -64,6 +64,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazing.Mvvm.Sample.WebApp"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazing.Mvvm.Sample.WebApp.Client", "samples\Blazing.Mvvm.Sample.WebApp\Blazing.Mvvm.Sample.WebApp.Client\Blazing.Mvvm.Sample.WebApp.Client.csproj", "{082E5E74-ED2C-20FE-125F-63331CD86437}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Migration Notes", "Migration Notes", "{17E67D4F-836D-4485-9486-9084304BB356}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\migration-notes\v1.4_to_v2.md = ..\docs\migration-notes\v1.4_to_v2.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Framework Version", "Framework Version", "{66958A82-6DE9-4085-8132-9EEDB53D9F2D}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\Running_Different_NET_Versions.md = ..\docs\Running_Different_NET_Versions.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -164,6 +174,8 @@ Global
 		{0B1263FC-A679-6F4C-D715-EDEE81C00614} = {F517F8B5-53D1-43DB-B0FE-A603C8BD343F}
 		{2C4EED6F-1E39-9B0A-9990-51AF9EFCFD7E} = {8BEC7F26-63FA-4B22-9B55-53D138AFF17D}
 		{082E5E74-ED2C-20FE-125F-63331CD86437} = {8BEC7F26-63FA-4B22-9B55-53D138AFF17D}
+		{17E67D4F-836D-4485-9486-9084304BB356} = {225ACB45-5BBE-48D0-A1FB-802E767F6D21}
+		{66958A82-6DE9-4085-8132-9EEDB53D9F2D} = {225ACB45-5BBE-48D0-A1FB-802E767F6D21}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2D6F818A-4305-467B-BB8E-E1AB2BEAC979}

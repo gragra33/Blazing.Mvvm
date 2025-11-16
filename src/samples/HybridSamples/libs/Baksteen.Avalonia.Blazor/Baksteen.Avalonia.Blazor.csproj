@@ -3,7 +3,7 @@
   <Title>Baksteen.Avalonia.Blazor</Title>
     <Summary>Avalonia BlazorWebView component</Summary>
     <Description>Avalonia BlazorWebView component</Description>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFrameworks>net8.0-windows;net9.0-windows;net10.0-windows</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <RootNamespace>Baksteen.Avalonia.Blazor</RootNamespace>
     <Nullable>enable</Nullable>
@@ -11,7 +11,7 @@
 	  <PackageId>Baksteen.Avalonia.Blazor</PackageId>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <PackageTags>avalonia;blazor;blazorhybrid;hybrid;webview;webview2</PackageTags>
-	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 	  <Authors>jpmikkers</Authors>
 	  <Description>BlazorWebView for Avalonia 11 (preview 6).</Description>
 	  <RepositoryType>git</RepositoryType>
@@ -21,7 +21,6 @@
 	  <Copyright>Copyright (c) JPMikkers 2023</Copyright>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <Version>0.5.0-preview</Version>
-	  <PackageIcon>icon.png</PackageIcon>
 	  <IncludeSymbols>False</IncludeSymbols>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -31,6 +30,7 @@
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.ReactiveUI" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView" />
   </ItemGroup>
   <ItemGroup>
     <None Update="icon.png">
