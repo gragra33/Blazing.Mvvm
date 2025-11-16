@@ -33,6 +33,11 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
+        // Register Shell and Pages
+        builder.Services.AddSingleton<AppShell>();
+        // Register MainPage as Singleton to prevent recreating BlazorWebView
+        builder.Services.AddSingleton<MainPage>();
+
         // Register services
         builder.Services
             .AddSingleton(RestService.For<IRedditService>("https://www.reddit.com/"))

@@ -6,141 +6,15 @@
              xmlns:viewModels="clr-namespace:HybridSample.MAUI.ViewModels"
              x:Class="HybridSample.MAUI.MainPage"
              x:DataType="viewModels:MainPageViewModel"
-             Title="{Binding Title}">
+             Title="{Binding Title}"
+             Shell.NavBarIsVisible="{OnPlatform Android=True, iOS=True, WinUI=False, MacCatalyst=False, Default=True}"
+             Shell.TabBarIsVisible="False">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-        <ScrollView Grid.Column="0" Grid.Row="0">
-            <VerticalStackLayout Padding="20" Spacing="10">
-                <Button Text="Introduction"
-                        Command="{Binding NavigateToCommand}"
-                        CommandParameter="home"
-                        Padding="10,5"
-                        WidthRequest="200"
-                        HeightRequest="40"
-                        BackgroundColor="#1b6ec2"
-                        TextColor="White" />
-                <Button Text="ObservableObject"
-                        Command="{Binding NavigateToCommand}"
-                        CommandParameter="observeObj"
-                        Padding="10,5"
-                        WidthRequest="200"
-                        HeightRequest="40"
-                        BackgroundColor="#1b6ec2"
-                        TextColor="White" />
-                <Button Text="Relay Commands"
-                        Command="{Binding NavigateToCommand}"
-                        CommandParameter="relayCommand"
-                        Padding="10,5"
-                        WidthRequest="200"
-                        HeightRequest="40"
-                        BackgroundColor="#1b6ec2"
-                        TextColor="White" />
-                <Button Text="Async Commands"
-                        Command="{Binding NavigateToCommand}"
-                        CommandParameter="asyncCommand"
-                        Padding="10,5"
-                        WidthRequest="200"
-                        HeightRequest="40"
-                        BackgroundColor="#1b6ec2"
-                        TextColor="White" />
-                <Button Text="Messenger"
-                        Command="{Binding NavigateToCommand}"
-                        CommandParameter="msg"
-                        Padding="10,5"
-                        WidthRequest="200"
-                        HeightRequest="40"
-                        BackgroundColor="#1b6ec2"
-                        TextColor="White" />
-                <Button Text="Sending Messages"
-                        Command="{Binding NavigateToCommand}"
-                        CommandParameter="sendMsg"
-                        Padding="10,5"
-                        WidthRequest="200"
-                        HeightRequest="40"
-                        BackgroundColor="#1b6ec2"
-                        TextColor="White" />
-                <Button Text="Request Messages"
-                        Command="{Binding NavigateToCommand}"
-                        CommandParameter="ReqMsg"
-                        Padding="10,5"
-                        WidthRequest="200"
-                        HeightRequest="40"
-                        BackgroundColor="#1b6ec2"
-                        TextColor="White" />
-                <Button Text="Inversion of Control"
-                        Command="{Binding NavigateToCommand}"
-                        CommandParameter="ioc"
-                        Padding="10,5"
-                        WidthRequest="200"
-                        HeightRequest="40"
-                        BackgroundColor="#1b6ec2"
-                        TextColor="White" />
-                <Button Text="ViewModel Setup"
-                        Command="{Binding NavigateToCommand}"
-                        CommandParameter="vmSetup"
-                        Padding="10,5"
-                        WidthRequest="200"
-                        HeightRequest="40"
-                        BackgroundColor="#1b6ec2"
-                        TextColor="White" />
-                <Button Text="Settings Service"
-                        Command="{Binding NavigateToCommand}"
-                        CommandParameter="SettingsSvc"
-                        Padding="10,5"
-                        WidthRequest="200"
-                        HeightRequest="40"
-                        BackgroundColor="#1b6ec2"
-                        TextColor="White" />
-                <Button Text="Reddit Service"
-                        Command="{Binding NavigateToCommand}"
-                        CommandParameter="redditSvc"
-                        Padding="10,5"
-                        WidthRequest="200"
-                        HeightRequest="40"
-                        BackgroundColor="#1b6ec2"
-                        TextColor="White" />
-                <Button Text="Building the UI"
-                        Command="{Binding NavigateToCommand}"
-                        CommandParameter="buildUI"
-                        Padding="10,5"
-                        WidthRequest="200"
-                        HeightRequest="40"
-                        BackgroundColor="#1b6ec2"
-                        TextColor="White" />
-                <Button Text="The Final Result"
-                        Command="{Binding NavigateToCommand}"
-                        CommandParameter="reddit"
-                        Padding="10,5"
-                        WidthRequest="200"
-                        HeightRequest="40"
-                        BackgroundColor="#1b6ec2"
-                        TextColor="White" />
-            </VerticalStackLayout>
-        </ScrollView>
-
-        <BlazorWebView Grid.Column="1" Grid.Row="0"
-                       HostPage="wwwroot/index.html">
-            <BlazorWebView.RootComponents>
-                <RootComponent Selector="#app" ComponentType="{x:Type components:Routes}" />
-            </BlazorWebView.RootComponents>
-        </BlazorWebView>
-
-        <Label Grid.Row="1" Grid.ColumnSpan="2"
-               HorizontalOptions="Fill"
-               HorizontalTextAlignment="Center"
-               Padding="10"
-               BackgroundColor="LightGray"
-               FontAttributes="Bold"
-               Text="Click on the BlazorWebView control, then CTRL-SHIFT-I or F12 to open the Browser DevTools window..." />
-    </Grid>
+    <!-- BlazorWebView takes full width - flyout menu handles navigation on all platforms -->
+    <BlazorWebView HostPage="wwwroot/index.html">
+        <BlazorWebView.RootComponents>
+            <RootComponent Selector="#app" ComponentType="{x:Type components:Routes}" />
+        </BlazorWebView.RootComponents>
+    </BlazorWebView>
 
 </ContentPage>

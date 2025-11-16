@@ -10,13 +10,13 @@ public partial class App : Application
     /// <summary>
     /// Initializes a new instance of the <see cref="App"/> class.
     /// </summary>
-    /// <param name="mainPageViewModel">The view model for the main page, injected via DI.</param>
-    public App(MainPageViewModel mainPageViewModel)
+    /// <param name="appShell">The app shell, injected via DI.</param>
+    public App(AppShell appShell)
     {
         InitializeComponent();
         
-        // Wrap MainPage in NavigationPage to enable push/pop navigation
-        MainPage = new NavigationPage(new MainPage(mainPageViewModel));
+        // Use Shell for navigation
+        MainPage = appShell;
     }
 
     /// <summary>
