@@ -36,6 +36,7 @@ The sample projects in this solution support multi-targeting across the followin
 ### Desktop Hybrid Sample Projects
 - **HybridSample.Wpf** (WPF + Blazor): `net8.0-windows`, `net9.0-windows`, `net10.0-windows`
 - **HybridSample.Avalonia** (Avalonia + Blazor): `net8.0-windows`, `net9.0-windows`, `net10.0-windows`
+- **HybridSample.WinForms** (WinForms + Blazor): `net8.0-windows`, `net9.0-windows`, `net10.0-windows`
 
 #### Supporting Libraries for Desktop Hybrid
 - **HybridSample.Core**: `net8.0`, `net9.0`, `net10.0`
@@ -47,6 +48,10 @@ The sample projects in this solution support multi-targeting across the followin
 
 ### MAUI Cross-Platform Sample Projects
 - **Blazing.Mvvm.Sample.HybridMaui**: Multiple targets including:
+  - **.NET 9.0**: `net9.0-android`, `net9.0-ios`, `net9.0-maccatalyst`, `net9.0-windows10.0.19041.0`
+  - **.NET 10.0**: `net10.0-android`, `net10.0-ios`, `net10.0-maccatalyst`, `net10.0-windows10.0.19041.0`
+- **HybridSample.MAUI**: Multi-platform hybrid sample including:
+  - **.NET 8.0**: `net8.0-android`, `net8.0-ios`, `net8.0-maccatalyst`, `net8.0-windows10.0.19041.0`
   - **.NET 9.0**: `net9.0-android`, `net9.0-ios`, `net9.0-maccatalyst`, `net9.0-windows10.0.19041.0`
   - **.NET 10.0**: `net10.0-android`, `net10.0-ios`, `net10.0-maccatalyst`, `net10.0-windows10.0.19041.0`
 
@@ -89,10 +94,10 @@ dotnet run -f <target-framework>
 **Common Framework Identifiers:**
 - **Standard .NET**: `net8.0`, `net9.0`, `net10.0`
 - **Windows-specific**: `net8.0-windows`, `net9.0-windows`, `net10.0-windows`
-- **Android**: `net9.0-android`, `net10.0-android`
-- **iOS**: `net9.0-ios`, `net10.0-ios`
-- **macOS**: `net9.0-maccatalyst`, `net10.0-maccatalyst`
-- **Windows (MAUI)**: `net9.0-windows10.0.19041.0`, `net10.0-windows10.0.19041.0`
+- **Android**: `net8.0-android`, `net9.0-android`, `net10.0-android`
+- **iOS**: `net8.0-ios`, `net9.0-ios`, `net10.0-ios`
+- **macOS**: `net8.0-maccatalyst`, `net9.0-maccatalyst`, `net10.0-maccatalyst`
+- **Windows (MAUI)**: `net8.0-windows10.0.19041.0`, `net9.0-windows10.0.19041.0`, `net10.0-windows10.0.19041.0`
 
 ## Running Different Project Types
 
@@ -198,7 +203,7 @@ dotnet run -f net10.0
 
 ### Desktop Hybrid Applications
 
-Desktop hybrid applications combine native desktop UI frameworks (WPF/Avalonia) with Blazor components using WebView.
+Desktop hybrid applications combine native desktop UI frameworks (WPF/Avalonia/WinForms) with Blazor components using WebView.
 
 #### **WPF + Blazor Hybrid**
 
@@ -248,11 +253,35 @@ dotnet run -f net9.0-windows
 dotnet run -f net10.0-windows
 ```
 
+#### **WinForms + Blazor Hybrid**
+
+**Project**: `HybridSample.WinForms`  
+**Target Frameworks**: `net8.0-windows`, `net9.0-windows`, `net10.0-windows`
+
+##### Visual Studio:
+1. Set `HybridSample.WinForms` as startup project
+2. Select framework from Run with Debugging toolbar dropdown button: `net8.0-windows`, `net9.0-windows`, or `net10.0-windows`  
+3. Press F5 to run
+
+##### CLI:
+```bash
+cd samples/HybridSamples/HybridSample.WinForms
+
+# Run .NET 8.0 on Windows
+dotnet run -f net8.0-windows
+
+# Run .NET 9.0 on Windows
+dotnet run -f net9.0-windows
+
+# Run .NET 10.0 on Windows  
+dotnet run -f net10.0-windows
+```
+
 ### MAUI Cross-Platform Applications
 
 MAUI applications are the most complex as they target multiple platforms simultaneously.
 
-#### **MAUI Blazor Hybrid**
+#### **MAUI Blazor Hybrid (Original Sample)**
 
 **Project**: `Blazing.Mvvm.Sample.HybridMaui`  
 **Target Frameworks**: 
@@ -314,6 +343,81 @@ dotnet run -f net9.0-windows10.0.19041.0
 dotnet run -f net10.0-windows10.0.19041.0
 ```
 
+#### **MAUI Blazor Hybrid (HybridSample)**
+
+**Project**: `HybridSample.MAUI`  
+**Target Frameworks**: 
+- **.NET 8.0**: `net8.0-android`, `net8.0-ios`, `net8.0-maccatalyst`, `net8.0-windows10.0.19041.0`
+- **.NET 9.0**: `net9.0-android`, `net9.0-ios`, `net9.0-maccatalyst`, `net9.0-windows10.0.19041.0`
+- **.NET 10.0**: `net10.0-android`, `net10.0-ios`, `net10.0-maccatalyst`, `net10.0-windows10.0.19041.0`
+
+##### Visual Studio:
+1. Set `HybridSample.MAUI` as startup project
+2. Select platform and framework from toolbar dropdown:
+   - **Android**: `net8.0-android`, `net9.0-android`, `net10.0-android`
+   - **iOS**: `net8.0-ios`, `net9.0-ios`, `net10.0-ios` (macOS only)
+   - **macOS**: `net8.0-maccatalyst`, `net9.0-maccatalyst`, `net10.0-maccatalyst` (macOS only)
+   - **Windows**: `net8.0-windows10.0.19041.0`, `net9.0-windows10.0.19041.0`, `net10.0-windows10.0.19041.0`
+3. Press F5 to run (will deploy to selected platform)
+
+##### CLI:
+
+**Android:**
+```bash
+cd samples/HybridSamples/HybridSample.MAUI
+
+# Build for .NET 8.0 Android
+dotnet build -f net8.0-android
+
+# Build for .NET 9.0 Android
+dotnet build -f net9.0-android
+
+# Build for .NET 10.0 Android
+dotnet build -f net10.0-android
+```
+
+**iOS (macOS only):**
+```bash
+cd samples/HybridSamples/HybridSample.MAUI
+
+# Build for .NET 8.0 iOS
+dotnet build -f net8.0-ios
+
+# Build for .NET 9.0 iOS
+dotnet build -f net9.0-ios
+
+# Build for .NET 10.0 iOS
+dotnet build -f net10.0-ios
+```
+
+**macOS Catalyst (macOS only):**
+```bash
+cd samples/HybridSamples/HybridSample.MAUI
+
+# Build for .NET 8.0 macOS
+dotnet build -f net8.0-maccatalyst
+
+# Build for .NET 9.0 macOS
+dotnet build -f net9.0-maccatalyst
+
+# Build for .NET 10.0 macOS
+dotnet build -f net10.0-maccatalyst
+```
+
+**Windows:**
+```bash
+cd samples/HybridSamples/HybridSample.MAUI
+
+# Run .NET 8.0 Windows
+dotnet run -f net8.0-windows10.0.19041.0
+
+# Run .NET 9.0 Windows
+dotnet run -f net9.0-windows10.0.19041.0
+
+# Run .NET 10.0 Windows
+dotnet run -f net10.0-windows10.0.19041.0
+```
+
 ## Understanding Multi-Targeted Projects
 
 ### **All Projects in This Solution are Multi-Targeted**
@@ -323,8 +427,8 @@ dotnet run -f net10.0-windows10.0.19041.0
 - **Visual Studio Editing**: Properties -> Application -> "Target frameworks" (plural) to modify the list
 - **Examples**:
   - **Blazor**: `<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>`
-  - **WPF/Avalonia**: `<TargetFrameworks>net8.0-windows;net9.0-windows;net10.0-windows</TargetFrameworks>`
-  - **MAUI**: `<TargetFrameworks>net9.0-android;net9.0-ios;net10.0-android;net10.0-ios</TargetFrameworks>`
+  - **WPF/Avalonia/WinForms**: `<TargetFrameworks>net8.0-windows;net9.0-windows;net10.0-windows</TargetFrameworks>`
+  - **MAUI**: `<TargetFrameworks>net8.0-android;net8.0-ios;net9.0-android;net9.0-ios;net10.0-android;net10.0-ios</TargetFrameworks>`
   - **Core Libraries**: `<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>`
 
 ## Visual Studio UI Guide
@@ -335,8 +439,8 @@ dotnet run -f net10.0-windows10.0.19041.0
 - **Appears when**: Multi-targeted project is set as startup project
 - **Examples**:
   - **Blazor**: `net8.0`, `net9.0`, `net10.0`
-  - **WPF/Avalonia**: `net8.0-windows`, `net9.0-windows`, `net10.0-windows`
-  - **MAUI**: `net9.0-android`, `net9.0-windows10.0.19041.0`, `net10.0-android`, `net10.0-windows10.0.19041.0`
+  - **WPF/Avalonia/WinForms**: `net8.0-windows`, `net9.0-windows`, `net10.0-windows`
+  - **MAUI**: `net8.0-android`, `net9.0-android`, `net9.0-windows10.0.19041.0`, `net10.0-android`, `net10.0-windows10.0.19041.0`
 
 ### **"Target frameworks" (Properties)**
 - **Location**: Project Properties -> Application tab  
@@ -371,7 +475,7 @@ dotnet run -f net10.0-windows10.0.19041.0
 - **.NET 10 SDK** installed
 - **Visual Studio 2022 17.13+** or **Visual Studio Code** with C# extension
 
-### For Windows-specific projects (WPF, Avalonia):
+### For Windows-specific projects (WPF, Avalonia, WinForms):
 - **Windows 10 version 1809 or later**
 - **Windows SDK** installed
 
@@ -423,6 +527,11 @@ dotnet workload list
 - Install Visual Studio with "Windows application development" workload
 - WebView2 runtime is usually installed automatically with Windows 11 or can be downloaded from Microsoft
 
+### Issue: WinForms project won't run
+**Solution**: Ensure you have the Windows Forms workload installed:
+- Install Visual Studio with ".NET desktop development" workload
+- Make sure `UseWindowsForms` is set to `true` in the project file
+
 ### Issue: MAUI project won't run
 **Solution**: Install MAUI workload and ensure correct platform SDKs:
 ```bash
@@ -464,6 +573,7 @@ This is configured in the `Directory.Packages.props` file at the solution root.
 
 ### Desktop Hybrid-Specific Packages:
 - **Microsoft.AspNetCore.Components.WebView.Wpf**: Framework-specific versions for WPF
+- **Microsoft.AspNetCore.Components.WebView.WindowsForms**: Framework-specific versions for WinForms
 - **Custom Avalonia WebView**: Uses Baksteen.Avalonia.Blazor library for Avalonia integration
 
 ## Testing and Validation
@@ -478,9 +588,12 @@ dotnet build
 
 # Build specific project for all its target frameworks
 dotnet build samples/HybridSamples/HybridSample.Wpf
+dotnet build samples/HybridSamples/HybridSample.WinForms
+dotnet build samples/HybridSamples/HybridSample.MAUI
 
 # Build MAUI project for all platforms
 dotnet build samples/Blazing.Mvvm.Sample.HybridMaui
+dotnet build samples/HybridSamples/HybridSample.MAUI
 
 # Restore packages for all frameworks
 dotnet restore
@@ -490,20 +603,37 @@ dotnet restore
 
 #### Android Emulator:
 ```bash
-# Build and deploy to Android
+# Build and deploy to Android (Original Sample)
 dotnet build samples/Blazing.Mvvm.Sample.HybridMaui -f net9.0-android
+
+# Build and deploy to Android (HybridSample)
+dotnet build samples/HybridSamples/HybridSample.MAUI -f net8.0-android
+dotnet build samples/HybridSamples/HybridSample.MAUI -f net9.0-android
+dotnet build samples/HybridSamples/HybridSample.MAUI -f net10.0-android
+
 # Deploy to emulator or device via Visual Studio
 ```
 
 #### Windows:
 ```bash
-# Run on Windows
+# Run on Windows (Original Sample)
 dotnet run --project samples/Blazing.Mvvm.Sample.HybridMaui -f net9.0-windows10.0.19041.0
+
+# Run on Windows (HybridSample)
+dotnet run --project samples/HybridSamples/HybridSample.MAUI -f net8.0-windows10.0.19041.0
+dotnet run --project samples/HybridSamples/HybridSample.MAUI -f net9.0-windows10.0.19041.0
+dotnet run --project samples/HybridSamples/HybridSample.MAUI -f net10.0-windows10.0.19041.0
 ```
 
 #### iOS Simulator (macOS only):
 ```bash
-# Build for iOS
+# Build for iOS (Original Sample)
 dotnet build samples/Blazing.Mvvm.Sample.HybridMaui -f net9.0-ios
+
+# Build for iOS (HybridSample)
+dotnet build samples/HybridSamples/HybridSample.MAUI -f net8.0-ios
+dotnet build samples/HybridSamples/HybridSample.MAUI -f net9.0-ios
+dotnet build samples/HybridSamples/HybridSample.MAUI -f net10.0-ios
+
 # Deploy via Visual Studio for Mac or Xcode
 ```

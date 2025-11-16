@@ -74,6 +74,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Framework Version", "Framew
 		..\docs\Running_Different_NET_Versions.md = ..\docs\Running_Different_NET_Versions.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HybridSample.WinForms", "samples\HybridSamples\HybridSample.WinForms\HybridSample.WinForms.csproj", "{5417429F-E3F6-AC65-6175-29BF27AD491B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -148,6 +150,10 @@ Global
 		{082E5E74-ED2C-20FE-125F-63331CD86437}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{082E5E74-ED2C-20FE-125F-63331CD86437}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{082E5E74-ED2C-20FE-125F-63331CD86437}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5417429F-E3F6-AC65-6175-29BF27AD491B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5417429F-E3F6-AC65-6175-29BF27AD491B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5417429F-E3F6-AC65-6175-29BF27AD491B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5417429F-E3F6-AC65-6175-29BF27AD491B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -176,6 +182,7 @@ Global
 		{082E5E74-ED2C-20FE-125F-63331CD86437} = {8BEC7F26-63FA-4B22-9B55-53D138AFF17D}
 		{17E67D4F-836D-4485-9486-9084304BB356} = {225ACB45-5BBE-48D0-A1FB-802E767F6D21}
 		{66958A82-6DE9-4085-8132-9EEDB53D9F2D} = {225ACB45-5BBE-48D0-A1FB-802E767F6D21}
+		{5417429F-E3F6-AC65-6175-29BF27AD491B} = {4A5EB697-A84D-4BC9-BA24-00D14B575FDE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2D6F818A-4305-467B-BB8E-E1AB2BEAC979}

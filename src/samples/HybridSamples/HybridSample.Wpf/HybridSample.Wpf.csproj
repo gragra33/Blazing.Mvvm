@@ -9,6 +9,8 @@
 	  <Version>1.4.0</Version>
 	  <AssemblyVersion>1.4.0.0</AssemblyVersion>
 	  <FileVersion>1.4.0.0</FileVersion>
+    <!-- Suppress assembly version conflict warnings -->
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3277;MSB3245;MSB3243</MSBuildWarningsAsMessages>
   </PropertyGroup>
 
 	<ItemGroup>
