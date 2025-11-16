@@ -1,5 +1,23 @@
 ﻿# Version History
 
+### V3.0.0 - 18 November 2025
+
+This is a major release with new features and enhancements.
+
+- Added support for .NET 10. [@gragra33](https://github.com/gragra33)
+- Added subpath hosting support for serving Blazor applications from URL subpaths. [@gragra33](https://github.com/gragra33)
+- Added new sample projects:
+  - `Blazing.Mvvm.ParentChildSample` - Demonstrates dynamic parent-child component communication
+  - `Blazing.SubpathHosting.Server` - Demonstrates subpath hosting configuration
+  - Hybrid samples for WinForms, WPF, MAUI, and Avalonia platforms
+- Added multi-targeting support across .NET 8, .NET 9, and .NET 10 for all sample projects. [@gragra33](https://github.com/gragra33)
+- Increased test coverage with an additional 128 unit tests (total 208 tests). [@gragra33](https://github.com/gragra33)
+- Enhanced documentation with comprehensive guides for:
+  - Subpath hosting configuration
+  - Complex multi-project ViewModel registration
+  - Running samples with different .NET target frameworks
+- Documentation updates and improvements. [@gragra33](https://github.com/gragra33)
+
 ### V2.2.0 7 December, 2024
 
 - Added support for `ObservableRecipient` being set to inactive when disposing the `MvvmComponentBase`, `MvvmOwningComponentBase`, `MvvmLayoutComponentBase`, and `RecipientViewModelBase`. [@gragra33](https://github.com/gragra33) & [@teunlielu](https://github.com/teunlielu)

@@ -30,7 +30,6 @@ public partial class App
 
         services
             .AddSingleton(RestService.For<IRedditService>("https://www.reddit.com/"))
-            //.AddViewModels() // obsolete - now uses the ViewModelDefinition attribute & auto registration
             .AddServicesWpf()
             .AddMvvm(options =>
             { 

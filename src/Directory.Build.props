@@ -6,9 +6,9 @@
     <LangVersion>12</LangVersion>
     
     <!-- Default versioning (can be overridden in individual projects) -->
-    <AssemblyVersion>2.2.0.0</AssemblyVersion>
-    <FileVersion>2.2.0.0</FileVersion>
-    <Version>2.2.0</Version>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
+    <Version>3.0.0</Version>
     
     <!-- Repository information -->
     <RepositoryUrl>https://github.com/gragra33/Blazing.Mvvm</RepositoryUrl>
