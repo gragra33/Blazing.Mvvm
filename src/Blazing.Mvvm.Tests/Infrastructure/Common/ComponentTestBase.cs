@@ -12,6 +12,23 @@ public abstract class ComponentTestBase : TestContext
     {
         _autoMocker = AutoMockerFactory();
         Services.AddFallbackServiceProvider(new MockServiceProvider(_autoMocker));
+        
+#if NET10_0
+        // For .NET 10.0, manually register ComponentsMetrics service as singleton
+        // This is required by the Blazor renderer in .NET 10.0
+        try
+        {
+            var componentsMetricsType = Type.GetType("Microsoft.AspNetCore.Components.ComponentsMetrics, Microsoft.AspNetCore.Components");
+            if (componentsMetricsType != null)
+            {
+                Services.AddSingleton(componentsMetricsType, _ => null!);
+            }
+        }
+        catch
+        {
+            // Ignore if the type doesn't exist or can't be loaded
+        }
+#endif
     }
 
     protected virtual AutoMocker AutoMockerFactory()

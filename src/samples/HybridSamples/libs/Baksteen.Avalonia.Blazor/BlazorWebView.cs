@@ -4,7 +4,6 @@ using Avalonia.Controls.Platform;
 using Avalonia.Platform;
 using DynamicData;
 using Microsoft.AspNetCore.Components.WebView.WindowsForms;
-using System;
 using Avalonia.Interactivity;
 
 namespace Baksteen.Avalonia.Blazor;
