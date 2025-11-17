@@ -10,11 +10,18 @@ public class CounterTests : ComponentTestBase
 {
     private const string ParagraphSelector = "p";
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CounterTests"/> class and registers the <see cref="CounterViewModel"/>.
+    /// </summary>
     public CounterTests()
     {
         Services.AddSingleton(_ => CreateInstance<CounterViewModel>(true));
     }
 
+    /// <summary>
+    /// Verifies that all life-cycle methods are called on the <see cref="CounterViewModel"/> when the <see cref="Counter"/> component is rendered.
+    /// </summary>
+    /// <param name="expectedLogMessage">The expected log message for the life-cycle event.</param>
     [Theory]
     [InlineData("CounterViewModel => Life-cycle event: OnInitialized.")]
     [InlineData("CounterViewModel => Life-cycle event: OnInitializedAsync.")]
@@ -35,6 +42,9 @@ public class CounterTests : ComponentTestBase
         logger.VerifyLog(LogLevel.Information, expectedLogMessage, Times.Once());
     }
 
+    /// <summary>
+    /// Verifies that the ShouldRender life-cycle method is called on the <see cref="CounterViewModel"/> when the component is re-rendered.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenRerenderIsTriggered_ThenShouldRenderLifeCycleMethodCalledOnViewModel()
     {
@@ -53,6 +63,9 @@ public class CounterTests : ComponentTestBase
         logger.VerifyLog(LogLevel.Information, expectedLogMessage, Times.Once());
     }
 
+    /// <summary>
+    /// Verifies that clicking the Click Me button increments the current count in the <see cref="CounterViewModel"/> and updates the UI.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenClickMeButtonClicked_ThenCurrentCountShouldBeIncremented()
     {
@@ -73,6 +86,9 @@ public class CounterTests : ComponentTestBase
         cutViewModel.CurrentCount.Should().Be(expectedCount);
     }
 
+    /// <summary>
+    /// Verifies that clicking the Reset button sets the current count to zero in the <see cref="CounterViewModel"/> and updates the UI.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenResetButtonClicked_ThenCurrentCountShouldBeZero()
     {

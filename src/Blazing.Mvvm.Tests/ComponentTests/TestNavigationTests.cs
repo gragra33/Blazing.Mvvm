@@ -1,24 +1,49 @@
 ﻿using Blazing.Mvvm.Components;
 using Blazing.Mvvm.Components.Parameter;
-using Blazing.Mvvm.Sample.WebApp.Client.Pages;
-using Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
+using Blazing.Mvvm.Components.Routing;
+using Blazing.Mvvm.Tests.Infrastructure.Fakes;
+using Blazing.Mvvm.Tests.Infrastructure.Fakes.Views;
 using Bunit;
 using Bunit.TestDoubles;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 
 namespace Blazing.Mvvm.Tests.ComponentTests;
 
 public class TestNavigationTests : ComponentTestBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestNavigationTests"/> class and configures route cache and services.
+    /// </summary>
     public TestNavigationTests()
     {
+        // Configure route cache with necessary route mappings
+        var routeCacheMock = new Mock<IViewModelRouteCache>();
+        var viewModelRoutes = new Dictionary<Type, string>
+        {
+            [typeof(ITestNavigationViewModel)] = "/test",
+            [typeof(IHexTranslateViewModel)] = "/hextranslate"
+        };
+        var keyedRoutes = new Dictionary<object, string>
+        {
+            ["TestKeyedNavigationViewModel"] = "/keyedtest"
+        };
+        
+        routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(viewModelRoutes);
+        routeCacheMock.Setup(x => x.KeyedViewModelRoutes).Returns(keyedRoutes);
+        
         // Add services to the DI container. AutoMocker will not resolve these services.
+        Services.AddSingleton(routeCacheMock.Object);
         Services.AddSingleton<IMvvmNavigationManager, MvvmNavigationManager>();
         Services.AddSingleton<ITestNavigationViewModel, TestNavigationViewModel>();
+        Services.AddSingleton<IHexTranslateViewModel, HexTranslateViewModel>();
         Services.AddKeyedSingleton<ITestKeyedNavigationViewModel, TestKeyedNavigationViewModel>("TestKeyedNavigationViewModel");
         Services.AddSingleton<IParameterResolver>(_ => new ParameterResolver(ParameterResolutionMode.ViewModel));
     }
 
+    /// <summary>
+    /// Verifies navigation to the HexTranslator page when the HexTranslate button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenHexTranslateButtonClicked_ThenShouldNavigateToHexTranslatorPage()
     {
@@ -36,6 +61,9 @@ public class TestNavigationTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Match(expectedUri);
     }
 
+    /// <summary>
+    /// Verifies navigation to the TestNavigation page when the Test button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenTestButtonClicked_ThenShouldNavigateToTestNavigationPage()
     {
@@ -53,6 +81,9 @@ public class TestNavigationTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be(expectedUri);
     }
 
+    /// <summary>
+    /// Verifies navigation to the TestNavigation page with a relative path when the corresponding button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenTestRelativePathButtonClicked_ThenShouldNavigateToTestNavigationPage()
     {
@@ -82,6 +113,9 @@ public class TestNavigationTests : ComponentTestBase
         cutViewModel.Test.Should().BeNull();
     }
 
+    /// <summary>
+    /// Verifies navigation to the TestNavigation page with a query string when the corresponding button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenTestQueryStringButtonClicked_ThenShouldNavigateToTestNavigationPage()
     {
@@ -109,6 +143,9 @@ public class TestNavigationTests : ComponentTestBase
         cutViewModel.Test.Should().Be(expectedQueryParameterValue);
     }
 
+    /// <summary>
+    /// Verifies navigation to the TestNavigation page with a relative path and query string when the corresponding button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenTestRelativePathQueryStringButtonClicked_ThenShouldNavigateToTestNavigationPage()
     {
@@ -143,6 +180,9 @@ public class TestNavigationTests : ComponentTestBase
         cutViewModel.Test.Should().Be(expectedQueryParameterValue);
     }
 
+    /// <summary>
+    /// Verifies navigation to the KeyedTestNavigation page when the KeyedTest button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenKeyedTestButtonClicked_ThenShouldNavigateToKeyedTestNavigationPage()
     {
@@ -160,6 +200,9 @@ public class TestNavigationTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be(expectedUri);
     }
 
+    /// <summary>
+    /// Verifies navigation to the KeyedTestNavigation page with a relative path when the corresponding button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenKeyedTestRelativePathButtonClicked_ThenShouldNavigateToKeyedTestNavigationPage()
     {
@@ -189,6 +232,9 @@ public class TestNavigationTests : ComponentTestBase
         cutViewModel.Test.Should().BeNull();
     }
 
+    /// <summary>
+    /// Verifies navigation to the KeyedTestNavigation page with a query string when the corresponding button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenKeyedTestQueryStringButtonClicked_ThenShouldNavigateToKeyedTestNavigationPage()
     {
@@ -216,6 +262,9 @@ public class TestNavigationTests : ComponentTestBase
         cutViewModel.Test.Should().Be(expectedQueryParameterValue);
     }
 
+    /// <summary>
+    /// Verifies navigation to the KeyedTestNavigation page with a relative path and query string when the corresponding button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenKeyedTestRelativePathQueryStringButtonClicked_ThenShouldNavigateToKeyedTestNavigationPage()
     {

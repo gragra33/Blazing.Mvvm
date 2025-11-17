@@ -3,19 +3,23 @@
 namespace Blazing.Mvvm.Components.Routing;
 
 /// <summary>
-/// A component that renders an anchor tag, automatically toggling its 'active'
-/// class based on whether its 'href' matches the current URI. Navigation is based on ViewModel (class/interface).
+/// A Blazor component that renders an anchor tag and automatically toggles its 'active' CSS class
+/// based on whether its 'href' matches the current URI. Navigation is performed using a navigation key.
 /// </summary>
 public sealed class MvvmKeyNavLink : MvvmNavLinkBase
 {
     /// <summary>
-    /// The key to use for keyed navigation.
+    /// Gets or sets the key to use for keyed navigation. This parameter is required.
     /// </summary>
     [Parameter]
     [EditorRequired]
     public required object NavigationKey { get; set; }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Resolves the navigation href for the anchor tag using the specified navigation key.
+    /// </summary>
+    /// <returns>The absolute URI string for navigation.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="NavigationKey"/> is <c>null</c>.</exception>
     protected override string ResolveHref()
     {
         if (NavigationKey is null)

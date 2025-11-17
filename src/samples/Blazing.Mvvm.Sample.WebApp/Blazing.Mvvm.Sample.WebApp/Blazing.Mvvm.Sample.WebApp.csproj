@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+	  <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Blazing.Mvvm\Blazing.Mvvm.csproj" />
+    <ProjectReference Include="..\Blazing.Mvvm.Sample.WebApp.Client\Blazing.Mvvm.Sample.WebApp.Client.csproj" />
+  </ItemGroup>
+
+</Project>

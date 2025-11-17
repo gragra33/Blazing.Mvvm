@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:HybridSample.MAUI"
+             xmlns:components="clr-namespace:HybridSample.MAUI.Components"
+             xmlns:viewModels="clr-namespace:HybridSample.MAUI.ViewModels"
+             x:Class="HybridSample.MAUI.MainPage"
+             x:DataType="viewModels:MainPageViewModel"
+             Title="{Binding Title}"
+             Shell.NavBarIsVisible="{OnPlatform Android=True, iOS=True, WinUI=False, MacCatalyst=False, Default=True}"
+             Shell.TabBarIsVisible="False">
+
+    <!-- BlazorWebView takes full width - flyout menu handles navigation on all platforms -->
+    <BlazorWebView HostPage="wwwroot/index.html">
+        <BlazorWebView.RootComponents>
+            <RootComponent Selector="#app" ComponentType="{x:Type components:Routes}" />
+        </BlazorWebView.RootComponents>
+    </BlazorWebView>
+
+</ContentPage>

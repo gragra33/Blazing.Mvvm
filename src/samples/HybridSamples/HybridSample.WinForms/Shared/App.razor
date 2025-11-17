@@ -1,0 +1,122 @@
+@using Blazing.Mvvm.Components
+@using Blazing.Mvvm.ComponentModel
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.Extensions.Logging
+@using HybridSample.WinForms.States
+@using HybridSample.WinForms.Logging
+@inject NavigationManager NavManager
+@inject IMvvmNavigationManager MvvmNavManager
+@inject ILogger<App> Logger
+@implements HybridSample.WinForms.States.INavigation
+
+<Router AppAssembly="@typeof(HybridSample.Blazor.Core._Imports).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(NewMainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(NewMainLayout)">
+            <p role="alert">Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+@code
+{
+    protected override void OnInitialized()
+    {
+        AppLogger.LogAppOnInitialized(Logger);
+        AppState.Navigation = this;
+        AppLogger.LogAppStateNavigationSet(Logger, AppState.Navigation);
+        AppLogger.LogNavigationManagerBaseUri(Logger, NavManager.BaseUri);
+        AppLogger.LogNavigationManagerUri(Logger, NavManager.Uri);
+        base.OnInitialized();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            AppLogger.LogAppAfterFirstRender(Logger);
+            AppLogger.LogNavigationManagerBaseUri(Logger, NavManager.BaseUri);
+            AppLogger.LogNavigationManagerUri(Logger, NavManager.Uri);
+        }
+    }
+
+    public void NavigateTo(string page)
+    {
+        AppLogger.LogAppNavigateToString(Logger, page);
+        try
+        {
+            AppLogger.LogCurrentNavManagerUri(Logger, NavManager.Uri);
+            AppLogger.LogNavigatingTo(Logger, page);
+            NavManager.NavigateTo(page, forceLoad: false);
+            AppLogger.LogNavigationManagerCompleted(Logger, page);
+            AppLogger.LogNewNavManagerUri(Logger, NavManager.Uri);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogNavigationManagerError(Logger, ex.Message);
+            AppLogger.LogNavigationManagerErrorStackTrace(Logger, ex.StackTrace);
+        }
+    }
+
+    public void NavigateTo<TViewModel>() where TViewModel : IViewModelBase
+    {
+        AppLogger.LogAppNavigateToViewModel(Logger, typeof(TViewModel).Name);
+        try
+        {
+            AppLogger.LogCurrentUriBeforeMvvmNavigation(Logger, NavManager.Uri);
+            
+            // Try direct navigation first as fallback
+            var viewModelName = typeof(TViewModel).Name;
+            string fallbackRoute = GetFallbackRoute<TViewModel>();
+            
+            try
+            {
+                MvvmNavManager.NavigateTo<TViewModel>(new BrowserNavigationOptions());
+                AppLogger.LogMvvmNavigationCompleted(Logger, typeof(TViewModel).Name);
+                AppLogger.LogNewUriAfterMvvmNavigation(Logger, NavManager.Uri);
+            }
+            catch (Exception mvvmEx)
+            {
+                AppLogger.LogMvvmNavigationFailed(Logger, mvvmEx.Message);
+                AppLogger.LogTryingFallbackNavigation(Logger, fallbackRoute);
+                
+                // Fallback to direct navigation
+                NavManager.NavigateTo(fallbackRoute, forceLoad: false);
+                AppLogger.LogFallbackNavigationCompleted(Logger, fallbackRoute);
+            }
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogNavigateToViewModelError(Logger, ex.Message);
+            AppLogger.LogNavigationManagerErrorStackTrace(Logger, ex.StackTrace);
+        }
+    }
+
+    private string GetFallbackRoute<TViewModel>() where TViewModel : IViewModelBase
+    {
+        var viewModelName = typeof(TViewModel).Name;
+        
+        // Map ViewModels to their known routes as fallback
+        return viewModelName switch
+        {
+            "IIntroductionPageViewModel" => "/",
+            "ObservableObjectPageViewModel" => "/ObservableObject",
+            "RelayCommandPageViewModel" => "/RelayCommand", 
+            "AsyncRelayCommandPageViewModel" => "/AsyncRelayCommand",
+            "MessengerPageViewModel" => "/Messenger",
+            "MessengerSendPageViewModel" => "/MessengerSend",
+            "MessengerRequestPageViewModel" => "/MessengerRequest",
+            "IocPageViewModel" => "/IoC",
+            "ISettingUpTheViewModelsPageViewModel" => "/SettingUpTheViewModels",
+            "ISettingsServicePageViewModel" => "/SettingsService",
+            "IRedditServicePageViewModel" => "/RedditService",
+            "IBuildingTheUIPageViewModel" => "/BuildingTheUI",
+            "IRedditBrowserPageViewModel" => "/RedditBrowser",
+            _ => "/"
+        };
+    }
+}

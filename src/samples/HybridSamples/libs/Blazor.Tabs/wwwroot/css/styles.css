@@ -1,0 +1,73 @@
+﻿.c-tabs {
+    display: flex;
+    flex-direction: column;
+}
+
+.c-tabs__header {
+    overflow-x: clip;
+    width: 100%;
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+    background-color: #F3F5F6;
+}
+
+.c-tabs__button {
+    display: flex;
+    border: solid 1px #dfe7ec;
+    border-top-width: 3px;
+    border-radius: 4px 4px 0 0;
+    border-bottom-color: #e6ecef;
+    background-color: #e6ecef;
+    margin-top: 1em;
+    justify-content: center;
+    align-items: center;
+    padding: 0.375rem 1.875rem;
+    margin: 0.4em 0.0625em 0 0.0625em;
+}
+
+.c-tabs__button--active {
+    z-index: 1;
+}
+
+.c-tabs__button:active,
+.c-tabs__header .c-tabs__button:focus {
+    outline: 0;
+}
+
+.c-tabs__button:not(.c-tabs__button--disabled) {
+    color: #479cc8;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.c-tabs__button:not(.c-tabs__button--disabled):is(.c-tabs__button--active) {
+    background-color: #fff;
+    color: #3a474d;
+}
+
+.c-tabs__button:not(.c-tabs__button--disabled):is(.c-tabs__button--active, :hover) {
+    margin-bottom: -1px;
+    padding-top: calc(0.375rem + 1px);
+    border-top-color: #479cc8;
+    border-bottom-color: #fff;
+    background-color: #fff;
+    color: #479cc8;
+}
+
+.c-tabs__button:is(.c-tabs__button--disabled),
+.c-tabs__button.disabled:is(.c-tabs__button--disabled, :hover) {
+    color: #bdbdbd;
+    cursor: default;
+}
+
+.c-tabs__panel {
+    background-color: #ffffff;
+    border: solid 1px #dfe7ec;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 8px 10px 0 rgba(0, 0, 0, 0.01);
+    flex: 1;
+    overflow: auto;
+    padding: 1.5em 3em;
+}

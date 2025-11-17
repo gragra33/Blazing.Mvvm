@@ -1,0 +1,21 @@
+<Project>
+  <PropertyGroup>
+    <!-- Common properties for all projects -->
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12</LangVersion>
+    
+    <!-- Default versioning (can be overridden in individual projects) -->
+    <ApplicationDisplayVersion>3.0.0</ApplicationDisplayVersion>
+    <ApplicationVersion>3</ApplicationVersion>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
+    <Version>3.0.0</Version>
+    
+    <!-- Repository information -->
+    <RepositoryUrl>https://github.com/gragra33/Blazing.Mvvm</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Copyright>MIT Licence</Copyright>
+    <Authors>Graeme Grant (@gragra33)</Authors>
+  </PropertyGroup>
+</Project>

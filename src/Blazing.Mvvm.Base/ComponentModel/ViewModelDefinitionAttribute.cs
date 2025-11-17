@@ -3,18 +3,19 @@
 namespace Blazing.Mvvm.ComponentModel;
 
 /// <summary>
-/// An attribute that defines a <c>ViewModel</c>.
+/// Specifies metadata for a <c>ViewModel</c> to control its registration in the dependency injection container.
+/// Supports configuration of service lifetime and optional keyed registration.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 public class ViewModelDefinitionAttribute : Attribute
 {
     /// <summary>
-    /// Defines the lifetime of the <c>ViewModel</c>. The default is <see cref="ServiceLifetime.Transient"/>.
+    /// Gets or sets the lifetime of the <c>ViewModel</c> in the dependency injection container. The default is <see cref="ServiceLifetime.Transient"/>.
     /// </summary>
     public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Transient;
 
     /// <summary>
-    /// Defines the key of the <c>ViewModel</c>. When set the <c>ViewModel</c> is registered as a keyed service.
+    /// Gets or sets the key for the <c>ViewModel</c>. When set, the <c>ViewModel</c> is registered as a keyed service.
     /// </summary>
     public object? Key { get; set; }
 }

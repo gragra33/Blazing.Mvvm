@@ -2,8 +2,20 @@
 
 namespace Blazing.Mvvm.Tests.Infrastructure.Extensions;
 
+/// <summary>
+/// Provides extension methods for verifying log invocations on mocked <see cref="ILogger"/> instances.
+/// </summary>
 public static class LoggingExtensions
 {
+    /// <summary>
+    /// Verifies that a log invocation with the specified log level and message occurred on the mocked logger.
+    /// </summary>
+    /// <typeparam name="TLogger">The type of the logger.</typeparam>
+    /// <param name="logger">The mocked logger.</param>
+    /// <param name="logLevel">The log level to verify.</param>
+    /// <param name="logMessage">The log message to verify.</param>
+    /// <param name="times">The number of times the log invocation should have occurred.</param>
+    /// <returns>The mocked logger.</returns>
     public static Mock<TLogger> VerifyLog<TLogger>(
         this Mock<TLogger> logger,
         LogLevel logLevel,
@@ -26,6 +38,17 @@ public static class LoggingExtensions
         return logger;
     }
 
+    /// <summary>
+    /// Verifies that a log invocation with the specified log level, message, exception type, and exception message occurred on the mocked logger.
+    /// </summary>
+    /// <typeparam name="TLogger">The type of the logger.</typeparam>
+    /// <param name="logger">The mocked logger.</param>
+    /// <param name="logLevel">The log level to verify.</param>
+    /// <param name="logMessage">The log message to verify.</param>
+    /// <param name="exceptionType">The type of the exception to verify.</param>
+    /// <param name="exceptionMessage">The exception message to verify.</param>
+    /// <param name="times">The number of times the log invocation should have occurred.</param>
+    /// <returns>The mocked logger.</returns>
     public static Mock<TLogger> VerifyLog<TLogger>(
         this Mock<TLogger> logger,
         LogLevel logLevel,
@@ -50,6 +73,16 @@ public static class LoggingExtensions
         return logger;
     }
 
+    /// <summary>
+    /// Verifies that a log invocation with the specified log level, message, and exception occurred on the mocked logger.
+    /// </summary>
+    /// <typeparam name="TLogger">The type of the logger.</typeparam>
+    /// <param name="logger">The mocked logger.</param>
+    /// <param name="logLevel">The log level to verify.</param>
+    /// <param name="logMessage">The log message to verify.</param>
+    /// <param name="exception">The exception to verify.</param>
+    /// <param name="times">The number of times the log invocation should have occurred.</param>
+    /// <returns>The mocked logger.</returns>
     public static Mock<TLogger> VerifyLog<TLogger>(
         this Mock<TLogger> logger,
         LogLevel logLevel,
@@ -73,6 +106,13 @@ public static class LoggingExtensions
         return logger;
     }
 
+    /// <summary>
+    /// Verifies that the exception matches the expected type and message.
+    /// </summary>
+    /// <param name="exception">The exception to verify.</param>
+    /// <param name="expectedExceptionType">The expected exception type.</param>
+    /// <param name="expectedExceptionMessage">The expected exception message.</param>
+    /// <returns><c>true</c> if the exception matches; otherwise, <c>false</c>.</returns>
     private static bool VerifyException(Exception? exception, Type expectedExceptionType, string expectedExceptionMessage)
     {
         if (exception is null)
@@ -88,6 +128,12 @@ public static class LoggingExtensions
         return CompareMessage(exception.Message, expectedExceptionMessage);
     }
 
+    /// <summary>
+    /// Compares a message string to an expected message, supporting wildcards.
+    /// </summary>
+    /// <param name="message">The actual message string.</param>
+    /// <param name="expectedMessage">The expected message string, which may contain wildcards.</param>
+    /// <returns><c>true</c> if the messages match; otherwise, <c>false</c>.</returns>
     private static bool CompareMessage(string? message, string expectedMessage)
     {
         if (message is null)

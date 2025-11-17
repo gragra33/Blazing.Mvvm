@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+  <Title>Baksteen.Avalonia.Blazor</Title>
+    <Summary>Avalonia BlazorWebView component</Summary>
+    <Description>Avalonia BlazorWebView component</Description>
+    <TargetFrameworks>net8.0-windows;net9.0-windows;net10.0-windows</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>Baksteen.Avalonia.Blazor</RootNamespace>
+    <Nullable>enable</Nullable>
+
+	  <PackageId>Baksteen.Avalonia.Blazor</PackageId>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageTags>avalonia;blazor;blazorhybrid;hybrid;webview;webview2</PackageTags>
+	  <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+	  <Authors>jpmikkers</Authors>
+	  <Description>BlazorWebView for Avalonia 11 (preview 6).</Description>
+	  <RepositoryType>git</RepositoryType>
+	  <RepositoryUrl>https://github.com/jpmikkers/Baksteen.Avalonia.Blazor.git</RepositoryUrl>
+	  <PackageProjectUrl>https://github.com/jpmikkers/Baksteen.Avalonia.Blazor</PackageProjectUrl>
+	  <PackageReleaseNotes>First release.</PackageReleaseNotes>
+	  <Copyright>Copyright (c) JPMikkers 2023</Copyright>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <Version>0.5.0-preview</Version>
+	  <IncludeSymbols>False</IncludeSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.ReactiveUI" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+</Project>

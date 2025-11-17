@@ -10,6 +10,9 @@ namespace Blazing.Mvvm.Tests.ComponentTests;
 
 public class FormTests : ComponentTestBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FormTests"/> class and registers the <see cref="EditContactViewModel"/>.
+    /// </summary>
     public FormTests()
     {
         Services.AddSingleton<EditContactViewModel>();
@@ -27,6 +30,9 @@ public class FormTests : ComponentTestBase
     private const string EmailValidationMessageAriaLabel = "email validation message";
     private const string PhoneNumberValidationMessageAriaLabel = "phone number validation message";
 
+    /// <summary>
+    /// Verifies that when the name input is populated, the Name property in the view model is updated accordingly.
+    /// </summary>
     [Fact]
     public void GivenNameInputHasNoValue_WhenNameInputIsPopulatedWithValue_ThenNamePropertyShouldBeValue()
     {
@@ -46,6 +52,9 @@ public class FormTests : ComponentTestBase
         cutViewModel.Contact.Name.Should().Be(expectedName);
     }
 
+    /// <summary>
+    /// Verifies that when the email input is populated, the Email property in the view model is updated accordingly.
+    /// </summary>
     [Fact]
     public void GivenEmailInputHasNoValue_WhenEmailInputIsPopulatedWithValue_ThenEmailPropertyShouldBeValue()
     {
@@ -65,6 +74,9 @@ public class FormTests : ComponentTestBase
         cutViewModel.Contact.Email.Should().Be(expectedEmail);
     }
 
+    /// <summary>
+    /// Verifies that when the phone number input is populated, the PhoneNumber property in the view model is updated accordingly.
+    /// </summary>
     [Fact]
     public void GivenPhoneNumberInputHasNoValue_WhenPhoneNumberInputIsPopulatedWithValue_ThenPhoneNumberPropertyShouldBeValue()
     {
@@ -84,6 +96,9 @@ public class FormTests : ComponentTestBase
         cutViewModel.Contact.PhoneNumber.Should().Be(expectedPhoneNumber);
     }
 
+    /// <summary>
+    /// Verifies that when the Name property is set in the view model, the name input is updated accordingly.
+    /// </summary>
     [Fact]
     public void GivenNameInputHasNoValue_WhenNamePropertyIsSetWithValue_ThenNameInputShouldHaveValue()
     {
@@ -100,6 +115,9 @@ public class FormTests : ComponentTestBase
         cut.FindByLabelText(NameInputAriaLabel).GetAttribute(AttributeNames.Value).Should().Be(expectedName);
     }
 
+    /// <summary>
+    /// Verifies that when the Email property is set in the view model, the email input is updated accordingly.
+    /// </summary>
     [Fact]
     public void GivenEmailInputHasNoValue_WhenEmailPropertyIsSetWithValue_ThenEmailInputShouldHaveValue()
     {
@@ -116,6 +134,9 @@ public class FormTests : ComponentTestBase
         cut.FindByLabelText(EmailInputAriaLabel).GetAttribute(AttributeNames.Value).Should().Be(expectedEmail);
     }
 
+    /// <summary>
+    /// Verifies that when the PhoneNumber property is set in the view model, the phone number input is updated accordingly.
+    /// </summary>
     [Fact]
     public void GivenPhoneNumberInputHasNoValue_WhenPhoneNumberPropertyIsSetWithValue_ThenPhoneNumberInputShouldHaveValue()
     {
@@ -132,6 +153,9 @@ public class FormTests : ComponentTestBase
         cut.FindByLabelText(PhoneNumberInputAriaLabel).GetAttribute(AttributeNames.Value).Should().Be(expectedPhoneNumber);
     }
 
+    /// <summary>
+    /// Verifies that when the form is valid and the submit button is clicked, the form is submitted and the appropriate log message is written.
+    /// </summary>
     [Fact]
     public void GivenFormIsValid_WhenSubmitButtonIsClicked_ThenFormShouldBeSubmitted()
     {
@@ -155,6 +179,9 @@ public class FormTests : ComponentTestBase
         loggerMock.VerifyLog(LogLevel.Information, expectedLogMessage);
     }
 
+    /// <summary>
+    /// Verifies that when form inputs are empty and the submit button is clicked, the button is disabled and error messages are displayed.
+    /// </summary>
     [Fact]
     public void GivenFormInputsAreEmpty_WhenSubmitButtonIsClicked_ThenSubmitButtonIsDisabledAndErrorMessagesDisplayed()
     {
@@ -163,6 +190,7 @@ public class FormTests : ComponentTestBase
         const string expectedEmailErrorMsg = "The Email field is required.";
         const string expectedPhoneNumberErrorMsg = "The Phone Number field is required.";
         const string expectedErrorSummaryHtml = $"""
+
             <ul diff:ignoreAttributes>
                 <li diff:ignoreAttributes>{expectedNameErrorMsg}</li>
                 <li diff:ignoreAttributes>{expectedEmailErrorMsg}</li>
@@ -185,6 +213,9 @@ public class FormTests : ComponentTestBase
         submitButton.IsDisabled().Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that when invalid inputs are entered, the submit button is disabled and error messages are displayed.
+    /// </summary>
     [Fact]
     public void GivenFormInputsAreEmpty_WhenInvalidInputsEntered_ThenSubmitButtonIsDisabledAndErrorMessagesDisplayed()
     {
@@ -193,6 +224,7 @@ public class FormTests : ComponentTestBase
         const string expectedEmailErrorMsg = "The Email field is not a valid e-mail address.";
         const string expectedPhoneNumberErrorMsg = "The Phone Number field is not a valid phone number.";
         const string expectedErrorSummaryHtml = $"""
+
             <ul diff:ignoreAttributes>
                 <li diff:ignoreAttributes>{expectedNameErrorMsg}</li>
                 <li diff:ignoreAttributes>{expectedEmailErrorMsg}</li>
@@ -216,6 +248,9 @@ public class FormTests : ComponentTestBase
         cut.Find(SubmitButtonSelector).IsDisabled().Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that when the clear button is clicked, the form is cleared and the submit button is enabled.
+    /// </summary>
     [Fact]
     public void GivenFormIsInvalid_WhenClearButtonIsClicked_ThenFormShouldBeCleared()
     {

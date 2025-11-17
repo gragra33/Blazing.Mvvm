@@ -1,0 +1,34 @@
+﻿@inject NavigationManager NavManager
+@inject IMvvmNavigationManager MvvmNavManager
+@implements HybridSample.Avalonia.States.INavigation
+
+<Router AppAssembly="@typeof(HybridSample.Blazor.Core._Imports).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p role="alert">Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+@code
+{
+    protected override void OnInitialized()
+    {
+        AppState.Navigation = this;
+        base.OnInitialized();
+
+        // force refresh to overcome Hybrid app not initializing WebNavigation
+        MvvmNavManager.ForceNavigationManagerUpdate(NavManager);
+    }
+
+    public void NavigateTo(string page)
+        => NavManager.NavigateTo(page);
+
+    public void NavigateTo<TViewModel>() where TViewModel : IViewModelBase
+        => MvvmNavManager.NavigateTo<TViewModel>(new BrowserNavigationOptions());
+}

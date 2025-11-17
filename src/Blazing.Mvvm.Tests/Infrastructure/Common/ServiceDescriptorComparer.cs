@@ -2,18 +2,33 @@
 
 namespace Blazing.Mvvm.Tests.UnitTests;
 
+/// <summary>
+/// Provides equality comparison for <see cref="ServiceDescriptor"/> instances, including support for keyed services.
+/// </summary>
 internal sealed class ServiceDescriptorComparer : IEqualityComparer<ServiceDescriptor>
 {
     private static readonly Lazy<ServiceDescriptorComparer> Lazy
         = new(() => new ServiceDescriptorComparer());
 
+    /// <summary>
+    /// Gets the singleton instance of <see cref="ServiceDescriptorComparer"/>.
+    /// </summary>
     public static ServiceDescriptorComparer Comparer
         => Lazy.Value;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServiceDescriptorComparer"/> class.
+    /// </summary>
     private ServiceDescriptorComparer()
     {
     }
 
+    /// <summary>
+    /// Determines whether two <see cref="ServiceDescriptor"/> instances are equal.
+    /// </summary>
+    /// <param name="x">The first <see cref="ServiceDescriptor"/> to compare.</param>
+    /// <param name="y">The second <see cref="ServiceDescriptor"/> to compare.</param>
+    /// <returns><c>true</c> if the specified objects are equal; otherwise, <c>false</c>.</returns>
     public bool Equals(ServiceDescriptor? x, ServiceDescriptor? y)
     {
         if (ReferenceEquals(x, y))
@@ -47,6 +62,11 @@ internal sealed class ServiceDescriptorComparer : IEqualityComparer<ServiceDescr
             => EqualityComparer<T>.Default.Equals(first, second);
     }
 
+    /// <summary>
+    /// Returns a hash code for the specified <see cref="ServiceDescriptor"/>.
+    /// </summary>
+    /// <param name="serviceDescriptor">The <see cref="ServiceDescriptor"/> for which a hash code is to be returned.</param>
+    /// <returns>A hash code for the specified object.</returns>
     public int GetHashCode(ServiceDescriptor serviceDescriptor)
     {
         return serviceDescriptor.IsKeyedService

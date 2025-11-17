@@ -1,0 +1,64 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFrameworks>net8.0-windows;net9.0-windows;net10.0-windows</TargetFrameworks>
+    <!--Avalonia doesen't support TrimMode=link currently,but we are working on that https://github.com/AvaloniaUI/Avalonia/issues/6892 -->
+    <TrimMode>copyused</TrimMode>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+	<RootNamespace>HybridSample.Avalonia</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!--This helps with theme dll-s trimming.
+	If you will publish your application in self-contained mode with p:PublishTrimmed=true and it will use Fluent theme Default theme will be trimmed from the output and vice versa.
+	https://github.com/AvaloniaUI/Avalonia/issues/5593 -->
+    <TrimmableAssembly Include="Avalonia.Themes.Fluent" />
+    <TrimmableAssembly Include="Avalonia.Themes.Default" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" />
+    <PackageReference Include="Avalonia.Markup.Xaml.Loader" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Themes.Simple" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Refit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Blazing.Mvvm\Blazing.Mvvm.csproj" />
+    <ProjectReference Include="..\core\HybridSample.Blazor.Core\HybridSample.Blazor.Core.csproj" />
+    <ProjectReference Include="..\core\HybridSample.Core\HybridSample.Core.csproj" />
+    <ProjectReference Include="..\libs\Baksteen.Avalonia.Blazor\Baksteen.Avalonia.Blazor.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Assets\docs\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\AsyncRelayCommand.md" Link="Assets\docs\AsyncRelayCommand.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\Introduction.md" Link="Assets\docs\Introduction.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\Ioc.md" Link="Assets\docs\Ioc.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\Messenger.md" Link="Assets\docs\Messenger.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\ObservableObject.md" Link="Assets\docs\ObservableObject.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\PuttingThingsTogether.md" Link="Assets\docs\PuttingThingsTogether.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\core\HybridSample.Blazor.Core\wwwroot\Assets\docs\RelayCommand.md" Link="Assets\docs\RelayCommand.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

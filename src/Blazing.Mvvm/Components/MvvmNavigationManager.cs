@@ -1,58 +1,90 @@
-﻿using System.Reflection;
-using Blazing.Mvvm.ComponentModel;
+﻿using Blazing.Mvvm.ComponentModel;
+using Blazing.Mvvm.Components.Routing;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Blazing.Mvvm.Components;
 
 /// <summary>
-/// Manages navigation via ViewModel.
+/// Manages navigation via ViewModel using the route cache, supporting both type-based and key-based navigation in Blazor MVVM applications.
 /// </summary>
 public partial class MvvmNavigationManager : IMvvmNavigationManager
 {
     private readonly NavigationManager _navigationManager;
+    private readonly IViewModelRouteCache _routeCache;
     private readonly ILogger<MvvmNavigationManager> _logger;
-
-    private readonly Dictionary<Type, string> _references = [];
-    private readonly Dictionary<object, string> _keyedReferences = [];
+    private readonly IOptions<LibraryConfiguration> _libraryConfiguration;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MvvmNavigationManager"/> class.
     /// </summary>
-    /// <param name="navigationManager">The navigation manager.</param>
-    /// <param name="logger">The logger.</param>
-    public MvvmNavigationManager(NavigationManager navigationManager, ILogger<MvvmNavigationManager> logger)
+    /// <param name="navigationManager">The Blazor navigation manager for handling browser navigation.</param>
+    /// <param name="logger">The logger for diagnostic information.</param>
+    /// <param name="routeCache">The ViewModel route cache containing cached ViewModel-to-route mappings.</param>
+    /// <param name="libraryConfiguration">The library configuration containing base path and other settings.</param>
+    public MvvmNavigationManager(NavigationManager navigationManager, ILogger<MvvmNavigationManager> logger, IViewModelRouteCache routeCache, IOptions<LibraryConfiguration> libraryConfiguration)
     {
         _navigationManager = navigationManager;
         _logger = logger;
+        _routeCache = routeCache;
+        _libraryConfiguration = libraryConfiguration;
+    }
 
-        GenerateReferenceCache();
+    /// <summary>
+    /// Gets the cached URI for the specified ViewModel type and resolves it for navigation.
+    /// </summary>
+    /// <typeparam name="TViewModel">The ViewModel type to get the URI for.</typeparam>
+    /// <returns>The resolved navigation URI.</returns>
+    /// <exception cref="ViewModelRouteNotFoundException">Thrown when the ViewModel type has no associated route.</exception>
+    private string GetResolvedUriForViewModel<TViewModel>() where TViewModel : IViewModelBase
+    {
+        if (!_routeCache.ViewModelRoutes.TryGetValue(typeof(TViewModel), out string? uriFromCache))
+        {
+            throw new ViewModelRouteNotFoundException(typeof(TViewModel));
+        }
+
+        LogUriResolution(typeof(TViewModel).Name, uriFromCache);
+        string resolvedUri = ResolveNavigationUri(uriFromCache);
+        LogResolvedUri(typeof(TViewModel).Name, uriFromCache, resolvedUri);
+        return resolvedUri;
+    }
+
+    /// <summary>
+    /// Gets the cached URI for the specified key and resolves it for navigation.
+    /// </summary>
+    /// <param name="key">The key to get the URI for.</param>
+    /// <returns>The resolved navigation URI.</returns>
+    /// <exception cref="ViewModelRouteNotFoundException">Thrown when the key has no associated route.</exception>
+    private string GetResolvedUriForKey(object key)
+    {
+        if (!_routeCache.KeyedViewModelRoutes.TryGetValue(key, out string? uriFromCache))
+        {
+            throw new ViewModelRouteNotFoundException(key);
+        }
+
+        LogKeyedUriResolution(key, uriFromCache);
+        string resolvedUri = ResolveNavigationUri(uriFromCache);
+        LogResolvedKeyedUri(key, uriFromCache, resolvedUri);
+        return resolvedUri;
     }
 
     /// <inheritdoc/>
     public void NavigateTo<TViewModel>(bool forceLoad = false, bool replace = false)
         where TViewModel : IViewModelBase
     {
-        if (!_references.TryGetValue(typeof(TViewModel), out string? uri))
-        {
-            throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
-        }
-
-        LogNavigationEvent(typeof(TViewModel).FullName, uri);
-        _navigationManager.NavigateTo(uri, forceLoad, replace);
+        string resolvedUri = GetResolvedUriForViewModel<TViewModel>();
+        LogNavigationEvent(typeof(TViewModel).FullName, resolvedUri);
+        _navigationManager.NavigateTo(resolvedUri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
     public void NavigateTo<TViewModel>(BrowserNavigationOptions options)
         where TViewModel : IViewModelBase
     {
-        if (!_references.TryGetValue(typeof(TViewModel), out string? uri))
-        {
-            throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
-        }
-
-        LogNavigationEvent(typeof(TViewModel).FullName, uri);
-        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
+        string resolvedUri = GetResolvedUriForViewModel<TViewModel>();
+        LogNavigationEvent(typeof(TViewModel).FullName, resolvedUri);
+        _navigationManager.NavigateTo(resolvedUri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -61,15 +93,11 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     {
         ArgumentNullException.ThrowIfNull(relativeUri);
 
-        if (!_references.TryGetValue(typeof(TViewModel), out string? uri))
-        {
-            throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
-        }
+        string resolvedUri = GetResolvedUriForViewModel<TViewModel>();
+        string finalUri = BuildUri(_navigationManager.ToAbsoluteUri(resolvedUri).AbsoluteUri, relativeUri);
 
-        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
-
-        LogNavigationEvent(typeof(TViewModel).FullName, uri);
-        _navigationManager.NavigateTo(uri, forceLoad, replace);
+        LogNavigationEvent(typeof(TViewModel).FullName, finalUri);
+        _navigationManager.NavigateTo(finalUri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
@@ -78,15 +106,11 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     {
         ArgumentNullException.ThrowIfNull(relativeUri);
 
-        if (!_references.TryGetValue(typeof(TViewModel), out string? uri))
-        {
-            throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
-        }
+        string resolvedUri = GetResolvedUriForViewModel<TViewModel>();
+        string finalUri = BuildUri(_navigationManager.ToAbsoluteUri(resolvedUri).AbsoluteUri, relativeUri);
 
-        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
-
-        LogNavigationEvent(typeof(TViewModel).FullName, uri);
-        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
+        LogNavigationEvent(typeof(TViewModel).FullName, finalUri);
+        _navigationManager.NavigateTo(finalUri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -94,13 +118,9 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     {
         ArgumentNullException.ThrowIfNull(key);
 
-        if (!_keyedReferences.TryGetValue(key, out string? uri))
-        {
-            throw new ArgumentException($"No associated page for key '{key}'");
-        }
-
-        LogKeyedNavigationEvent(key, uri);
-        _navigationManager.NavigateTo(uri, forceLoad, replace);
+        string resolvedUri = GetResolvedUriForKey(key);
+        LogKeyedNavigationEvent(key, resolvedUri);
+        _navigationManager.NavigateTo(resolvedUri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
@@ -108,13 +128,9 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     {
         ArgumentNullException.ThrowIfNull(key);
 
-        if (!_keyedReferences.TryGetValue(key, out string? uri))
-        {
-            throw new ArgumentException($"No associated page for key '{key}'");
-        }
-
-        LogKeyedNavigationEvent(key, uri);
-        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
+        string resolvedUri = GetResolvedUriForKey(key);
+        LogKeyedNavigationEvent(key, resolvedUri);
+        _navigationManager.NavigateTo(resolvedUri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
@@ -123,15 +139,11 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(relativeUri);
 
-        if (!_keyedReferences.TryGetValue(key, out string? uri))
-        {
-            throw new ArgumentException($"No associated page for key '{key}'");
-        }
+        string resolvedUri = GetResolvedUriForKey(key);
+        string finalUri = BuildUri(_navigationManager.ToAbsoluteUri(resolvedUri).AbsoluteUri, relativeUri);
 
-        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
-
-        LogKeyedNavigationEvent(key, uri);
-        _navigationManager.NavigateTo(uri, forceLoad, replace);
+        LogKeyedNavigationEvent(key, finalUri);
+        _navigationManager.NavigateTo(finalUri, forceLoad, replace);
     }
 
     /// <inheritdoc/>
@@ -140,48 +152,106 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(relativeUri);
 
-        if (!_keyedReferences.TryGetValue(key, out string? uri))
-        {
-            throw new ArgumentException($"No associated page for key '{key}'");
-        }
+        string resolvedUri = GetResolvedUriForKey(key);
+        string finalUri = BuildUri(_navigationManager.ToAbsoluteUri(resolvedUri).AbsoluteUri, relativeUri);
 
-        uri = BuildUri(_navigationManager.ToAbsoluteUri(uri).AbsoluteUri, relativeUri);
-
-        LogKeyedNavigationEvent(key, uri);
-        _navigationManager.NavigateTo(uri, CloneNavigationOptions(options));
+        LogKeyedNavigationEvent(key, finalUri);
+        _navigationManager.NavigateTo(finalUri, CloneNavigationOptions(options));
     }
 
     /// <inheritdoc/>
     public string GetUri<TViewModel>()
         where TViewModel : IViewModelBase
     {
-        if (!_references.TryGetValue(typeof(TViewModel), out string? uri))
+        if (!_routeCache.ViewModelRoutes.TryGetValue(typeof(TViewModel), out string? uriFromCache))
         {
-            throw new ArgumentException($"{typeof(TViewModel)} has no associated page");
+            throw new ViewModelRouteNotFoundException(typeof(TViewModel));
         }
 
-        return uri;
+        return uriFromCache;
     }
 
     /// <inheritdoc/>
     public string GetUri(object key)
     {
-        if (!_keyedReferences.TryGetValue(key, out string? uri))
+        if (!_routeCache.KeyedViewModelRoutes.TryGetValue(key, out string? uriFromCache))
         {
-            throw new ArgumentException($"No associated page for key '{key}'");
+            throw new ViewModelRouteNotFoundException(key);
         }
 
-        return uri;
+        return uriFromCache;
     }
 
     #region Internals
 
     /// <summary>
-    /// Builds a complete URI from a base URI and a relative URI.
+    /// Resolves a route template to a navigation URI at runtime, handling base path and root path scenarios.
     /// </summary>
-    /// <param name="uri">The base URI.</param>
-    /// <param name="relativeUri">The relative URI or query string.</param>
-    /// <returns>The complete URI.</returns>
+    /// <param name="routeTemplate">The route template from the cache to resolve.</param>
+    /// <returns>The resolved navigation URI ready for browser navigation.</returns>
+    private string ResolveNavigationUri(string routeTemplate)
+    {
+        LogRouteTemplateResolution(routeTemplate);
+        
+        // Handle root path
+        if (routeTemplate == "/")
+        {
+            string rootPath = new Uri(_navigationManager.BaseUri).LocalPath;
+            LogRootPathResolution(routeTemplate, rootPath);
+            return rootPath;
+        }
+
+        // Get configured BasePath for subpath hosting scenarios
+        string? configuredBasePath = _libraryConfiguration.Value.BasePath?.Trim('/');
+        LogBasePath(configuredBasePath);
+
+        // Handle absolute paths
+        if (routeTemplate.StartsWith("/"))
+        {
+            string workingUri = routeTemplate;
+            
+            // If we have a configured BasePath and the route template starts with it, remove it
+            if (!string.IsNullOrEmpty(configuredBasePath))
+            {
+                string basePathWithSlash = "/" + configuredBasePath;
+                if (workingUri.StartsWith(basePathWithSlash + "/", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Remove BasePath prefix: "/test/counter" -> "/counter"
+                    workingUri = workingUri.Substring(basePathWithSlash.Length);
+                    LogBasePathRemoval(routeTemplate, basePathWithSlash, workingUri);
+                }
+                else if (workingUri.Equals(basePathWithSlash, StringComparison.OrdinalIgnoreCase))
+                {
+                    // BasePath root: "/test" -> "/"
+                    workingUri = "/";
+                    LogBasePathRootRemoval(routeTemplate, basePathWithSlash, workingUri);
+                }
+            }
+            
+            // Convert to relative path by removing leading slash
+            if (workingUri.Length > 1 && workingUri.StartsWith("/"))
+            {
+                string relativePath = workingUri[1..];
+                LogRelativePathConversion(workingUri, relativePath);
+                return relativePath;
+            }
+            else if (workingUri == "/")
+            {
+                LogEmptyRelativePathConversion(workingUri);
+                return string.Empty;
+            }
+        }
+        
+        LogUnchangedRouteTemplate(routeTemplate);
+        return routeTemplate;
+    }
+
+    /// <summary>
+    /// Builds a complete URI from a base URI and a relative URI or query string.
+    /// </summary>
+    /// <param name="uri">The base URI to build upon.</param>
+    /// <param name="relativeUri">The relative URI or query string to append.</param>
+    /// <returns>The complete URI combining the base and relative parts.</returns>
     private static string BuildUri(string uri, string relativeUri)
     {
         if (string.IsNullOrWhiteSpace(relativeUri))
@@ -211,138 +281,10 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     }
 
     /// <summary>
-    /// Generates a cache of references for navigation.
+    /// Clones browser navigation options for use with the underlying NavigationManager.
     /// </summary>
-    private void GenerateReferenceCache()
-    {
-        Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-        _logger.LogDebug("Starting generation of a new Reference Cache");
-
-        foreach (Assembly assembly in assemblies)
-        {
-            List<(Type Type, Type? Argument)> items;
-
-            try
-            {
-                items = assembly
-                    .GetTypes()
-                    .Select(GetViewArgumentType)
-                    .Where(t => t.Argument is not null)
-                    .ToList();
-            }
-            catch (Exception)
-            {
-                // avoid issue with unit tests
-                continue;
-            }
-
-            // does the assembly contain the required types?
-            if (items.Count == 0)
-            {
-                continue;
-            }
-
-            foreach ((Type Type, Type? Argument) item in items)
-            {
-                var routeAttribute = item.Type.GetCustomAttributes<RouteAttribute>().FirstOrDefault();
-
-                // is this a page or a component?
-                if (routeAttribute is null)
-                {
-                    continue;
-                }
-
-                // we have a page, let's reference it!
-                string uri = routeAttribute.Template;
-                _references.Add(item.Argument!, uri);
-                _logger.LogDebug("Caching navigation reference '{Argument}' with uri '{Uri}' for '{FullName}'", item.Argument, uri, item.Type.FullName);
-
-                var vmKeyAttribute = item.Type.GetCustomAttribute<ViewModelKeyAttribute>();
-
-                if (vmKeyAttribute is null)
-                {
-                    continue;
-                }
-
-                // If page has a view model key, we cache it, so we can navigate to it using the key also
-                _keyedReferences.Add(vmKeyAttribute.Key, uri);
-                _logger.LogDebug("Caching keyed navigation reference '{Key}' with uri '{Uri}' for '{FullName}'", vmKeyAttribute.Key, uri, item.Type.FullName);
-            }
-        }
-
-        _logger.LogDebug("Completed generating the Reference Cache");
-    }
-
-    /// <summary>
-    /// Logs a navigation event.
-    /// </summary>
-    /// <param name="viewModel">The ViewModel being navigated to.</param>
-    /// <param name="uri">The URI being navigated to.</param>
-    [LoggerMessage(LogLevel.Debug, Message = "Navigating to '{ViewModel}' with uri '{Uri}'")]
-    private partial void LogNavigationEvent(string? viewModel, string uri);
-
-    [LoggerMessage(LogLevel.Debug, Message = "Navigating to key '{Key}' with uri '{Uri}'")]
-    private partial void LogKeyedNavigationEvent(object key, string uri);
-
-    /// <summary>
-    /// Gets the ViewModel argument type for a given type.
-    /// </summary>
-    /// <param name="type">The type to get the ViewModel argument type for.</param>
-    /// <returns>A tuple containing the type and its ViewModel argument type.</returns>
-    private static (Type Type, Type? Argument) GetViewArgumentType(Type type)
-    {
-        Type viewInterfaceType = typeof(IView<>);
-        Type viewModelType = typeof(IViewModelBase);
-        Type componentBaseGenericType = typeof(MvvmComponentBase<>);
-        Type owingComponentBaseGenericType = typeof(MvvmOwningComponentBase<>);
-        Type? componentBaseType = null;
-        Type? typeArgument = null;
-
-        foreach (Type interfaceType in type.GetInterfaces())
-        {
-            if (!interfaceType.IsGenericType || interfaceType.GetGenericTypeDefinition() != viewInterfaceType)
-            {
-                continue;
-            }
-
-            typeArgument = interfaceType.GetGenericArguments()[0];
-            componentBaseType = componentBaseGenericType.MakeGenericType(typeArgument);
-
-            // Check if the type constraint is a subtype of MvvmComponentBase<>
-            if (componentBaseType.IsAssignableFrom(type))
-            {
-                break;
-            }
-
-            // Check if the type constraint is a subtype of MvvmOwningComponentBase<>
-            componentBaseType = owingComponentBaseGenericType.MakeGenericType(typeArgument);
-
-            if (componentBaseType.IsAssignableFrom(type))
-            {
-                break;
-            }
-
-            return default;
-        }
-
-        if (componentBaseType is null)
-        {
-            return default;
-        }
-
-        // get all interfaces
-        Type[] interfaces = componentBaseType
-            .GetGenericArguments()[0]
-            .GetInterfaces();
-
-        // Check if the type argument of IView<> implements IViewModel
-        return Array.Find(interfaces, i => i.Name == $"{viewModelType.Name}") is null
-            ? default
-            // all checks passed, so return the type with the argument type declared
-            : (type, typeArgument);
-    }
-
+    /// <param name="options">The browser navigation options to clone.</param>
+    /// <returns>A NavigationOptions instance compatible with the NavigationManager.</returns>
     private NavigationOptions CloneNavigationOptions(BrowserNavigationOptions options)
     {
         return new NavigationOptions()
@@ -352,6 +294,122 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             ReplaceHistoryEntry = options.ReplaceHistoryEntry
         };
     }
+
+    #region Logging Methods
+
+    /// <summary>
+    /// Logs a navigation event for diagnostic purposes.
+    /// </summary>
+    /// <param name="viewModel">The ViewModel type name being navigated to.</param>
+    /// <param name="uri">The URI being navigated to.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Navigating to '{ViewModel}' with uri '{Uri}'")]
+    private partial void LogNavigationEvent(string? viewModel, string uri);
+
+    /// <summary>
+    /// Logs a keyed navigation event for diagnostic purposes.
+    /// </summary>
+    /// <param name="key">The key being used for navigation.</param>
+    /// <param name="uri">The URI being navigated to.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Navigating to key '{Key}' with uri '{Uri}'")]
+    private partial void LogKeyedNavigationEvent(object key, string uri);
+
+    /// <summary>
+    /// Logs URI resolution start for ViewModel navigation.
+    /// </summary>
+    /// <param name="viewModelName">The ViewModel name being resolved.</param>
+    /// <param name="cachedUri">The cached URI from route cache.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Resolving URI for ViewModel '{ViewModelName}' from cached route '{CachedUri}'")]
+    private partial void LogUriResolution(string viewModelName, string cachedUri);
+
+    /// <summary>
+    /// Logs final resolved URI for ViewModel navigation.
+    /// </summary>
+    /// <param name="viewModelName">The ViewModel name being resolved.</param>
+    /// <param name="cachedUri">The cached URI from route cache.</param>
+    /// <param name="resolvedUri">The final resolved URI for navigation.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Resolved ViewModel '{ViewModelName}' from '{CachedUri}' to '{ResolvedUri}'")]
+    private partial void LogResolvedUri(string viewModelName, string cachedUri, string resolvedUri);
+
+    /// <summary>
+    /// Logs URI resolution start for keyed navigation.
+    /// </summary>
+    /// <param name="key">The key being resolved.</param>
+    /// <param name="cachedUri">The cached URI from route cache.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Resolving URI for key '{Key}' from cached route '{CachedUri}'")]
+    private partial void LogKeyedUriResolution(object key, string cachedUri);
+
+    /// <summary>
+    /// Logs final resolved URI for keyed navigation.
+    /// </summary>
+    /// <param name="key">The key being resolved.</param>
+    /// <param name="cachedUri">The cached URI from route cache.</param>
+    /// <param name="resolvedUri">The final resolved URI for navigation.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Resolved key '{Key}' from '{CachedUri}' to '{ResolvedUri}'")]
+    private partial void LogResolvedKeyedUri(object key, string cachedUri, string resolvedUri);
+
+    /// <summary>
+    /// Logs route template resolution start.
+    /// </summary>
+    /// <param name="routeTemplate">The route template being resolved.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Resolving route template '{RouteTemplate}'")]
+    private partial void LogRouteTemplateResolution(string routeTemplate);
+
+    /// <summary>
+    /// Logs configured BasePath for diagnostics.
+    /// </summary>
+    /// <param name="basePath">The configured BasePath value.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Configured BasePath: '{BasePath}'")]
+    private partial void LogBasePath(string? basePath);
+
+    /// <summary>
+    /// Logs root path resolution.
+    /// </summary>
+    /// <param name="routeTemplate">The original route template.</param>
+    /// <param name="rootPath">The resolved root path.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Root path '{RouteTemplate}' resolved to '{RootPath}'")]
+    private partial void LogRootPathResolution(string routeTemplate, string rootPath);
+
+    /// <summary>
+    /// Logs BasePath removal from route template.
+    /// </summary>
+    /// <param name="originalRoute">The original route template.</param>
+    /// <param name="basePath">The BasePath being removed.</param>
+    /// <param name="resultingRoute">The route after BasePath removal.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Removed BasePath '{BasePath}' from '{OriginalRoute}' resulting in '{ResultingRoute}'")]
+    private partial void LogBasePathRemoval(string originalRoute, string basePath, string resultingRoute);
+
+    /// <summary>
+    /// Logs BasePath root removal.
+    /// </summary>
+    /// <param name="originalRoute">The original route template.</param>
+    /// <param name="basePath">The BasePath being removed.</param>
+    /// <param name="resultingRoute">The route after BasePath removal.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Removed BasePath root '{BasePath}' from '{OriginalRoute}' resulting in '{ResultingRoute}'")]
+    private partial void LogBasePathRootRemoval(string originalRoute, string basePath, string resultingRoute);
+
+    /// <summary>
+    /// Logs conversion to relative path.
+    /// </summary>
+    /// <param name="absolutePath">The absolute path being converted.</param>
+    /// <param name="relativePath">The resulting relative path.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Converted absolute path '{AbsolutePath}' to relative path '{RelativePath}'")]
+    private partial void LogRelativePathConversion(string absolutePath, string relativePath);
+
+    /// <summary>
+    /// Logs conversion of root to empty relative path.
+    /// </summary>
+    /// <param name="rootPath">The root path being converted.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Converted root path '{RootPath}' to empty relative path")]
+    private partial void LogEmptyRelativePathConversion(string rootPath);
+
+    /// <summary>
+    /// Logs when route template remains unchanged.
+    /// </summary>
+    /// <param name="routeTemplate">The unchanged route template.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Route template '{RouteTemplate}' returned unchanged")]
+    private partial void LogUnchangedRouteTemplate(string routeTemplate);
+
+    #endregion Logging Methods
 
     #endregion Internals
 }

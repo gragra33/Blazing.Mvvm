@@ -1,9 +1,9 @@
-﻿# Blazor.Mvvm - An Extension for the MVVM CommunityToolkit
+﻿# Blazor Extension for the MVVM CommunityToolkit
 
 [![NuGet Version](https://img.shields.io/nuget/v/Blazing.Mvvm.svg)](https://www.nuget.org/packages/Blazing.Mvvm)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/Blazing.Mvvm.svg)](https://www.nuget.org/packages/Blazing.Mvvm)
 
-This project expands upon the [blazor-mvvm](https://github.com/IntelliTect-Samples/blazor-mvvm) repository by [Kelly Adams](https://github.com/adamskt), implementing full MVVM support via the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/). Enhancements include preventing cross-thread exceptions, adding extra base class types, MVVM-style navigation, and converting the project into a usable library.
+🔥 **Blazing.Mvvm** brings full MVVM support to Blazor applications through seamless integration with the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/). This library supports all Blazor hosting models including Server, WebAssembly (WASM), Static Server-Side Rendering (SSR), Auto, Hybrid (WPF, WinForms, Avalonia), and MAUI. It features strongly-typed ViewModel-first navigation, automatic ViewModel registration and discovery, parameter resolution between Views and ViewModels, validation support with `ObservableValidator`, and comprehensive lifecycle management. The library includes extensive sample projects and complete documentation to help you get started quickly.
 
 ## Table of Contents
 
@@ -30,7 +30,12 @@ This project expands upon the [blazor-mvvm](https://github.com/IntelliTect-Sampl
     - [MVVM Navigation](#mvvm-navigation)
       - [Navigate by abstraction](#navigate-by-abstraction)
     - [MVVM Validation](#mvvm-validation)
+    - [Subpath Hosting](#subpath-hosting)
+    - [Complex Multi-Project ViewModel Registration](#complex-multi-project-viewmodel-registration)
+    - [Sample Projects](#sample-projects)
+      - [Running Samples with Different .NET Target Frameworks](#running-samples-with-different-net-target-frameworks)
   - [History](#history)
+    - [V3.0.0](#v300)
     - [V2.0.0](#v200)
 <!-- TOC -->
 
@@ -190,11 +195,6 @@ The library package includes:
 - `ViewModelBase`, `RecipientViewModelBase`, & `ValidatorViewModelBase` wrappers for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/).
 - `MvvmNavigationManager` class, `MvvmNavLink`, and `MvvmKeyNavLink` component for MVVM-style navigation, no more hard-coded paths.
 - Sample applications for getting started quickly with all hosting models.
-
-There are two additional sample projects in separate GitHub repositories:
-
-1. [Blazor MVVM Sample](https://github.com/gragra33/MvvmSampleBlazor) - takes Microsoft's [Xamarin Sample](https://github.com/CommunityToolkit/MVVM-Samples) project for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/) and converts it to: Blazor Wasm & Blazor Hybrid for Wpf & Avalonia. Minimal changes were made.
-2. [Dynamic Parent and Child](https://github.com/gragra33/Blazing.Mvvm.ParentChildSample) - demonstrates loose coupling of a parent component/page and an unknown number of child components using [Messenger](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/messenger) for interactivity.
 
 ### View Model
 
@@ -569,9 +569,186 @@ public sealed partial class EditContactViewModel : ViewModelBase, IDisposable
 </EditForm>  
 ```
 
+### Subpath Hosting
+
+Blazing.Mvvm supports hosting your Blazor application under a subpath of a web server. This is useful when you want to serve your application from a specific URL segment rather than the root of the domain (e.g., `https://example.com/myapp` instead of `https://example.com`).
+
+#### Configuration Steps
+
+**1. Configure `launchSettings.json`**
+
+Add the `launchUrl` property to specify the subpath:
+
+```json
+"https": {
+  "commandName": "Project",
+  "dotnetRunMessages": true,
+  "launchBrowser": true,
+  "launchUrl": "fu/bar",
+  "applicationUrl": "https://localhost:7037;http://localhost:5272",
+  "environmentVariables": {
+    "ASPNETCORE_ENVIRONMENT": "Development"
+  }
+}
+```
+
+**2. Configure Blazing.Mvvm in `Program.cs`**
+
+Set the `BasePath` property in the `AddMvvm` configuration:
+
+```csharp
+builder.Services.AddMvvm(options =>
+{
+    options.HostingModelType = BlazorHostingModelType.Server;
+    options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
+    options.BasePath = "/fu/bar/"; // Set the base path for the application
+});
+```
+
+**3. Configure ASP.NET Core Middleware**
+
+Add the path base middleware in `Program.cs`:
+
+```csharp
+app.UsePathBase("/fu/bar/"); // Set the base path for the application
+
+app.UseRouting();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapRazorPages();
+});
+
+app.Run();
+```
+
+**4. Update the Base Href**
+
+Set the `<base>` element in your `index.html` (WebAssembly) or `_Host.cshtml` (Server):
+
+```html
+<base href="/fu/bar/" />
+```
+
+For a complete working example, see the [Blazing.SubpathHosting.Server](samples/Blazing.SubpathHosting.Server) sample project.
+
+### Complex Multi-Project ViewModel Registration
+
+When working with complex multi-project solutions where ViewModels are distributed across multiple assemblies, you can register all ViewModels from different assemblies using the `RegisterViewModelsFromAssemblyContaining` method in the `AddMvvm` configuration.
+
+This is particularly useful in Hybrid applications (WPF, WinForms, MAUI, Avalonia) where you might have:
+- A core project containing business logic and ViewModels
+- A Blazor UI project containing page-specific ViewModels
+- Shared ViewModels across multiple projects
+
+#### Example: Registering ViewModels from Multiple Assemblies
+
+```csharp
+using Blazing.Mvvm;
+using HybridSample.Core.ViewModels;
+using HybridSample.Blazor.Core.Pages;
+
+builder.Services.AddMvvm(options =>
+{ 
+    options.HostingModelType = BlazorHostingModelType.Hybrid;
+    
+    // Register ViewModels from the Core project
+    options.RegisterViewModelsFromAssemblyContaining<SamplePageViewModel>();
+    
+    // Register ViewModels from the Blazor.Core project
+    options.RegisterViewModelsFromAssemblyContaining<IntroductionPage>();
+});
+```
+
+#### Alternative Methods
+
+You can also register assemblies directly:
+
+```csharp
+// Using Type
+var coreAssembly = typeof(SamplePageViewModel).Assembly;
+var blazorAssembly = typeof(IntroductionPage).Assembly;
+
+builder.Services.AddMvvm(options =>
+{ 
+    options.RegisterViewModelsFromAssembly(coreAssembly, blazorAssembly);
+});
+
+// Or using RegisterViewModelsFromAssemblies for a collection
+var assemblies = new[] { coreAssembly, blazorAssembly };
+builder.Services.AddMvvm(options =>
+{ 
+    options.RegisterViewModelsFromAssemblies(assemblies);
+});
+```
+
+This approach ensures that all ViewModels across your solution are properly discovered and registered with the dependency injection container, enabling seamless MVVM navigation and component resolution.
+
+For working examples, see the Hybrid sample projects:
+- [HybridSample.Wpf](samples/HybridSamples/HybridSample.Wpf)
+- [HybridSample.WinForms](samples/HybridSamples/HybridSample.WinForms)
+- [HybridSample.MAUI](samples/HybridSamples/HybridSample.MAUI)
+- [HybridSample.Avalonia](samples/HybridSamples/HybridSample.Avalonia)
+
+### Sample Projects
+
+The repository includes several sample projects demonstrating different Blazor hosting models and scenarios:
+
+#### Blazor Hosting Model Samples
+
+- **[Blazing.Mvvm.Sample.Server](samples/Blazing.Mvvm.Sample.Server)** - Blazor Server App sample
+- **[Blazing.Mvvm.Sample.Wasm](samples/Blazing.Mvvm.Sample.Wasm)** - Blazor WebAssembly (WASM) App sample
+- **[Blazing.Mvvm.Sample.WebApp](samples/Blazing.Mvvm.Sample.WebApp)** - Blazor Web App (.NET 8+) sample
+- **[Blazing.Mvvm.Sample.HybridMaui](samples/Blazing.Mvvm.Sample.HybridMaui)** - Blazor Hybrid MAUI sample
+
+#### Blazor Hybrid Samples
+
+Modernises the Microsoft's [Xamarin Sample](https://github.com/CommunityToolkit/MVVM-Samples) project, using Blazing.Mvvm, for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/).  Minimal changes were made.
+
+- **[HybridSample.Wpf](samples/HybridSamples/HybridSample.Wpf)** - WPF Blazor Hybrid sample
+- **[HybridSample.WinForms](samples/HybridSamples/HybridSample.WinForms)** - WinForms Blazor Hybrid sample
+- **[HybridSample.MAUI](samples/HybridSamples/HybridSample.MAUI)** - MAUI Blazor Hybrid sample
+- **[HybridSample.Avalonia](samples/HybridSamples/HybridSample.Avalonia)** - Avalonia Blazor Hybrid sample (Windows only)
+
+**NOTE:** The original Project was [Blazor MVVM Sample](https://github.com/gragra33/MvvmSampleBlazor) - now archived.
+
+#### Specialized Samples
+
+- **[Blazing.SubpathHosting.Server](samples/Blazing.SubpathHosting.Server)** - Demonstrates subpath hosting configuration
+- **[Blazing.Mvvm.ParentChildSample](samples/ParentChildSample)** - Demonstrates dynamic parent-child component communication using Messenger. [Original](https://github.com/gragra33/Blazing.Mvvm.ParentChildSample)  repo is now archived.
+
+#### Running Samples with Different .NET Target Frameworks
+
+All sample projects in this repository support multi-targeting across .NET 8, .NET 9, and .NET 10. To run a sample with a specific .NET version:
+
+1. Open the solution in Visual Studio or your preferred IDE
+2. Right-click on the sample project you want to run and `Set as Startup Project`
+3. Select the Start With Debugging Run Button (green solid) dropdown arrow
+4. Select the target framework from the dropdown (e.g., `net8.0`, `net9.0`, `net10.0`)
+5. Run the project
+
+For detailed instructions on switching between .NET target frameworks and troubleshooting multi-targeting scenarios, see the [Running Samples with Different .NET Versions](docs/Running_Different_NET_Versions.md) guide.
+
 ## History
 
-### V2.2.0 7 December, 2024
+### V3.0.0 - 18 November 2025
+
+This is a major release with new features and enhancements.
+
+- Added support for .NET 10. [@gragra33](https://github.com/gragra33)
+- Added subpath hosting support for serving Blazor applications from URL subpaths. [@gragra33](https://github.com/gragra33)
+- Added new sample projects:
+  - `Blazing.Mvvm.ParentChildSample` - Demonstrates dynamic parent-child component communication
+  - `Blazing.SubpathHosting.Server` - Demonstrates subpath hosting configuration
+  - Hybrid samples for WinForms, WPF, MAUI, and Avalonia platforms
+- Added multi-targeting support across .NET 8, .NET 9, and .NET 10 for all sample projects. [@gragra33](https://github.com/gragra33)
+- Increased test coverage with an additional 128 unit tests (total 208 tests). [@gragra33](https://github.com/gragra33)
+- Enhanced documentation with comprehensive guides for:
+  - Subpath hosting configuration
+  - Complex multi-project ViewModel registration
+  - Running samples with different .NET target frameworks
+- Documentation updates and improvements. [@gragra33](https://github.com/gragra33)
+
+### V2.2.0 - 7 December, 2024
 
 - Added support for `ObservableRecipient` being set to inactive when disposing the `MvvmComponentBase`, `MvvmOwningComponentBase`, `MvvmLayoutComponentBase`, and `RecipientViewModelBase`. [@gragra33](https://github.com/gragra33) & [@teunlielu](https://github.com/teunlielu)
 
@@ -579,11 +756,11 @@ public sealed partial class EditContactViewModel : ViewModelBase, IDisposable
 
 - Version bump to fix a nuget release issue
 
-### V2.1.0 3 December, 2024
+### V2.1.0 - 3 December, 2024
 
 - Added MAUI Blazor Hybrid App support + sample HybridMaui app. [@hakakou](https://github.com/hakakou)
 
-### V2.0.0 30 November, 2024
+### V2.0.0 - 30 November, 2024
 
 This is a major release with breaking changes, migration notes can be found [here](docs/migration-notes/v1.4_to_v2.md).
 

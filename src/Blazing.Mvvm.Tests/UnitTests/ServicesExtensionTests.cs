@@ -4,8 +4,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazing.Mvvm.Tests.UnitTests;
 
+/// <summary>
+/// Unit tests for MVVM service extension methods, verifying service registration and configuration scenarios.
+/// </summary>
 public class ServicesExtensionTests
 {
+    /// <summary>
+    /// Tests that AddMvvm registers required services in the service collection.
+    /// </summary>
     [Fact]
     public void GivenAddMvvm_WhenServicesAdded_ThenShouldContainRequiredServices()
     {
@@ -23,6 +29,9 @@ public class ServicesExtensionTests
         sut.Contains(parameterResolverServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that AddMvvm registers services with the correct lifetime based on hosting model type.
+    /// </summary>
     [Theory]
     [InlineData(BlazorHostingModelType.NotSpecified, ServiceLifetime.Singleton)]
     [InlineData(BlazorHostingModelType.WebAssembly, ServiceLifetime.Singleton)]
@@ -43,6 +52,9 @@ public class ServicesExtensionTests
         sut.Contains(mvvmNavigationServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that AddMvvm registers view models from the calling assembly.
+    /// </summary>
     [Theory]
     [MemberData(nameof(ServicesExtensionTestData.ViewModelsInCallingAssembly), MemberType = typeof(ServicesExtensionTestData))]
     public void GivenAddMvvm_WhenViewModelsRegisteredFromCallingAssembly_ThenShouldContainViewModel(ServiceDescriptor vmServiceDescriptor)
@@ -57,6 +69,9 @@ public class ServicesExtensionTests
         sut.Contains(vmServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that AddMvvm registers view models from the assembly containing a generic type.
+    /// </summary>
     [Theory]
     [MemberData(nameof(ServicesExtensionTestData.ViewModelsInCallingAssembly), MemberType = typeof(ServicesExtensionTestData))]
     public void GivenAddMvvm_WhenViewModelsRegisteredFromAssemblyContainingGenericType_ThenShouldContainViewModel(ServiceDescriptor vmServiceDescriptor)
@@ -71,6 +86,9 @@ public class ServicesExtensionTests
         sut.Contains(vmServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that AddMvvm registers view models from the assembly containing a specified type.
+    /// </summary>
     [Theory]
     [MemberData(nameof(ServicesExtensionTestData.ViewModelsInCallingAssembly), MemberType = typeof(ServicesExtensionTestData))]
     public void GivenAddMvvm_WhenViewModelsRegisteredFromAssemblyContainingType_ThenShouldContainViewModel(ServiceDescriptor vmServiceDescriptor)
@@ -85,6 +103,9 @@ public class ServicesExtensionTests
         sut.Contains(vmServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that AddMvvm registers view models from a specified assembly.
+    /// </summary>
     [Theory]
     [MemberData(nameof(ServicesExtensionTestData.ViewModelsInCallingAssembly), MemberType = typeof(ServicesExtensionTestData))]
     public void GivenAddMvvm_WhenViewModelsRegisteredFromSpecifiedAssembly_ThenShouldContainViewModel(ServiceDescriptor vmServiceDescriptor)
@@ -100,6 +121,9 @@ public class ServicesExtensionTests
         sut.Contains(vmServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that AddMvvm registers view models from specified assemblies.
+    /// </summary>
     [Theory]
     [MemberData(nameof(ServicesExtensionTestData.ViewModelsInCallingAssembly), MemberType = typeof(ServicesExtensionTestData))]
     public void GivenAddMvvm_WhenViewModelsRegisteredFromSpecifiedAssemblies_ThenShouldContainViewModel(ServiceDescriptor vmServiceDescriptor)
@@ -115,6 +139,9 @@ public class ServicesExtensionTests
         sut.Contains(vmServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that AddMvvm registers transient view models from a dependent assembly containing a type.
+    /// </summary>
     [Theory]
     [MemberData(nameof(ServicesExtensionTestData.ViewModelsInDependentAssembly), MemberType = typeof(ServicesExtensionTestData))]
     public void GivenAddMvvm_WhenViewModelsRegisteredFromDependentAssemblyContainingType_ThenShouldContainTransientViewModels(ServiceDescriptor vmServiceDescriptor)

@@ -1,17 +1,33 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace Blazing.Mvvm.ComponentModel;
 
 /// <summary>
-/// A base class for a <c>ViewModel</c> that implements <see cref="ObservableRecipient"/> which provides support for receiving messages and access to the <see cref="CommunityToolkit.Mvvm.Messaging.IMessenger"/> type.
+/// Provides a base class for ViewModels that implement <see cref="ObservableRecipient"/>, supporting message reception and access to <see cref="IMessenger"/>.
+/// Implements <see cref="IViewModelBase"/> for Blazor MVVM lifecycle integration and <see cref="IDisposable"/> for resource cleanup.
 /// </summary>
 public abstract class RecipientViewModelBase : ObservableRecipient, IViewModelBase, IDisposable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RecipientViewModelBase"/> class.
+    /// </summary>
+    protected RecipientViewModelBase()
+    { /* skip */ }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RecipientViewModelBase"/> class with the specified <see cref="IMessenger"/>.
+    /// </summary>
+    /// <param name="messenger">The messenger instance for message delivery.</param>
+    protected RecipientViewModelBase(IMessenger messenger)
+        : base(messenger)
+    { /* skip */ }
+
     private bool IsDisposed;
 
     /// <inheritdoc/>
     public virtual void OnAfterRender(bool firstRender)
-    { }
+    { /* skip */ }
 
     /// <inheritdoc/>
     public virtual Task OnAfterRenderAsync(bool firstRender)
@@ -20,7 +36,7 @@ public abstract class RecipientViewModelBase : ObservableRecipient, IViewModelBa
     /// <inheritdoc/>
     public virtual void OnInitialized()
     {
-        // Setting this to true ensuring the OnActivated() method will be invoked, which will register all necessary message handlers for this recipient.
+        // Setting this to true ensures the OnActivated() method will be invoked, registering all necessary message handlers for this recipient.
         IsActive = true;
     }
 
@@ -47,7 +63,7 @@ public abstract class RecipientViewModelBase : ObservableRecipient, IViewModelBa
     /// <summary>
     /// Releases the unmanaged resources used by the <see cref="RecipientViewModelBase"/> and optionally releases the managed resources.
     /// </summary>
-    /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+    /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
     protected virtual void Dispose(bool disposing)
     {
         if (IsDisposed)
@@ -63,7 +79,9 @@ public abstract class RecipientViewModelBase : ObservableRecipient, IViewModelBa
         IsDisposed = true;
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Disposes the ViewModel and releases resources.
+    /// </summary>
     public void Dispose()
     {
         Dispose(true);
