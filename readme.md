@@ -629,7 +629,7 @@ Set the `<base>` element in your `index.html` (WebAssembly) or `_Host.cshtml` (S
 <base href="/fu/bar/" />
 ```
 
-For a complete working example, see the [Blazing.SubpathHosting.Server](samples/Blazing.SubpathHosting.Server) sample project.
+For a complete working example, see the [Blazing.SubpathHosting.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.SubpathHosting.Server) sample project.
 
 ### Complex Multi-Project ViewModel Registration
 
@@ -684,10 +684,10 @@ builder.Services.AddMvvm(options =>
 This approach ensures that all ViewModels across your solution are properly discovered and registered with the dependency injection container, enabling seamless MVVM navigation and component resolution.
 
 For working examples, see the Hybrid sample projects:
-- [HybridSample.Wpf](samples/HybridSamples/HybridSample.Wpf)
-- [HybridSample.WinForms](samples/HybridSamples/HybridSample.WinForms)
-- [HybridSample.MAUI](samples/HybridSamples/HybridSample.MAUI)
-- [HybridSample.Avalonia](samples/HybridSamples/HybridSample.Avalonia)
+- [HybridSample.Wpf](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.Wpf)
+- [HybridSample.WinForms](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.WinForms)
+- [HybridSample.MAUI](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.MAUI)
+- [HybridSample.Avalonia](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.Avalonia)
 
 ### Sample Projects
 
@@ -695,19 +695,19 @@ The repository includes several sample projects demonstrating different Blazor h
 
 #### Blazor Hosting Model Samples
 
-- **[Blazing.Mvvm.Sample.Server](samples/Blazing.Mvvm.Sample.Server)** - Blazor Server App sample
-- **[Blazing.Mvvm.Sample.Wasm](samples/Blazing.Mvvm.Sample.Wasm)** - Blazor WebAssembly (WASM) App sample
-- **[Blazing.Mvvm.Sample.WebApp](samples/Blazing.Mvvm.Sample.WebApp)** - Blazor Web App (.NET 8+) sample
-- **[Blazing.Mvvm.Sample.HybridMaui](samples/Blazing.Mvvm.Sample.HybridMaui)** - Blazor Hybrid MAUI sample
+- **[Blazing.Mvvm.Sample.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.Server)** - Blazor Server App sample
+- **[Blazing.Mvvm.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.Wasm)** - Blazor WebAssembly (WASM) App sample
+- **[Blazing.Mvvm.Sample.WebApp](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.WebApp)** - Blazor Web App (.NET 8+) sample
+- **[Blazing.Mvvm.Sample.HybridMaui](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.HybridMaui)** - Blazor Hybrid MAUI sample
 
 #### Blazor Hybrid Samples
 
 Modernises the Microsoft's [Xamarin Sample](https://github.com/CommunityToolkit/MVVM-Samples) project, using Blazing.Mvvm, for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/).  Minimal changes were made.
 
-- **[HybridSample.Wpf](samples/HybridSamples/HybridSample.Wpf)** - WPF Blazor Hybrid sample
-- **[HybridSample.WinForms](samples/HybridSamples/HybridSample.WinForms)** - WinForms Blazor Hybrid sample
-- **[HybridSample.MAUI](samples/HybridSamples/HybridSample.MAUI)** - MAUI Blazor Hybrid sample
-- **[HybridSample.Avalonia](samples/HybridSamples/HybridSample.Avalonia)** - Avalonia Blazor Hybrid sample (Windows only)
+- **[HybridSample.Wpf](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.Wpf)** - WPF Blazor Hybrid sample
+- **[HybridSample.WinForms](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.WinForms)** - WinForms Blazor Hybrid sample
+- **[HybridSample.MAUI](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.MAUI)** - MAUI Blazor Hybrid sample
+- **[HybridSample.Avalonia](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.Avalonia)** - Avalonia Blazor Hybrid sample (Windows only)
 
 **NOTE:** The original Project was [Blazor MVVM Sample](https://github.com/gragra33/MvvmSampleBlazor) - now archived.
 
@@ -779,4 +779,4 @@ This is a major release with breaking changes, migration notes can be found [her
 
 - Renamed `BlazorHostingModel` to `BlazorHostingModelType` to avoid confusion
 
-The full history can be found in the [Version Tracking](https://github.com/gragra33/Blazing.Mvvm/HISTORY.md) documentation.
+The full history can be found in the [Version Tracking](https://github.com/gragra33/Blazing.Mvvm/blob/master/HISTORY.md) documentation.
