@@ -14,9 +14,9 @@ public partial class App : Application
     public App(AppShell appShell)
     {
         InitializeComponent();
-        
-        // Use Shell for navigation
+#pragma warning disable CS0618 // Type or member is obsolete
         MainPage = appShell;
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     /// <summary>
@@ -24,11 +24,6 @@ public partial class App : Application
     /// </summary>
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        var window = base.CreateWindow(activationState);
-        
-        // Optional: Set window properties here if needed
-        // window.Title = "Blazing MVVM - MAUI Hybrid Sample";
-        
-        return window;
+        return base.CreateWindow(activationState);
     }
 }

@@ -22,10 +22,10 @@ internal class FilesService : IFilesService
     /// </summary>
     /// <param name="path">The path of the file to retrieve.</param>
     /// <returns>The <see cref="Stream"/> for the specified file.</returns>
-    public Task<Stream> OpenForReadAsync(string path)
+    public Task<Stream?> OpenForReadAsync(string path)
     {
         string filePath = Path.Combine(InstallationPath, path);
         FileStream stream = File.OpenRead(filePath);
-        return Task.FromResult<Stream>(stream);
+        return Task.FromResult<Stream?>(stream);
     }
 }

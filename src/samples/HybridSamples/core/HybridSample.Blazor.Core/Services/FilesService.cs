@@ -30,7 +30,7 @@ public class FilesService : IFilesService
     /// </summary>
     /// <param name="path">The path of the file to retrieve.</param>
     /// <returns>The <see cref="Stream"/> for the specified file.</returns>
-    public async Task<Stream> OpenForReadAsync(string path)
+    public async Task<Stream?> OpenForReadAsync(string path)
     {
         return  await _httpClient!.GetStreamAsync(path);
     }

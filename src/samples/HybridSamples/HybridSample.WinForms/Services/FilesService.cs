@@ -17,7 +17,7 @@ public class FilesService : IFilesService
     /// </summary>
     /// <param name="path">The path of the file to retrieve.</param>
     /// <returns>The Stream for the specified file.</returns>
-    public Task<Stream>? OpenForReadAsync(string path)
+    public Task<Stream?> OpenForReadAsync(string path)
     {
         try
         {
@@ -27,23 +27,23 @@ public class FilesService : IFilesService
             if (File.Exists(fullPath))
             {
                 var stream = File.OpenRead(fullPath);
-                return Task.FromResult<Stream>(stream);
+                return Task.FromResult<Stream?>(stream);
             }
             
             // Try the path as-is if it's already absolute
             if (File.Exists(path))
             {
                 var stream = File.OpenRead(path);
-                return Task.FromResult<Stream>(stream);
+                return Task.FromResult<Stream?>(stream);
             }
 
             // File not found
-            return null;
+            return Task.FromResult<Stream?>(null);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error opening file '{path}': {ex.Message}");
-            return null;
+            return Task.FromResult<Stream?>(null);
         }
     }
 

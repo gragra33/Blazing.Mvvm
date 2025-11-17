@@ -141,6 +141,7 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     /// Disposes the component asynchronously and releases unmanaged resources for the scoped services.
     /// </summary>
     /// <returns>A <see cref="ValueTask"/> representing the asynchronous dispose operation.</returns>
+#pragma warning disable CS0114, CS0115
     protected virtual async ValueTask DisposeAsyncCore()
     {
         if (ScopedServices is not IAsyncDisposable asyncDisposable)
@@ -150,6 +151,7 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
 
         await asyncDisposable.DisposeAsync();
     }
+#pragma warning restore CS0114, CS0115
 
     /// <summary>
     /// Handles property change notifications from the ViewModel and triggers a UI update.

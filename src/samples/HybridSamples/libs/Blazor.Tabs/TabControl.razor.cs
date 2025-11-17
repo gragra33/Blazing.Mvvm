@@ -1,10 +1,7 @@
 using Blazing.Common;
-using Blazing.Tabs;
-using Blazing.Common;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
-using System.Security.Claims;
 using CSS = Blazing.Tabs.Css.CssClass;
 
 namespace Blazing.Tabs;
@@ -71,6 +68,7 @@ public partial class TabControl : ComponentControlBase
     /// <summary>
     /// Gets or sets the index of the selected tab panel.
     /// </summary>
+#pragma warning disable CS0105, BL0007
     [Parameter]
     public int SelectedIndex
     {
@@ -82,6 +80,7 @@ public partial class TabControl : ComponentControlBase
             InvokeAsync(() => SetSelectedIndexAsync(value));
         }
     }
+#pragma warning restore CS0105, BL0007
 
     /// <summary>
     /// Gets or sets the callback invoked when the selected index changes.
@@ -138,6 +137,7 @@ public partial class TabControl : ComponentControlBase
     /// Adds a tab panel to the control.
     /// </summary>
     /// <param name="tabPanel">The tab panel to add.</param>
+#pragma warning disable BL0005
     internal void AddPanel(TabPanel tabPanel)
     {
         if (!_panels.Any(panel => panel.Selected))
@@ -145,6 +145,7 @@ public partial class TabControl : ComponentControlBase
         _panels.Add(tabPanel);
         Refresh();
     }
+#pragma warning restore BL0005
 
     /// <summary>
     /// Sets the selected index asynchronously.
@@ -172,6 +173,7 @@ public partial class TabControl : ComponentControlBase
     /// Activates the specified tab panel.
     /// </summary>
     /// <param name="panel">The tab panel to activate.</param>
+#pragma warning disable BL0005
     private async Task ActivatePage(TabPanel panel)
     {
         if (!panel.Enabled) return;
@@ -182,6 +184,7 @@ public partial class TabControl : ComponentControlBase
             tabPanel.Selected = tabPanel.UniqueId == ActivePanel.UniqueId;
         await SelectedIndexChanged.InvokeAsync(_selectedIndex);
     }
+#pragma warning restore BL0005
 
     /// <summary>
     /// Triggers a UI refresh for the component.

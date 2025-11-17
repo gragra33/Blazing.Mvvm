@@ -93,7 +93,7 @@ public class KeyframeBuilder
     {
         bool isReverse = _direction == KeyframeBuilderDirection.Reverse;
 
-        foreach (IGrouping<string, CssKeyFrame> kvp in frames.GroupBy(keyframe => keyframe.Selector))
+        foreach (IGrouping<string, CssKeyFrame> kvp in frames.GroupBy(keyframe => keyframe.Selector)!)
         {
             IReadOnlyList<string> parts = kvp
                 .Where(keyframe => !string.IsNullOrEmpty(isReverse ? keyframe.Reverse : keyframe.Forward))

@@ -94,8 +94,8 @@ public struct CssBuilder
 	/// <param name="value">CSS Class to conditionally add.</param>
 	/// <param name="when">Condition in which the CSS Class is added.</param>
 	/// <returns>CssBuilder</returns>
-	public CssBuilder AddClass(string value, Func<bool> when = null)
-		=> AddClass(value, when());
+	public CssBuilder AddClass(string value, Func<bool>? when = null)
+		=> AddClass(value, when?.Invoke() ?? true);
 
 	/// <summary>
 	/// Adds a conditional CSS Class to the builder with space separator.
@@ -112,8 +112,8 @@ public struct CssBuilder
 	/// <param name="value">Function that returns a CSS Class to conditionally add.</param>
 	/// <param name="when">Condition in which the CSS Class is added.</param>
 	/// <returns>CssBuilder</returns>
-	public CssBuilder AddClass(Func<string> value, Func<bool> when = null)
-		=> AddClass(value, when());
+	public CssBuilder AddClass(Func<string> value, Func<bool>? when = null)
+		=> AddClass(value(), when?.Invoke() ?? true);
 
 	/// <summary>
 	/// Adds a conditional nested CssBuilder to the builder with space separator.
@@ -125,13 +125,13 @@ public struct CssBuilder
 		=> when ? AddClass(builder.Build()) : this;
 
 	/// <summary>
-	/// Adds a conditional CSS Class to the builder with space separator.
+	/// Adds a conditional nested CssBuilder to the builder with space separator.
 	/// </summary>
 	/// <param name="value">CSS Class to conditionally add.</param>
 	/// <param name="when">Condition in which the CSS Class is added.</param>
 	/// <returns>CssBuilder</returns>
-	public CssBuilder AddClass(CssBuilder builder, Func<bool> when = null)
-		=> AddClass(builder, when());
+	public CssBuilder AddClass(CssBuilder builder, Func<bool>? when = null)
+		=> AddClass(builder.Build(), when?.Invoke() ?? true);
 
 	/// <summary>
 	/// Adds a conditional CSS Class when it exists in a dictionary to the builder with space separator.
@@ -143,7 +143,7 @@ public struct CssBuilder
 		=> additionalAttributes == null
 			? this
 			: additionalAttributes.TryGetValue("class", out object? c) && c != null
-				? AddClass(c.ToString())
+				? AddClass(c.ToString()!)
 				: this;
 
 	/// <summary>

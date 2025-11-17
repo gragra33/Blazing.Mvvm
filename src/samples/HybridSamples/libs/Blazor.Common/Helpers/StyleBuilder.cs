@@ -131,8 +131,8 @@ public struct StyleBuilder
     /// <param name="value">Style to conditionally add.</param>
     /// <param name="when">Condition in which the style is added.</param>
     /// <returns>The current <see cref="StyleBuilder"/> instance.</returns>
-    public StyleBuilder AddStyle(string prop, string value, Func<bool> when = null)
-        => AddStyle(prop, value, when != null && when());
+    public StyleBuilder AddStyle(string prop, string value, Func<bool>? when = null)
+        => AddStyle(prop, value, when?.Invoke() ?? true);
 
     /// <summary>
     /// Adds a conditional in-line style to the builder with space separator and closing semicolon.
@@ -141,18 +141,18 @@ public struct StyleBuilder
     /// <param name="value">Style to conditionally add.</param>
     /// <param name="when">Condition in which the style is added.</param>
     /// <returns>The current <see cref="StyleBuilder"/> instance.</returns>
-    public StyleBuilder AddStyle(string prop, Func<string> value, Func<bool> when = null)
-        => AddStyle(prop, value(), when != null && when());
+    public StyleBuilder AddStyle(string prop, Func<string> value, Func<bool>? when = null)
+        => AddStyle(prop, value(), when?.Invoke() ?? true);
 
     /// <summary>
-    /// Adds a conditional nested <see cref="StyleBuilder"/> to the builder with separator and closing semicolon.
+    /// Adds a conditional nested <see cref="StyleBuilder"/> to the builder with space separator and closing semicolon.
     /// </summary>
     /// <param name="builder">Style Builder to conditionally add.</param>
     /// <returns>The current <see cref="StyleBuilder"/> instance.</returns>
     public StyleBuilder AddStyle(StyleBuilder builder) => AddRaw(builder.Build());
 
     /// <summary>
-    /// Adds a conditional nested <see cref="StyleBuilder"/> to the builder with separator and closing semicolon.
+    /// Adds a conditional nested <see cref="StyleBuilder"/> to the builder with space separator and closing semicolon.
     /// </summary>
     /// <param name="builder">Style Builder to conditionally add.</param>
     /// <param name="when">Condition in which the style is added.</param>
@@ -166,11 +166,8 @@ public struct StyleBuilder
     /// <param name="builder">Style Builder to conditionally add.</param>
     /// <param name="when">Condition in which the styles are added.</param>
     /// <returns>The current <see cref="StyleBuilder"/> instance.</returns>
-    public StyleBuilder AddStyle(StyleBuilder builder, Func<bool> when = null)
-    {
-        if (when == null) throw new ArgumentNullException(nameof(when));
-        return AddStyle(builder, when != null && when());
-    }
+    public StyleBuilder AddStyle(StyleBuilder builder, Func<bool>? when = null)
+        => AddStyle(builder, when?.Invoke() ?? true);
 
     /// <summary>
     /// Adds a conditional in-line style to the builder with space separator and closing semicolon.

@@ -1,6 +1,4 @@
 using Blazing.Common;
-using Blazing.Tabs;
-using Blazing.Common;
 using Microsoft.AspNetCore.Components;
 
 namespace Blazing.Tabs;
@@ -72,6 +70,7 @@ public class TabPanel : ComponentControlBase
     /// <summary>
     /// Gets or sets a value indicating whether this tab is enabled.
     /// </summary>
+#pragma warning disable CS0105, BL0007
     [Parameter]
     public bool Enabled
     {
@@ -83,6 +82,7 @@ public class TabPanel : ComponentControlBase
             InvokeAsync(async () => await NotifyEnableChangeAsync());
         }
     }
+#pragma warning restore CS0105, BL0007
 
     /// <summary>
     /// Gets or sets the callback invoked when the enabled state changes.

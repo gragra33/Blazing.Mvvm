@@ -17,9 +17,9 @@
 
     <h2>Posts:</h2>
     <div class="subreddit_posts">
-        <ListBox TItem=Post ItemSource="ViewModel.Posts"
-                 SelectedItem=@ViewModel.SelectedPost
-                 SelectionChanged="@(e => InvokeAsync(() => ViewModel.SelectedPost = e.Item))">
+        <ListBox TItem=Post ItemSource="ViewModel?.Posts"
+                 SelectedItem=@ViewModel?.SelectedPost
+                 SelectionChanged="@(e => InvokeAsync(() => ViewModel!.SelectedPost = e.Item))">
             <ItemTemplate Context="post">
                 <div class="list-post">
                     <h3 class="list-post__title">@post.Title</h3>
