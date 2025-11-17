@@ -16,6 +16,9 @@ public class HexTranslateTests : ComponentTestBase
     private const string SendAsciiButtonSelector = "#send-ascii";
     private const string SendHexButtonSelector = "#send-hex";
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HexTranslateTests"/> class and registers required services and view models.
+    /// </summary>
     public HexTranslateTests()
     {
         Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
@@ -24,6 +27,10 @@ public class HexTranslateTests : ComponentTestBase
         Services.AddSingleton<TextEntryViewModel>();
     }
 
+    /// <summary>
+    /// Verifies that the Send Ascii button is disabled when the ASCII input is invalid.
+    /// </summary>
+    /// <param name="input">The ASCII input value to test.</param>
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
@@ -39,6 +46,10 @@ public class HexTranslateTests : ComponentTestBase
         cut.Find(SendAsciiButtonSelector).IsDisabled().Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that the Send Hex button is disabled when the Hex input is invalid.
+    /// </summary>
+    /// <param name="input">The Hex input value to test.</param>
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
@@ -54,6 +65,9 @@ public class HexTranslateTests : ComponentTestBase
         cut.Find(SendHexButtonSelector).IsDisabled().Should().BeTrue();
     }
 
+    /// <summary>
+    /// Verifies that clicking the Send Ascii button sends a message to convert ASCII to Hex and updates the UI and view models.
+    /// </summary>
     [Fact]
     public void GivenAsciiInputValid_WhenSendAsciiButtonClicked_ThenShouldSendConvertAsciiToHexMessage()
     {
@@ -79,6 +93,9 @@ public class HexTranslateTests : ComponentTestBase
         textEntryViewModel.AsciiText.Should().Be(input);
     }
 
+    /// <summary>
+    /// Verifies that clicking the Send Hex button sends a message to convert Hex to ASCII and updates the UI and view models.
+    /// </summary>
     [Fact]
     public void GivenHexInputValid_WhenSendHexButtonClicked_ThenShouldSendConvertHexToAsciiMessage()
     {
@@ -104,6 +121,9 @@ public class HexTranslateTests : ComponentTestBase
         hexEntryViewModel.HexText.Should().Be(input);
     }
 
+    /// <summary>
+    /// Verifies that clicking the clear button clears both input fields and resets the view models.
+    /// </summary>
     [Fact]
     public void GivenInputsHaveValues_WhenClearButtonClicked_ThenShouldClearInputs()
     {

@@ -8,11 +8,17 @@ namespace Blazing.Mvvm.Tests.ComponentTests;
 
 public class MainLayoutTests : ComponentTestBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MainLayoutTests"/> class and registers the <see cref="MainLayoutViewModel"/>.
+    /// </summary>
     public MainLayoutTests()
     {
         Services.AddSingleton<MainLayoutViewModel>();
     }
 
+    /// <summary>
+    /// Verifies that the counter is incremented and the navigation count is updated when the location changes.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenLocationChanged_ThenCounterShouldBeIncremented()
     {

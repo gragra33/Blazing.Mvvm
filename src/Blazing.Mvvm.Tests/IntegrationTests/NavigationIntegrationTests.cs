@@ -12,12 +12,18 @@ using Moq;
 
 namespace Blazing.Mvvm.Tests.IntegrationTests;
 
+/// <summary>
+/// Integration tests for Blazing.Mvvm navigation scenarios, including route discovery, navigation flows, parameter binding, and error handling.
+/// </summary>
 public class NavigationIntegrationTests : ComponentTestBase
 {
     private readonly Mock<ILogger<ViewModelRouteCache>> _routeCacheLoggerMock;
     private readonly Mock<ILogger<MvvmNavigationManager>> _navManagerLoggerMock;
     private readonly Mock<IViewModelRouteCache> _routeCacheMock;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NavigationIntegrationTests"/> class and sets up test services and route cache mocks.
+    /// </summary>
     public NavigationIntegrationTests()
     {
         _routeCacheLoggerMock = new Mock<ILogger<ViewModelRouteCache>>();
@@ -50,6 +56,9 @@ public class NavigationIntegrationTests : ComponentTestBase
         Services.AddKeyedSingleton<IAdminViewModel, AdminViewModel>("Admin");
     }
 
+    /// <summary>
+    /// Tests that full navigation flow works for a complete setup and navigates to the expected URI.
+    /// </summary>
     [Fact]
     public void FullNavigationFlow_GivenCompleteSetup_ShouldNavigateSuccessfully()
     {
@@ -64,6 +73,9 @@ public class NavigationIntegrationTests : ComponentTestBase
         navigationManager.Uri.Should().Be("http://localhost/");
     }
 
+    /// <summary>
+    /// Tests navigation with a parameterized route and verifies the resulting URI.
+    /// </summary>
     [Fact]
     public void FullNavigationFlow_GivenParameterizedRoute_ShouldNavigateWithParameters()
     {
@@ -78,6 +90,9 @@ public class NavigationIntegrationTests : ComponentTestBase
         navigationManager.Uri.Should().Be("http://localhost/products/123");
     }
 
+    /// <summary>
+    /// Tests navigation with query parameters and verifies the resulting URI.
+    /// </summary>
     [Fact]
     public void FullNavigationFlow_GivenQueryParameters_ShouldNavigateWithQuery()
     {
@@ -92,6 +107,9 @@ public class NavigationIntegrationTests : ComponentTestBase
         navigationManager.Uri.Should().Be("http://localhost/products?category=electronics&sort=name");
     }
 
+    /// <summary>
+    /// Tests keyed navigation and verifies the resulting URI.
+    /// </summary>
     [Fact]
     public void FullNavigationFlow_GivenKeyedNavigation_ShouldNavigateSuccessfully()
     {
@@ -106,6 +124,9 @@ public class NavigationIntegrationTests : ComponentTestBase
         navigationManager.Uri.Should().Be("http://localhost/admin");
     }
 
+    /// <summary>
+    /// Tests NavLink integration with the navigation manager and verifies URIs.
+    /// </summary>
     [Fact]
     public void NavLinkIntegration_NavigationManagerIntegration_ShouldWork()
     {
@@ -125,6 +146,9 @@ public class NavigationIntegrationTests : ComponentTestBase
         adminUri.Should().Be("/admin");
     }
 
+    /// <summary>
+    /// Tests navigation flow using NavLink and verifies the resulting URIs.
+    /// </summary>
     [Fact]
     public void NavLinkIntegration_NavigationFlow_ShouldWork()
     {
@@ -145,6 +169,9 @@ public class NavigationIntegrationTests : ComponentTestBase
         productUri.Should().Be("http://localhost/products");
     }
 
+    /// <summary>
+    /// Simulates a complete user journey with multiple navigations and verifies the final state.
+    /// </summary>
     [Fact]
     public void CompleteUserJourney_MultipleNavigations_ShouldWorkCorrectly()
     {
@@ -176,6 +203,9 @@ public class NavigationIntegrationTests : ComponentTestBase
         navigationManager.Uri.Should().Be("http://localhost/");
     }
 
+    /// <summary>
+    /// Tests route discovery using the mock route cache and verifies all expected routes are present.
+    /// </summary>
     [Fact]
     public void RouteDiscovery_GivenMockRouteCache_ShouldContainAllRoutes()
     {
@@ -190,6 +220,9 @@ public class NavigationIntegrationTests : ComponentTestBase
         routeCache.KeyedViewModelRoutes.Should().ContainKey("Admin");
     }
 
+    /// <summary>
+    /// Tests that the ViewModel lifecycle methods are called during component integration.
+    /// </summary>
     [Fact]
     public void ComponentIntegration_ViewModelLifecycle_ShouldWork()
     {
@@ -207,6 +240,9 @@ public class NavigationIntegrationTests : ComponentTestBase
         viewModel.OnAfterRenderCalled.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests parameter binding integration and verifies that parameters are resolved correctly.
+    /// </summary>
     [Fact]
     public void ParameterBinding_Integration_ShouldResolveCorrectly()
     {
@@ -224,6 +260,9 @@ public class NavigationIntegrationTests : ComponentTestBase
         viewModel.TestParameter.Should().Be("TestValue");
     }
 
+    /// <summary>
+    /// Tests error handling for invalid ViewModel navigation and verifies that a meaningful exception is thrown.
+    /// </summary>
     [Fact]
     public void ErrorHandling_InvalidViewModel_ShouldThrowMeaningfulException()
     {
@@ -238,6 +277,9 @@ public class NavigationIntegrationTests : ComponentTestBase
            .WithMessage("*IInvalidViewModel*no associated page*");
     }
 
+    /// <summary>
+    /// Tests error handling for invalid key navigation and verifies that a meaningful exception is thrown.
+    /// </summary>
     [Fact]
     public void ErrorHandling_InvalidKey_ShouldThrowMeaningfulException()
     {

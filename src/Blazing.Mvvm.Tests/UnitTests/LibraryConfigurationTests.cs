@@ -3,8 +3,14 @@ using Blazing.Mvvm.Components;
 
 namespace Blazing.Mvvm.Tests.UnitTests;
 
+/// <summary>
+/// Unit tests for <see cref="LibraryConfiguration"/> covering default values, property setters, method chaining, and assembly registration scenarios.
+/// </summary>
 public class LibraryConfigurationTests
 {
+    /// <summary>
+    /// Tests that the constructor initializes default values.
+    /// </summary>
     [Fact]
     public void Constructor_ShouldInitializeWithDefaults()
     {
@@ -19,6 +25,9 @@ public class LibraryConfigurationTests
         config.BasePath.Should().BeNull();
     }
 
+    /// <summary>
+    /// Tests that <see cref="HostingModelType"/> is settable.
+    /// </summary>
     [Fact]
     public void HostingModelType_ShouldBeSettable()
     {
@@ -32,6 +41,9 @@ public class LibraryConfigurationTests
         config.HostingModelType.Should().Be(BlazorHostingModelType.WebAssembly);
     }
 
+    /// <summary>
+    /// Tests that <see cref="ParameterResolutionMode"/> is settable.
+    /// </summary>
     [Fact]
     public void ParameterResolutionMode_ShouldBeSettable()
     {
@@ -45,6 +57,9 @@ public class LibraryConfigurationTests
         config.ParameterResolutionMode.Should().Be(ParameterResolutionMode.ViewModel);
     }
 
+    /// <summary>
+    /// Tests that <see cref="BasePath"/> is settable.
+    /// </summary>
     [Fact]
     public void BasePath_ShouldBeSettable()
     {
@@ -58,6 +73,9 @@ public class LibraryConfigurationTests
         config.BasePath.Should().Be("/myapp");
     }
 
+    /// <summary>
+    /// Tests that registering view models from a generic type adds the assembly.
+    /// </summary>
     [Fact]
     public void RegisterViewModelsFromAssemblyContaining_GivenGenericType_ShouldAddAssembly()
     {
@@ -71,6 +89,9 @@ public class LibraryConfigurationTests
         config.ViewModelAssemblies.Should().Contain(typeof(LibraryConfigurationTests).Assembly);
     }
 
+    /// <summary>
+    /// Tests that registering view models from a type adds the assembly.
+    /// </summary>
     [Fact]
     public void RegisterViewModelsFromAssemblyContaining_GivenType_ShouldAddAssembly()
     {
@@ -84,6 +105,9 @@ public class LibraryConfigurationTests
         config.ViewModelAssemblies.Should().Contain(typeof(LibraryConfigurationTests).Assembly);
     }
 
+    /// <summary>
+    /// Tests that registering view models from a single assembly adds the assembly.
+    /// </summary>
     [Fact]
     public void RegisterViewModelsFromAssembly_GivenSingleAssembly_ShouldAddAssembly()
     {
@@ -98,6 +122,9 @@ public class LibraryConfigurationTests
         config.ViewModelAssemblies.Should().Contain(assembly);
     }
 
+    /// <summary>
+    /// Tests that registering view models from multiple assemblies adds all assemblies.
+    /// </summary>
     [Fact]
     public void RegisterViewModelsFromAssembly_GivenMultipleAssemblies_ShouldAddAllAssemblies()
     {
@@ -115,6 +142,9 @@ public class LibraryConfigurationTests
         config.ViewModelAssemblies.Should().Contain(assembly2);
     }
 
+    /// <summary>
+    /// Tests that registering view models from an enumerable adds all assemblies.
+    /// </summary>
     [Fact]
     public void RegisterViewModelsFromAssemblies_GivenEnumerable_ShouldAddAllAssemblies()
     {
@@ -135,6 +165,9 @@ public class LibraryConfigurationTests
         config.ViewModelAssemblies.Should().Contain(assemblies[1]);
     }
 
+    /// <summary>
+    /// Tests that duplicate assemblies are only added once.
+    /// </summary>
     [Fact]
     public void RegisterViewModelsFromAssemblies_GivenDuplicateAssemblies_ShouldOnlyAddOnce()
     {
@@ -150,6 +183,9 @@ public class LibraryConfigurationTests
         config.ViewModelAssemblies.Should().ContainSingle(a => a == assembly);
     }
 
+    /// <summary>
+    /// Tests that multiple calls to register view models from assemblies add distinct assemblies.
+    /// </summary>
     [Fact]
     public void RegisterViewModelsFromAssemblyContaining_GivenMultipleCalls_ShouldAddDistinctAssemblies()
     {
@@ -168,6 +204,9 @@ public class LibraryConfigurationTests
         config.ViewModelAssemblies.Should().Contain(typeof(string).Assembly);
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelAssemblies"/> is a read-write collection.
+    /// </summary>
     [Fact]
     public void ViewModelAssemblies_ShouldBeReadWriteCollection()
     {
@@ -182,6 +221,9 @@ public class LibraryConfigurationTests
         config.ViewModelAssemblies.Should().Contain(assembly);
     }
 
+    /// <summary>
+    /// Tests that <see cref="HostingModelType"/> accepts all valid values.
+    /// </summary>
     [Theory]
     [InlineData(BlazorHostingModelType.NotSpecified)]
     [InlineData(BlazorHostingModelType.WebAssembly)]
@@ -201,6 +243,9 @@ public class LibraryConfigurationTests
         config.HostingModelType.Should().Be(hostingType);
     }
 
+    /// <summary>
+    /// Tests that <see cref="ParameterResolutionMode"/> accepts all valid values.
+    /// </summary>
     [Theory]
     [InlineData(ParameterResolutionMode.None)]
     [InlineData(ParameterResolutionMode.ViewModel)]
@@ -217,6 +262,9 @@ public class LibraryConfigurationTests
         config.ParameterResolutionMode.Should().Be(resolutionMode);
     }
 
+    /// <summary>
+    /// Tests that <see cref="BasePath"/> accepts various path formats.
+    /// </summary>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -238,6 +286,9 @@ public class LibraryConfigurationTests
         config.BasePath.Should().Be(basePath);
     }
 
+    /// <summary>
+    /// Tests that configuration supports method chaining.
+    /// </summary>
     [Fact]
     public void Configuration_ShouldSupportMethodChaining()
     {
@@ -255,6 +306,9 @@ public class LibraryConfigurationTests
         config.ViewModelAssemblies.Should().HaveCount(2);
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelAssemblies"/> is empty when no assemblies are registered.
+    /// </summary>
     [Fact]
     public void ViewModelAssemblies_WhenEmpty_ShouldBeEmptyCollection()
     {
@@ -266,6 +320,9 @@ public class LibraryConfigurationTests
         config.ViewModelAssemblies.Should().NotBeNull();
     }
 
+    /// <summary>
+    /// Tests that registering view models from an empty enumerable does not throw.
+    /// </summary>
     [Fact]
     public void RegisterViewModelsFromAssemblies_GivenEmptyEnumerable_ShouldNotThrow()
     {
@@ -281,6 +338,9 @@ public class LibraryConfigurationTests
         config.ViewModelAssemblies.Should().BeEmpty();
     }
 
+    /// <summary>
+    /// Tests that registering view models from an empty array does not throw.
+    /// </summary>
     [Fact]
     public void RegisterViewModelsFromAssembly_GivenEmptyArray_ShouldNotThrow()
     {

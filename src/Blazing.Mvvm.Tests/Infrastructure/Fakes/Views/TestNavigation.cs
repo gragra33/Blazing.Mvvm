@@ -3,13 +3,28 @@ using Microsoft.AspNetCore.Components;
 
 namespace Blazing.Mvvm.Tests.Infrastructure.Fakes.Views;
 
+/// <summary>
+/// A test view for the <see cref="ITestNavigationViewModel"/> supporting navigation scenarios.
+/// Used in unit tests to verify view-model binding, routing, and navigation commands.
+/// </summary>
+/// <remarks>
+/// This view is routed to "/test" and "/test/{echo}" for navigation testing.
+/// </remarks>
 [Route("/test")]
 [Route("/test/{echo}")]
 public class TestNavigation : MvvmComponentBase<ITestNavigationViewModel>
 {
+    /// <summary>
+    /// Gets or sets the echo parameter from the route.
+    /// </summary>
     [Parameter]
     public string? Echo { get; set; }
 
+    /// <summary>
+    /// Builds the render tree for the test navigation view.
+    /// Renders navigation buttons and displays navigation state.
+    /// </summary>
+    /// <param name="builder">The render tree builder.</param>
     protected override void BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder)
     {
         builder.OpenElement(0, "div");

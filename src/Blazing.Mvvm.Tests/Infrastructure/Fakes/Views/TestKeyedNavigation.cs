@@ -3,14 +3,29 @@ using Microsoft.AspNetCore.Components;
 
 namespace Blazing.Mvvm.Tests.Infrastructure.Fakes.Views;
 
+/// <summary>
+/// A test view for the <see cref="ITestKeyedNavigationViewModel"/> supporting keyed navigation scenarios.
+/// Used in unit tests to verify view-model binding, routing, and navigation commands.
+/// </summary>
+/// <remarks>
+/// This view is associated with the <c>TestKeyedNavigationViewModel</c> using the <see cref="ViewModelKeyAttribute"/> and is routed to "/keyedtest" and "/keyedtest/{echo}".
+/// </remarks>
 [ViewModelKey("TestKeyedNavigationViewModel")]
 [Route("/keyedtest")]
 [Route("/keyedtest/{echo}")]
 public class TestKeyedNavigation : MvvmComponentBase<ITestKeyedNavigationViewModel>
 {
+    /// <summary>
+    /// Gets or sets the echo parameter from the route.
+    /// </summary>
     [Parameter]
     public string? Echo { get; set; }
 
+    /// <summary>
+    /// Builds the render tree for the test keyed navigation view.
+    /// Renders navigation buttons and displays navigation state.
+    /// </summary>
+    /// <param name="builder">The render tree builder.</param>
     protected override void BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder)
     {
         builder.OpenElement(0, "div");

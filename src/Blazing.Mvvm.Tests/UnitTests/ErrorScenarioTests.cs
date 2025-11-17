@@ -10,8 +10,14 @@ using Moq;
 
 namespace Blazing.Mvvm.Tests.UnitTests;
 
+/// <summary>
+/// Unit tests for error scenarios in Blazing.Mvvm, covering navigation, route cache, parameter resolution, and service configuration edge cases.
+/// </summary>
 public class ErrorScenarioTests
 {
+    /// <summary>
+    /// Tests that navigating with a null relative URI throws <see cref="ArgumentNullException"/>.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenNullRelativeUri_ShouldThrowArgumentNullException()
     {
@@ -32,6 +38,9 @@ public class ErrorScenarioTests
         act.Should().Throw<ArgumentNullException>().WithParameterName("relativeUri");
     }
 
+    /// <summary>
+    /// Tests that navigating with a null key throws <see cref="ArgumentNullException"/>.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenNullKey_ShouldThrowArgumentNullException()
     {
@@ -51,6 +60,9 @@ public class ErrorScenarioTests
         act.Should().Throw<ArgumentNullException>().WithParameterName("key");
     }
 
+    /// <summary>
+    /// Tests that the route cache handles assemblies with <see cref="ReflectionTypeLoadException"/> gracefully.
+    /// </summary>
     [Fact]
     public void ViewModelRouteCache_GivenAssemblyWithReflectionErrors_ShouldHandleGracefully()
     {
@@ -71,6 +83,9 @@ public class ErrorScenarioTests
         act.Should().NotThrow();
     }
 
+    /// <summary>
+    /// Tests that the route cache handles assemblies with generic exceptions gracefully.
+    /// </summary>
     [Fact]
     public void ViewModelRouteCache_GivenAssemblyWithGenericException_ShouldHandleGracefully()
     {
@@ -88,6 +103,9 @@ public class ErrorScenarioTests
         act.Should().NotThrow();
     }
 
+    /// <summary>
+    /// Tests that parameter resolver throws <see cref="ArgumentNullException"/> when view is null.
+    /// </summary>
     [Fact]
     public void ParameterResolver_GivenNullView_ShouldThrowArgumentNullException()
     {
@@ -101,6 +119,9 @@ public class ErrorScenarioTests
         act.Should().Throw<ArgumentNullException>().WithParameterName("view");
     }
 
+    /// <summary>
+    /// Tests that parameter resolver throws <see cref="ArgumentNullException"/> when view model is null.
+    /// </summary>
     [Fact]
     public void ParameterResolver_GivenNullViewModel_ShouldThrowArgumentNullException()
     {
@@ -114,6 +135,9 @@ public class ErrorScenarioTests
         act.Should().Throw<ArgumentNullException>().WithParameterName("viewModel");
     }
 
+    /// <summary>
+    /// Tests that property setter throws <see cref="InvalidOperationException"/> for properties without a setter.
+    /// </summary>
     [Fact]
     public void PropertySetter_GivenPropertyWithoutSetter_ShouldThrowInvalidOperationException()
     {
@@ -127,6 +151,9 @@ public class ErrorScenarioTests
            .WithMessage("*ReadOnlyProperty*does not have a setter*");
     }
 
+    /// <summary>
+    /// Tests that complex service configuration does not throw exceptions.
+    /// </summary>
     [Fact]
     public void ServicesExtension_GivenComplexConfiguration_ShouldNotThrow()
     {
@@ -147,6 +174,9 @@ public class ErrorScenarioTests
         act.Should().NotThrow();
     }
 
+    /// <summary>
+    /// Tests that navigation manager handles malformed base URIs gracefully.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenMalformedBaseUri_ShouldHandleGracefully()
     {
@@ -168,6 +198,9 @@ public class ErrorScenarioTests
         act.Should().NotThrow();
     }
 
+    /// <summary>
+    /// Tests that route cache does not modify routes when base path is null.
+    /// </summary>
     [Fact]
     public void ViewModelRouteCache_GivenNullBasePath_ShouldNotModifyRoutes()
     {
@@ -184,6 +217,9 @@ public class ErrorScenarioTests
         cache.ViewModelRoutes[typeof(TestViewModel)].Should().Be("/test");
     }
 
+    /// <summary>
+    /// Tests that route cache does not modify routes when base path is empty.
+    /// </summary>
     [Fact]
     public void ViewModelRouteCache_GivenEmptyBasePath_ShouldNotModifyRoutes()
     {
@@ -200,6 +236,9 @@ public class ErrorScenarioTests
         cache.ViewModelRoutes[typeof(TestViewModel)].Should().Be("/test");
     }
 
+    /// <summary>
+    /// Tests that route cache does not modify routes when base path is whitespace.
+    /// </summary>
     [Fact]
     public void ViewModelRouteCache_GivenWhitespaceBasePath_ShouldNotModifyRoutes()
     {
@@ -216,6 +255,9 @@ public class ErrorScenarioTests
         cache.ViewModelRoutes[typeof(TestViewModel)].Should().Be("/test");
     }
 
+    /// <summary>
+    /// Tests that navigation manager returns the original URI when given an empty relative URI.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenEmptyRelativeUri_ShouldReturnOriginalUri()
     {
@@ -238,6 +280,9 @@ public class ErrorScenarioTests
         navigationManager.LastNavigatedUri.Should().Contain("test");
     }
 
+    /// <summary>
+    /// Tests that view model resolver throws <see cref="InvalidOperationException"/> when service is not found.
+    /// </summary>
     [Fact]
     public void ViewModelResolver_GivenServiceProviderWithoutService_ShouldThrowInvalidOperationException()
     {
@@ -250,6 +295,9 @@ public class ErrorScenarioTests
         act.Should().Throw<InvalidOperationException>();
     }
 
+    /// <summary>
+    /// Tests that navigation manager handles complex relative URIs with multiple question marks correctly.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenComplexRelativeUriWithMultipleQuestionMarks_ShouldHandleCorrectly()
     {

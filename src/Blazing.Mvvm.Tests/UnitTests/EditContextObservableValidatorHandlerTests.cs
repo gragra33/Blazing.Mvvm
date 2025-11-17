@@ -4,8 +4,14 @@ using Microsoft.AspNetCore.Components.Forms;
 
 namespace Blazing.Mvvm.Tests.UnitTests;
 
+/// <summary>
+/// Unit tests for <see cref="EditContextObservableValidatorHandler"/> covering validation, error handling, and disposal scenarios.
+/// </summary>
 public class EditContextObservableValidatorHandlerTests
 {
+    /// <summary>
+    /// Tests that instantiating the handler with an invalid model throws <see cref="InvalidOperationException"/>.
+    /// </summary>
     [Fact]
     public void GivenInstantiation_WhenCannotHandleEditContextModel_ShouldThrowInvalidOperationException()
     {
@@ -22,6 +28,9 @@ public class EditContextObservableValidatorHandlerTests
             .WithMessage(expectedMessage);
     }
 
+    /// <summary>
+    /// Tests that validation requests validate the model and update validation messages.
+    /// </summary>
     [Fact]
     public void GivenInstantiated_WhenValidationsRequested_ShouldValidateModel()
     {
@@ -39,6 +48,9 @@ public class EditContextObservableValidatorHandlerTests
         editContext.GetValidationMessages().Should().BeEquivalentTo(contactInfo.GetErrors().Select(x => x.ErrorMessage));
     }
 
+    /// <summary>
+    /// Tests that invalid model property updates result in validation errors.
+    /// </summary>
     [Fact]
     public void GivenModelPropertyHasNoErrors_WhenModelPropertyIsInvalid_ShouldUpdateValidationMessagesWithErrors()
     {
@@ -56,6 +68,9 @@ public class EditContextObservableValidatorHandlerTests
         editContext.GetValidationMessages().Should().BeEquivalentTo(contactInfo.GetErrors().Select(x => x.ErrorMessage));
     }
 
+    /// <summary>
+    /// Tests that valid model property updates clear previous validation errors.
+    /// </summary>
     [Fact]
     public void GivenModelPropertyHasErrors_WhenModelPropertyIsValid_ShouldClearPropertyErrors()
     {
@@ -73,6 +88,9 @@ public class EditContextObservableValidatorHandlerTests
         contactInfo.GetErrors().Should().BeEmpty();
     }
 
+    /// <summary>
+    /// Tests that disposing the handler unsubscribes from events and clears validation messages.
+    /// </summary>
     [Fact]
     public void GivenHandler_WhenDisposed_ShouldUnsubscribeFromEventsAndClearValidationMessages()
     {

@@ -8,17 +8,26 @@ using Moq;
 
 namespace Blazing.Mvvm.Tests.UnitTests;
 
+/// <summary>
+/// Unit tests for <see cref="ViewModelRouteCache"/> covering route caching, base path handling, and error scenarios.
+/// </summary>
 public class ViewModelRouteCacheTests
 {
     private readonly Mock<ILogger<ViewModelRouteCache>> _loggerMock;
     private readonly LibraryConfiguration _configuration;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ViewModelRouteCacheTests"/> class.
+    /// </summary>
     public ViewModelRouteCacheTests()
     {
         _loggerMock = new Mock<ILogger<ViewModelRouteCache>>();
         _configuration = new LibraryConfiguration();
     }
 
+    /// <summary>
+    /// Tests that the constructor initializes empty route dictionaries with a valid configuration.
+    /// </summary>
     [Fact]
     public void Constructor_GivenValidConfiguration_ShouldInitializeEmptyRoutes()
     {
@@ -30,6 +39,9 @@ public class ViewModelRouteCacheTests
         cache.KeyedViewModelRoutes.Should().NotBeNull();
     }
 
+    /// <summary>
+    /// Tests that the constructor caches routes for view models found in the registered assembly.
+    /// </summary>
     [Fact]
     public void Constructor_GivenAssemblyWithViewModels_ShouldCacheRoutes()
     {
@@ -45,6 +57,9 @@ public class ViewModelRouteCacheTests
         cache.ViewModelRoutes[typeof(TestViewModel)].Should().Be("/test");
     }
 
+    /// <summary>
+    /// Tests that the constructor caches keyed routes for view models with a key attribute.
+    /// </summary>
     [Fact]
     public void Constructor_GivenAssemblyWithKeyedViewModels_ShouldCacheKeyedRoutes()
     {
@@ -60,6 +75,9 @@ public class ViewModelRouteCacheTests
         cache.KeyedViewModelRoutes["TestKey"].Should().Be("/keyed-test");
     }
 
+    /// <summary>
+    /// Tests that the constructor prepends the base path to cached routes when configured.
+    /// </summary>
     [Fact]
     public void Constructor_GivenBasePathConfiguration_ShouldPrependBasePath()
     {
@@ -74,6 +92,9 @@ public class ViewModelRouteCacheTests
         cache.ViewModelRoutes[typeof(TestViewModel)].Should().Be("/app/test");
     }
 
+    /// <summary>
+    /// Tests that the constructor handles base paths with trailing slashes correctly.
+    /// </summary>
     [Fact]
     public void Constructor_GivenBasePathWithTrailingSlash_ShouldHandleCorrectly()
     {
@@ -88,6 +109,9 @@ public class ViewModelRouteCacheTests
         cache.ViewModelRoutes[typeof(TestViewModel)].Should().Be("/app/test");
     }
 
+    /// <summary>
+    /// Tests that the constructor does not cache routes for views without a route attribute.
+    /// </summary>
     [Fact]
     public void Constructor_GivenViewWithoutRoute_ShouldNotCacheRoute()
     {
@@ -101,6 +125,9 @@ public class ViewModelRouteCacheTests
         cache.ViewModelRoutes.Should().NotContainKey(typeof(TestViewModelWithoutRoute));
     }
 
+    /// <summary>
+    /// Tests that the constructor caches only the first route when multiple routes are present on the same view.
+    /// </summary>
     [Fact]
     public void Constructor_GivenMultipleRoutesOnSameView_ShouldCacheFirstRoute()
     {
@@ -116,6 +143,9 @@ public class ViewModelRouteCacheTests
         cache.ViewModelRoutes[typeof(TestViewModelWithMultipleRoutes)].Should().Be("/first");
     }
 
+    /// <summary>
+    /// Tests that the constructor continues processing when an invalid assembly is encountered.
+    /// </summary>
     [Fact]
     public void Constructor_GivenInvalidAssembly_ShouldContinueProcessing()
     {
@@ -135,6 +165,9 @@ public class ViewModelRouteCacheTests
         act.Should().NotThrow();
     }
 
+    /// <summary>
+    /// Tests that the constructor creates an empty cache when no assemblies are registered.
+    /// </summary>
     [Fact]
     public void Constructor_GivenEmptyAssemblyList_ShouldCreateEmptyCache()
     {
@@ -150,6 +183,9 @@ public class ViewModelRouteCacheTests
         cache.KeyedViewModelRoutes.Should().BeEmpty();
     }
 
+    /// <summary>
+    /// Tests that the constructor caches both route and key for views with both attributes.
+    /// </summary>
     [Fact]
     public void Constructor_GivenViewWithBothRouteAndKey_ShouldCacheBoth()
     {
@@ -167,6 +203,9 @@ public class ViewModelRouteCacheTests
         cache.KeyedViewModelRoutes["RouteAndKey"].Should().Be("/route-and-key");
     }
 
+    /// <summary>
+    /// Tests that the constructor caches routes for views inheriting from OwningComponentBase.
+    /// </summary>
     [Fact]
     public void Constructor_GivenOwningComponentBase_ShouldCacheRoute()
     {
@@ -182,6 +221,9 @@ public class ViewModelRouteCacheTests
         cache.ViewModelRoutes[typeof(TestOwningViewModel)].Should().Be("/owning");
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelRouteCache.ViewModelRoutes"/> returns a read-only dictionary.
+    /// </summary>
     [Fact]
     public void ViewModelRoutes_ShouldReturnReadOnlyDictionary()
     {
@@ -195,6 +237,9 @@ public class ViewModelRouteCacheTests
         routes.Should().BeAssignableTo<IReadOnlyDictionary<Type, string>>();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelRouteCache.KeyedViewModelRoutes"/> returns a read-only dictionary.
+    /// </summary>
     [Fact]
     public void KeyedViewModelRoutes_ShouldReturnReadOnlyDictionary()
     {

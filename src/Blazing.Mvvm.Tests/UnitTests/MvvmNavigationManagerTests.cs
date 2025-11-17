@@ -8,26 +8,42 @@ using Microsoft.Extensions.Options;
 
 namespace Blazing.Mvvm.Tests.UnitTests;
 
-// Test double for NavigationManager that allows verification of navigation calls
+/// <summary>
+/// Test double for <see cref="NavigationManager"/> that allows verification of navigation calls.
+/// </summary>
 public class TestNavigationManager : NavigationManager
 {
     private readonly List<NavigationCall> _navigationCalls = new();
     
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestNavigationManager"/> class with the specified base URI.
+    /// </summary>
+    /// <param name="baseUri">The base URI for navigation.</param>
     public TestNavigationManager(string baseUri)
     {
         Initialize(baseUri, baseUri);
     }
     
+    /// <summary>
+    /// Records navigation calls for verification.
+    /// </summary>
     protected override void NavigateToCore(string uri, bool forceLoad)
     {
         _navigationCalls.Add(new NavigationCall(uri, forceLoad, false));
     }
     
+    /// <summary>
+    /// Sets the base URI for navigation.
+    /// </summary>
+    /// <param name="baseUri">The new base URI.</param>
     public void SetBaseUri(string baseUri)
     {
         Initialize(baseUri, baseUri);
     }
     
+    /// <summary>
+    /// Verifies that a navigation call was made to the expected URI with the specified options.
+    /// </summary>
     public void VerifyNavigateTo(string expectedUri, bool expectedForceLoad = false, bool expectedReplace = false)
     {
         var matching = _navigationCalls.Where(call => call.Uri == expectedUri && 
@@ -39,6 +55,9 @@ public class TestNavigationManager : NavigationManager
         }
     }
     
+    /// <summary>
+    /// Verifies that no navigation calls were made.
+    /// </summary>
     public void VerifyNoNavigationCalls()
     {
         if (_navigationCalls.Any())
@@ -47,16 +66,28 @@ public class TestNavigationManager : NavigationManager
         }
     }
     
+    /// <summary>
+    /// Clears all recorded navigation calls.
+    /// </summary>
     public void ClearNavigationCalls()
     {
         _navigationCalls.Clear();
     }
     
+    /// <summary>
+    /// Represents a navigation call for verification.
+    /// </summary>
     public record NavigationCall(string Uri, bool ForceLoad, bool Replace);
 }
 
+/// <summary>
+/// Unit tests for <see cref="MvvmNavigationManager"/> covering navigation, URI resolution, and base path handling scenarios.
+/// </summary>
 public class MvvmNavigationManagerTests
 {
+    /// <summary>
+    /// Tests that navigating to an invalid view model type throws <see cref="ViewModelRouteNotFoundException"/>.
+    /// </summary>
     [Fact]
     public void NavigateTo_GivenInvalidViewModelType_ShouldThrowViewModelRouteNotFoundException()
     {
@@ -79,6 +110,9 @@ public class MvvmNavigationManagerTests
             .WithMessage($"{typeof(TestViewModel)} has no associated page");
     }
 
+    /// <summary>
+    /// Tests that getting a URI for an invalid view model type throws <see cref="ViewModelRouteNotFoundException"/>.
+    /// </summary>
     [Fact]
     public void GetUri_GivenInvalidViewModelType_ShouldThrowViewModelRouteNotFoundException()
     {
@@ -101,6 +135,9 @@ public class MvvmNavigationManagerTests
             .WithMessage($"{typeof(TestViewModel)} has no associated page");
     }
 
+    /// <summary>
+    /// Tests that getting a URI for a valid view model type returns the expected URI.
+    /// </summary>
     [Fact]
     public void GetUri_GivenValidViewModelType_ShouldReturnUri()
     {
@@ -123,6 +160,9 @@ public class MvvmNavigationManagerTests
         uri.Should().Be("/counter");
     }
 
+    /// <summary>
+    /// Tests that getting a URI for a valid view model type with an owning component parent returns the expected URI.
+    /// </summary>
     [Fact]
     public void GetUri_GivenValidViewModelTypeHasOwingComponentParent_ShouldReturnUri()
     {
@@ -145,6 +185,9 @@ public class MvvmNavigationManagerTests
         uri.Should().Be("/fetchdata");
     }
 
+    /// <summary>
+    /// Tests that getting a URI for a valid interface view model type returns the expected URI.
+    /// </summary>
     [Fact]
     public void GetUri_GivenValidIViewModelType_ShouldReturnUri()
     {
@@ -167,6 +210,9 @@ public class MvvmNavigationManagerTests
         uri.Should().Be("/test");
     }
 
+    /// <summary>
+    /// Tests that navigating to an invalid key throws <see cref="ViewModelRouteNotFoundException"/>.
+    /// </summary>
     [Fact]
     public void NavigateTo_GivenInvalidKey_ShouldThrowViewModelRouteNotFoundException()
     {
@@ -189,6 +235,9 @@ public class MvvmNavigationManagerTests
             .WithMessage("No associated page for key 'InvalidKey'");
     }
 
+    /// <summary>
+    /// Tests that getting a URI for an invalid key throws <see cref="ViewModelRouteNotFoundException"/>.
+    /// </summary>
     [Fact]
     public void GetUri_GivenInvalidKey_ShouldThrowViewModelRouteNotFoundException()
     {
@@ -211,6 +260,9 @@ public class MvvmNavigationManagerTests
             .WithMessage("No associated page for key 'InvalidKey'");
     }
 
+    /// <summary>
+    /// Tests that getting a URI for a valid key returns the expected route.
+    /// </summary>
     [Theory]
     [InlineData(nameof(SingletonTestViewModel), "/singleton")]
     [InlineData(nameof(SingletonKeyedTestViewModel), "/singleton-keyed")]
@@ -237,6 +289,9 @@ public class MvvmNavigationManagerTests
 
     #region URI Resolution Tests for Regular Hosting (No BasePath)
 
+    /// <summary>
+    /// Tests that navigating to the root route in regular hosting navigates to the root path.
+    /// </summary>
     [Fact]
     public void NavigateTo_RegularHosting_RootRoute_ShouldNavigateToRootPath()
     {
@@ -259,6 +314,9 @@ public class MvvmNavigationManagerTests
         navigationManager.VerifyNavigateTo("/", false, false);
     }
 
+    /// <summary>
+    /// Tests that navigating to an absolute route in regular hosting navigates to the relative path.
+    /// </summary>
     [Fact]
     public void NavigateTo_RegularHosting_AbsoluteRoute_ShouldNavigateToRelativePath()
     {
@@ -281,6 +339,9 @@ public class MvvmNavigationManagerTests
         navigationManager.VerifyNavigateTo("counter", false, false);
     }
 
+    /// <summary>
+    /// Tests that navigating to a nested route in regular hosting navigates to the relative path.
+    /// </summary>
     [Fact]
     public void NavigateTo_RegularHosting_NestedRoute_ShouldNavigateToRelativePath()
     {
@@ -307,6 +368,9 @@ public class MvvmNavigationManagerTests
 
     #region URI Resolution Tests for Subpath Hosting (With BasePath)
 
+    /// <summary>
+    /// Tests that navigating to the base path root in subpath hosting navigates to the empty path.
+    /// </summary>
     [Fact]
     public void NavigateTo_SubpathHosting_BasePathRoot_ShouldNavigateToEmptyPath()
     {
@@ -329,6 +393,9 @@ public class MvvmNavigationManagerTests
         navigationManager.VerifyNavigateTo("", false, false);
     }
 
+    /// <summary>
+    /// Tests that navigating to a base path route in subpath hosting navigates to the relative path.
+    /// </summary>
     [Fact]
     public void NavigateTo_SubpathHosting_BasePathRoute_ShouldNavigateToRelativePath()
     {
@@ -351,6 +418,9 @@ public class MvvmNavigationManagerTests
         navigationManager.VerifyNavigateTo("counter", false, false);
     }
 
+    /// <summary>
+    /// Tests that navigating to a hex translate route in subpath hosting works correctly.
+    /// </summary>
     [Fact]
     public void NavigateTo_SubpathHosting_HexTranslateRoute_ShouldNavigateCorrectly()
     {
@@ -373,6 +443,9 @@ public class MvvmNavigationManagerTests
         navigationManager.VerifyNavigateTo("hextranslate", false, false);
     }
 
+    /// <summary>
+    /// Tests that navigating to a test route in subpath hosting works correctly.
+    /// </summary>
     [Fact]
     public void NavigateTo_SubpathHosting_TestRoute_ShouldNavigateCorrectly()
     {
@@ -395,6 +468,9 @@ public class MvvmNavigationManagerTests
         navigationManager.VerifyNavigateTo("test", false, false);
     }
 
+    /// <summary>
+    /// Tests that navigating to a nested route in subpath hosting navigates to the relative path.
+    /// </summary>
     [Fact]
     public void NavigateTo_SubpathHosting_NestedRoute_ShouldNavigateToRelativePath()
     {
@@ -421,6 +497,9 @@ public class MvvmNavigationManagerTests
 
     #region Keyed Navigation URI Resolution Tests
 
+    /// <summary>
+    /// Tests that keyed navigation in regular hosting navigates to the relative path.
+    /// </summary>
     [Fact]
     public void NavigateTo_KeyedNavigation_RegularHosting_ShouldNavigateToRelativePath()
     {
@@ -443,6 +522,9 @@ public class MvvmNavigationManagerTests
         navigationManager.VerifyNavigateTo("keyedtest", false, false);
     }
 
+    /// <summary>
+    /// Tests that keyed navigation in subpath hosting navigates correctly.
+    /// </summary>
     [Fact]
     public void NavigateTo_KeyedNavigation_SubpathHosting_ShouldNavigateCorrectly()
     {
@@ -469,6 +551,9 @@ public class MvvmNavigationManagerTests
 
     #region Edge Cases for BasePath Handling
 
+    /// <summary>
+    /// Tests that navigating with a base path without a trailing slash works.
+    /// </summary>
     [Fact]
     public void NavigateTo_SubpathHosting_BasePathWithoutTrailingSlash_ShouldWork()
     {
@@ -491,6 +576,9 @@ public class MvvmNavigationManagerTests
         navigationManager.VerifyNavigateTo("counter", false, false);
     }
 
+    /// <summary>
+    /// Tests that navigating with a base path without a leading slash works.
+    /// </summary>
     [Fact]
     public void NavigateTo_SubpathHosting_BasePathWithoutLeadingSlash_ShouldWork()
     {
@@ -513,6 +601,9 @@ public class MvvmNavigationManagerTests
         navigationManager.VerifyNavigateTo("counter", false, false);
     }
 
+    /// <summary>
+    /// Tests that navigating when the route doesn't match the base path navigates as a relative path.
+    /// </summary>
     [Fact]
     public void NavigateTo_RouteNotMatchingBasePath_ShouldNavigateAsRelativePath()
     {

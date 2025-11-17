@@ -15,6 +15,9 @@ public class FetchDataTests : ComponentTestBase
 
     private readonly FakePersistentComponentState _fakeState;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FetchDataTests"/> class and registers the <see cref="FetchDataViewModel"/>.
+    /// </summary>
     public FetchDataTests()
     {
         _fakeState = this.AddFakePersistentComponentState();
@@ -23,6 +26,9 @@ public class FetchDataTests : ComponentTestBase
         Services.AddScoped(_ => CreateInstance<FetchDataViewModel>(true));
     }
 
+    /// <summary>
+    /// Verifies that the loading text is shown when the weather forecast data is being fetched.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenFetchingWeatherForecastData_ThenShouldShowLoadingText()
     {
@@ -42,6 +48,9 @@ public class FetchDataTests : ComponentTestBase
         cut.FindByLabelText(loadingParagraphAriaLabel).TextContent.Should().Be(expectedParagraphContent);
     }
 
+    /// <summary>
+    /// Verifies that an empty table is shown when the fetched weather forecast data is empty.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenFetchedWeatherForecastDataIsEmpty_ThenShouldShowEmptyTable()
     {
@@ -72,6 +81,9 @@ public class FetchDataTests : ComponentTestBase
         cut.WaitForAssertion(() => cut.Find(TableSelector).MarkupMatches(expectedTableHtml));
     }
 
+    /// <summary>
+    /// Verifies that the table is shown with weather forecast data when returned from the weather service.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenWeatherForecastDataReturnedFromWeatherService_ThenShouldShowTableWithData()
     {
@@ -118,6 +130,9 @@ public class FetchDataTests : ComponentTestBase
         cutViewModel.WeatherForecasts.Should().BeEquivalentTo([weatherForecast]);
     }
 
+    /// <summary>
+    /// Verifies that the table is shown with weather forecast data when returned from persistent component state.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenWeatherForecastDataReturnedFromPersistentComponentState_ThenShouldShowTableWithData()
     {
@@ -164,6 +179,9 @@ public class FetchDataTests : ComponentTestBase
         weatherServiceMock.Verify(x => x.GetForecastAsync(It.IsAny<CancellationToken>()), Times.Never());
     }
 
+    /// <summary>
+    /// Verifies that the state is persisted when OnPersisting is triggered.
+    /// </summary>
     [Fact]
     public void GivenComponent_WhenRegisterOnPersistingIsTriggered_ThenShouldPersistState()
     {
@@ -181,6 +199,9 @@ public class FetchDataTests : ComponentTestBase
         weatherForecasts.Should().BeEquivalentTo(cutViewModel.WeatherForecasts);
     }
 
+    /// <summary>
+    /// Verifies that the view model is disposed when the component is disposed.
+    /// </summary>
     [Fact]
     public void GivenComponent_WhenDisposed_ThenShouldDisposeViewModel()
     {

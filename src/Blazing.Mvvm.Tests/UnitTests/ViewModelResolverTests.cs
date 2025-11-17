@@ -5,17 +5,26 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazing.Mvvm.Tests.UnitTests;
 
+/// <summary>
+/// Unit tests for <see cref="ViewModelResolver"/> covering keyed and non-keyed ViewModel resolution, service lifetimes, and attribute caching.
+/// </summary>
 public class ViewModelResolverTests
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IServiceCollection _services;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ViewModelResolverTests"/> class.
+    /// </summary>
     public ViewModelResolverTests()
     {
         _services = new ServiceCollection();
         _serviceProvider = _services.BuildServiceProvider();
     }
 
+    /// <summary>
+    /// Tests that resolving a view without a key returns the registered service from the provider.
+    /// </summary>
     [Fact]
     public void Resolve_GivenViewWithoutKey_ShouldResolveFromServiceProvider()
     {
@@ -32,6 +41,9 @@ public class ViewModelResolverTests
         result.Should().BeSameAs(testViewModel);
     }
 
+    /// <summary>
+    /// Tests that resolving a view with a key returns the keyed service from the provider.
+    /// </summary>
     [Fact]
     public void Resolve_GivenViewWithKey_ShouldResolveKeyedService()
     {
@@ -48,6 +60,9 @@ public class ViewModelResolverTests
         result.Should().BeSameAs(testViewModel);
     }
 
+    /// <summary>
+    /// Tests that resolving a view with a key caches the key attribute for subsequent calls.
+    /// </summary>
     [Fact]
     public void Resolve_GivenViewWithKey_ShouldCacheKeyAttribute()
     {
@@ -70,6 +85,9 @@ public class ViewModelResolverTests
         result1.Should().NotBeSameAs(result2); // Transient services create new instances
     }
 
+    /// <summary>
+    /// Tests that resolving a view without a key attribute does not use keyed service resolution.
+    /// </summary>
     [Fact]
     public void Resolve_GivenViewWithoutKeyAttribute_ShouldNotUseKeyedService()
     {
@@ -86,6 +104,9 @@ public class ViewModelResolverTests
         result.Should().BeSameAs(testViewModel);
     }
 
+    /// <summary>
+    /// Tests that resolving a service not registered throws <see cref="InvalidOperationException"/>.
+    /// </summary>
     [Fact]
     public void Resolve_GivenServiceNotRegistered_ShouldThrowInvalidOperationException()
     {
@@ -101,6 +122,9 @@ public class ViewModelResolverTests
            .WithMessage("*ITestViewModel*");
     }
 
+    /// <summary>
+    /// Tests that resolving a keyed service not registered throws <see cref="InvalidOperationException"/>.
+    /// </summary>
     [Fact]
     public void Resolve_GivenKeyedServiceNotRegistered_ShouldThrowInvalidOperationException()
     {
@@ -116,6 +140,9 @@ public class ViewModelResolverTests
            .WithMessage("*TestKey*");
     }
 
+    /// <summary>
+    /// Tests that resolving different view types caches attributes per type.
+    /// </summary>
     [Fact]
     public void Resolve_GivenDifferentViewTypes_ShouldCacheAttributesPerType()
     {
@@ -139,6 +166,9 @@ public class ViewModelResolverTests
         keyedResult.Should().BeSameAs(testKeyedViewModel);
     }
 
+    /// <summary>
+    /// Tests that multiple calls to resolve respect the service lifetime (transient).
+    /// </summary>
     [Fact]
     public void Resolve_GivenMultipleCalls_ShouldRespectServiceLifetime()
     {
@@ -156,6 +186,9 @@ public class ViewModelResolverTests
         result1.Should().NotBeSameAs(result2); // Transient should create new instances
     }
 
+    /// <summary>
+    /// Tests that resolving a singleton service returns the same instance.
+    /// </summary>
     [Fact]
     public void Resolve_GivenSingletonService_ShouldReturnSameInstance()
     {
@@ -173,6 +206,9 @@ public class ViewModelResolverTests
         result1.Should().BeSameAs(result2); // Singleton should return same instance
     }
 
+    /// <summary>
+    /// Tests that resolving a view with an inherited key resolves the correct keyed service.
+    /// </summary>
     [Fact]
     public void Resolve_GivenViewWithInheritedKey_ShouldResolveCorrectly()
     {

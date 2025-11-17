@@ -2,8 +2,14 @@ using Blazing.Mvvm.ComponentModel;
 
 namespace Blazing.Mvvm.Tests.UnitTests;
 
+/// <summary>
+/// Unit tests for <see cref="ViewModelBase"/> covering lifecycle methods, property change notification, and rendering logic.
+/// </summary>
 public class ViewModelBaseTests
 {
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.OnAfterRender(bool)"/> is called with firstRender = true.
+    /// </summary>
     [Fact]
     public void OnAfterRender_GivenFirstRender_ShouldCallVirtualMethod()
     {
@@ -18,6 +24,9 @@ public class ViewModelBaseTests
         viewModel.OnAfterRenderFirstRender.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.OnAfterRender(bool)"/> is called with firstRender = false.
+    /// </summary>
     [Fact]
     public void OnAfterRender_GivenNotFirstRender_ShouldCallVirtualMethod()
     {
@@ -32,6 +41,9 @@ public class ViewModelBaseTests
         viewModel.OnAfterRenderFirstRender.Should().BeFalse();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.OnAfterRenderAsync(bool)"/> is called with firstRender = true.
+    /// </summary>
     [Fact]
     public async Task OnAfterRenderAsync_GivenFirstRender_ShouldCallVirtualMethod()
     {
@@ -46,6 +58,9 @@ public class ViewModelBaseTests
         viewModel.OnAfterRenderAsyncFirstRender.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.OnAfterRenderAsync(bool)"/> is called with firstRender = false.
+    /// </summary>
     [Fact]
     public async Task OnAfterRenderAsync_GivenNotFirstRender_ShouldCallVirtualMethod()
     {
@@ -60,6 +75,9 @@ public class ViewModelBaseTests
         viewModel.OnAfterRenderAsyncFirstRender.Should().BeFalse();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.OnInitialized()"/> is called.
+    /// </summary>
     [Fact]
     public void OnInitialized_ShouldCallVirtualMethod()
     {
@@ -73,6 +91,9 @@ public class ViewModelBaseTests
         viewModel.OnInitializedCalled.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.OnInitializedAsync()"/> is called.
+    /// </summary>
     [Fact]
     public async Task OnInitializedAsync_ShouldCallVirtualMethod()
     {
@@ -86,6 +107,9 @@ public class ViewModelBaseTests
         viewModel.OnInitializedAsyncCalled.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.OnParametersSet()"/> is called.
+    /// </summary>
     [Fact]
     public void OnParametersSet_ShouldCallVirtualMethod()
     {
@@ -99,6 +123,9 @@ public class ViewModelBaseTests
         viewModel.OnParametersSetCalled.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.OnParametersSetAsync()"/> is called.
+    /// </summary>
     [Fact]
     public async Task OnParametersSetAsync_ShouldCallVirtualMethod()
     {
@@ -112,6 +139,9 @@ public class ViewModelBaseTests
         viewModel.OnParametersSetAsyncCalled.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.ShouldRender()"/> returns true by default.
+    /// </summary>
     [Fact]
     public void ShouldRender_ByDefault_ShouldReturnTrue()
     {
@@ -125,6 +155,9 @@ public class ViewModelBaseTests
         result.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.ShouldRender()"/> returns a custom value when overridden.
+    /// </summary>
     [Fact]
     public void ShouldRender_WhenOverridden_ShouldReturnCustomValue()
     {
@@ -139,6 +172,9 @@ public class ViewModelBaseTests
         result.Should().BeFalse();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.NotifyStateChanged()"/> triggers property changed notification.
+    /// </summary>
     [Fact]
     public void NotifyStateChanged_ShouldTriggerPropertyChanged()
     {
@@ -158,6 +194,9 @@ public class ViewModelBaseTests
         propertyChangedTriggered.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase"/> implements <see cref="IViewModelBase"/>.
+    /// </summary>
     [Fact]
     public void ViewModelBase_ShouldImplementIViewModelBase()
     {
@@ -168,6 +207,9 @@ public class ViewModelBaseTests
         viewModel.Should().BeAssignableTo<IViewModelBase>();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase"/> implements <see cref="System.ComponentModel.INotifyPropertyChanged"/>.
+    /// </summary>
     [Fact]
     public void ViewModelBase_ShouldImplementINotifyPropertyChanged()
     {
@@ -178,6 +220,9 @@ public class ViewModelBaseTests
         viewModel.Should().BeAssignableTo<System.ComponentModel.INotifyPropertyChanged>();
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.OnAfterRenderAsync(bool)"/> returns a completed task by default.
+    /// </summary>
     [Fact]
     public async Task OnAfterRenderAsync_ByDefault_ShouldReturnCompletedTask()
     {
@@ -192,6 +237,9 @@ public class ViewModelBaseTests
         await task; // Should complete without throwing
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.OnInitializedAsync()"/> returns a completed task by default.
+    /// </summary>
     [Fact]
     public async Task OnInitializedAsync_ByDefault_ShouldReturnCompletedTask()
     {
@@ -206,6 +254,9 @@ public class ViewModelBaseTests
         await task; // Should complete without throwing
     }
 
+    /// <summary>
+    /// Tests that <see cref="ViewModelBase.OnParametersSetAsync()"/> returns a completed task by default.
+    /// </summary>
     [Fact]
     public async Task OnParametersSetAsync_ByDefault_ShouldReturnCompletedTask()
     {
@@ -220,6 +271,9 @@ public class ViewModelBaseTests
         await task; // Should complete without throwing
     }
 
+    /// <summary>
+    /// Tests that multiple calls to lifecycle methods maintain state.
+    /// </summary>
     [Fact]
     public void ViewModelBase_MultipleCalls_ShouldMaintainState()
     {
@@ -238,6 +292,9 @@ public class ViewModelBaseTests
         viewModel.OnAfterRenderCalled.Should().BeTrue();
     }
 
+    /// <summary>
+    /// Tests that async lifecycle methods work in parallel.
+    /// </summary>
     [Fact]
     public async Task ViewModelBase_AsyncMethods_ShouldWorkInParallel()
     {

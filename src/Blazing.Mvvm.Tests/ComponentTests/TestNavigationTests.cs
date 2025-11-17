@@ -12,6 +12,9 @@ namespace Blazing.Mvvm.Tests.ComponentTests;
 
 public class TestNavigationTests : ComponentTestBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestNavigationTests"/> class and configures route cache and services.
+    /// </summary>
     public TestNavigationTests()
     {
         // Configure route cache with necessary route mappings
@@ -38,6 +41,9 @@ public class TestNavigationTests : ComponentTestBase
         Services.AddSingleton<IParameterResolver>(_ => new ParameterResolver(ParameterResolutionMode.ViewModel));
     }
 
+    /// <summary>
+    /// Verifies navigation to the HexTranslator page when the HexTranslate button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenHexTranslateButtonClicked_ThenShouldNavigateToHexTranslatorPage()
     {
@@ -55,6 +61,9 @@ public class TestNavigationTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Match(expectedUri);
     }
 
+    /// <summary>
+    /// Verifies navigation to the TestNavigation page when the Test button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenTestButtonClicked_ThenShouldNavigateToTestNavigationPage()
     {
@@ -72,6 +81,9 @@ public class TestNavigationTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be(expectedUri);
     }
 
+    /// <summary>
+    /// Verifies navigation to the TestNavigation page with a relative path when the corresponding button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenTestRelativePathButtonClicked_ThenShouldNavigateToTestNavigationPage()
     {
@@ -101,6 +113,9 @@ public class TestNavigationTests : ComponentTestBase
         cutViewModel.Test.Should().BeNull();
     }
 
+    /// <summary>
+    /// Verifies navigation to the TestNavigation page with a query string when the corresponding button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenTestQueryStringButtonClicked_ThenShouldNavigateToTestNavigationPage()
     {
@@ -128,6 +143,9 @@ public class TestNavigationTests : ComponentTestBase
         cutViewModel.Test.Should().Be(expectedQueryParameterValue);
     }
 
+    /// <summary>
+    /// Verifies navigation to the TestNavigation page with a relative path and query string when the corresponding button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenTestRelativePathQueryStringButtonClicked_ThenShouldNavigateToTestNavigationPage()
     {
@@ -162,6 +180,9 @@ public class TestNavigationTests : ComponentTestBase
         cutViewModel.Test.Should().Be(expectedQueryParameterValue);
     }
 
+    /// <summary>
+    /// Verifies navigation to the KeyedTestNavigation page when the KeyedTest button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenKeyedTestButtonClicked_ThenShouldNavigateToKeyedTestNavigationPage()
     {
@@ -179,6 +200,9 @@ public class TestNavigationTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be(expectedUri);
     }
 
+    /// <summary>
+    /// Verifies navigation to the KeyedTestNavigation page with a relative path when the corresponding button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenKeyedTestRelativePathButtonClicked_ThenShouldNavigateToKeyedTestNavigationPage()
     {
@@ -208,6 +232,9 @@ public class TestNavigationTests : ComponentTestBase
         cutViewModel.Test.Should().BeNull();
     }
 
+    /// <summary>
+    /// Verifies navigation to the KeyedTestNavigation page with a query string when the corresponding button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenKeyedTestQueryStringButtonClicked_ThenShouldNavigateToKeyedTestNavigationPage()
     {
@@ -235,6 +262,9 @@ public class TestNavigationTests : ComponentTestBase
         cutViewModel.Test.Should().Be(expectedQueryParameterValue);
     }
 
+    /// <summary>
+    /// Verifies navigation to the KeyedTestNavigation page with a relative path and query string when the corresponding button is clicked.
+    /// </summary>
     [Fact]
     public void GivenComponentRendered_WhenKeyedTestRelativePathQueryStringButtonClicked_ThenShouldNavigateToKeyedTestNavigationPage()
     {

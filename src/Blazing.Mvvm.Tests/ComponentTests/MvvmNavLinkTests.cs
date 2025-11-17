@@ -18,6 +18,9 @@ public class MvvmNavLinkTests : ComponentTestBase
     private readonly Mock<IViewModelRouteCache> _routeCacheMock;
     private readonly Mock<ILogger<MvvmNavigationManager>> _loggerMock;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MvvmNavLinkTests"/> class and sets up route cache and navigation manager mocks.
+    /// </summary>
     public MvvmNavLinkTests()
     {
         _routeCacheMock = new Mock<IViewModelRouteCache>();
@@ -42,6 +45,9 @@ public class MvvmNavLinkTests : ComponentTestBase
         Services.AddSingleton(Options.Create(new LibraryConfiguration()));
     }
 
+    /// <summary>
+    /// Verifies that GetUri returns the correct URI for a valid ViewModel type.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenValidViewModel_ShouldGetCorrectUri()
     {
@@ -55,6 +61,9 @@ public class MvvmNavLinkTests : ComponentTestBase
         uri.Should().Be("/test");
     }
 
+    /// <summary>
+    /// Verifies that GetUri returns the correct URI for a valid key.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenValidKey_ShouldGetCorrectUri()
     {
@@ -68,6 +77,9 @@ public class MvvmNavLinkTests : ComponentTestBase
         uri.Should().Be("/keyed-test");
     }
 
+    /// <summary>
+    /// Verifies that NavigateTo navigates to the correct URI for a valid ViewModel type.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenValidViewModel_ShouldNavigateCorrectly()
     {
@@ -82,6 +94,9 @@ public class MvvmNavLinkTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be("http://localhost/test");
     }
 
+    /// <summary>
+    /// Verifies that NavigateTo navigates to the correct URI for a valid key.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenValidKey_ShouldNavigateCorrectly()
     {
@@ -96,6 +111,9 @@ public class MvvmNavLinkTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be("http://localhost/keyed-test");
     }
 
+    /// <summary>
+    /// Verifies that NavigateTo navigates to the correct URI with a relative path for a ViewModel type.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenViewModelWithRelativeUri_ShouldNavigateCorrectly()
     {
@@ -110,6 +128,9 @@ public class MvvmNavLinkTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be("http://localhost/test/details/123");
     }
 
+    /// <summary>
+    /// Verifies that NavigateTo navigates to the correct URI with a query string for a ViewModel type.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenViewModelWithQueryString_ShouldNavigateCorrectly()
     {
@@ -124,6 +145,9 @@ public class MvvmNavLinkTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be("http://localhost/test?id=123&name=test");
     }
 
+    /// <summary>
+    /// Verifies that NavigateTo navigates to the correct URI with a relative path and query string for a ViewModel type.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenViewModelWithRelativeUriAndQuery_ShouldNavigateCorrectly()
     {
@@ -138,6 +162,9 @@ public class MvvmNavLinkTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be("http://localhost/test/details?id=123");
     }
 
+    /// <summary>
+    /// Verifies that NavigateTo navigates to the correct URI with a relative path for a key.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenKeyWithRelativeUri_ShouldNavigateCorrectly()
     {
@@ -152,6 +179,9 @@ public class MvvmNavLinkTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be("http://localhost/keyed-test/admin/users");
     }
 
+    /// <summary>
+    /// Verifies that NavigateTo throws an exception for an invalid ViewModel type.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenInvalidViewModel_ShouldThrowException()
     {
@@ -164,6 +194,9 @@ public class MvvmNavLinkTests : ComponentTestBase
            .WithMessage("*IInvalidViewModel*");
     }
 
+    /// <summary>
+    /// Verifies that NavigateTo throws an exception for an invalid key.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenInvalidKey_ShouldThrowException()
     {
@@ -176,6 +209,9 @@ public class MvvmNavLinkTests : ComponentTestBase
            .WithMessage("*InvalidKey*");
     }
 
+    /// <summary>
+    /// Verifies that NavigateTo navigates with browser navigation options for a ViewModel type.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenNavigationOptions_ShouldNavigateWithOptions()
     {
@@ -195,6 +231,9 @@ public class MvvmNavLinkTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be("http://localhost/test");
     }
 
+    /// <summary>
+    /// Verifies that NavigateTo navigates with browser navigation options for a key.
+    /// </summary>
     [Fact] 
     public void MvvmNavigationManager_GivenKeyWithNavigationOptions_ShouldNavigateWithOptions()
     {
@@ -214,6 +253,9 @@ public class MvvmNavLinkTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be("http://localhost/keyed-test");
     }
 
+    /// <summary>
+    /// Verifies that NavigateTo navigates to the correct URI with a relative path and browser navigation options for a ViewModel type.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenRelativeUriWithNavigationOptions_ShouldNavigateCorrectly()
     {
@@ -229,6 +271,9 @@ public class MvvmNavLinkTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be("http://localhost/test/details/456");
     }
 
+    /// <summary>
+    /// Verifies that NavigateTo navigates to the correct URI with a relative path and browser navigation options for a key.
+    /// </summary>
     [Fact]
     public void MvvmNavigationManager_GivenKeyWithRelativeUriAndOptions_ShouldNavigateCorrectly()
     {
@@ -244,7 +289,12 @@ public class MvvmNavLinkTests : ComponentTestBase
         fakeNavigationManager.Uri.Should().Be("http://localhost/keyed-test/settings");
     }
 
-    // Test interfaces
+    /// <summary>
+    /// Test interface for a valid ViewModel.
+    /// </summary>
     public interface ITestViewModel : IViewModelBase { }
+    /// <summary>
+    /// Test interface for an invalid ViewModel.
+    /// </summary>
     public interface IInvalidViewModel : IViewModelBase { }
 }

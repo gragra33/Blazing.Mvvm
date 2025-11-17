@@ -6,6 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazing.Mvvm.Tests.UnitTests;
 
+/// <summary>
+/// Unit tests for <see cref="ParameterResolver"/> covering parameter resolution modes and property setting scenarios for Views and ViewModels.
+/// </summary>
 public partial class ParameterResolverTests : ComponentTestBase
 {
     private static readonly Dictionary<string, ComponentParameter> Parameters = new()
@@ -19,6 +22,9 @@ public partial class ParameterResolverTests : ComponentTestBase
         { IParameterTestView.NamedQueryParameterName, ComponentParameter.CreateCascadingValue(IParameterTestView.NamedQueryParameterName, DateOnly.FromDateTime(DateTime.Now)) }
     };
 
+    /// <summary>
+    /// Tests that when parameter resolution mode is None, only view properties are set.
+    /// </summary>
     [Fact]
     public void GivenSetParameters_WhenParameterResolutionModeIsNone_ShouldSetViewProperties()
     {
@@ -36,6 +42,9 @@ public partial class ParameterResolverTests : ComponentTestBase
         AssertThatViewModelPropertiesAreNotSet(viewModel);
     }
 
+    /// <summary>
+    /// Tests that when parameter resolution mode is ViewModel, only view model properties are set.
+    /// </summary>
     [Fact]
     public void GivenSetParameters_WhenParameterResolutionModeIsViewModel_ShouldSetViewModelPropertiesOnly()
     {
@@ -53,6 +62,9 @@ public partial class ParameterResolverTests : ComponentTestBase
         AssertThatViewPropertiesAreNotSet(view.Instance);
     }
 
+    /// <summary>
+    /// Tests that when parameter resolution mode is ViewAndViewModel, both view and view model properties are set.
+    /// </summary>
     [Fact]
     public void GivenSetParameters_WhenParameterResolutionModeIsViewAndViewModel_ShouldSetViewAndViewModelProperties()
     {
@@ -70,6 +82,9 @@ public partial class ParameterResolverTests : ComponentTestBase
         AssertThatViewModelPropertiesAreSet(viewModel);
     }
 
+    /// <summary>
+    /// Tests that when parameter resolution mode is None and component inherits LayoutComponentBase, only view properties are set.
+    /// </summary>
     [Fact]
     public void GivenSetParameters_WhenParameterResolutionModeIsNoneAndComponentInheritsLayoutComponentBase_ShouldSetViewProperties()
     {
@@ -87,6 +102,9 @@ public partial class ParameterResolverTests : ComponentTestBase
         AssertThatViewModelPropertiesAreNotSet(viewModel);
     }
 
+    /// <summary>
+    /// Tests that when parameter resolution mode is ViewModel and component inherits LayoutComponentBase, only view model properties are set.
+    /// </summary>
     [Fact]
     public void GivenSetParameters_WhenParameterResolutionModeIsSetViewModelAndComponentInheritsLayoutComponentBase_ShouldSetViewModelPropertiesOnly()
     {
@@ -104,6 +122,9 @@ public partial class ParameterResolverTests : ComponentTestBase
         AssertThatViewPropertiesAreNotSet(view.Instance);
     }
 
+    /// <summary>
+    /// Tests that when parameter resolution mode is ViewAndViewModel and component inherits LayoutComponentBase, both view and view model properties are set.
+    /// </summary>
     [Fact]
     public void GivenSetParameters_WhenParameterResolutionModeIsSetViewAndViewModelAndComponentInheritsLayoutComponentBase_ShouldSetViewAndViewModelProperties()
     {
@@ -121,6 +142,9 @@ public partial class ParameterResolverTests : ComponentTestBase
         AssertThatViewModelPropertiesAreSet(viewModel);
     }
 
+    /// <summary>
+    /// Tests that when parameter resolution mode is None and component inherits OwningComponentBase, only view properties are set.
+    /// </summary>
     [Fact]
     public void GivenSetParameters_WhenParameterResolutionModeIsNoneAndComponentInheritsOwingComponentBase_ShouldSetViewProperties()
     {
@@ -138,6 +162,9 @@ public partial class ParameterResolverTests : ComponentTestBase
         AssertThatViewModelPropertiesAreNotSet(viewModel);
     }
 
+    /// <summary>
+    /// Tests that when parameter resolution mode is ViewModel and component inherits OwningComponentBase, only view model properties are set.
+    /// </summary>
     [Fact]
     public void GivenSetParameters_WhenParameterResolutionModeIsViewModelAndComponentInheritsOwingComponentBase_ShouldSetViewModelPropertiesOnly()
     {
@@ -155,6 +182,9 @@ public partial class ParameterResolverTests : ComponentTestBase
         AssertThatViewPropertiesAreNotSet(view.Instance);
     }
 
+    /// <summary>
+    /// Tests that when parameter resolution mode is ViewAndViewModel and component inherits OwningComponentBase, both view and view model properties are set.
+    /// </summary>
     [Fact]
     public void GivenSetParameters_WhenParameterResolutionModeIsViewAndViewModelAndComponentInheritsOwingComponentBase_ShouldSetViewAndViewModelProperties()
     {
@@ -172,6 +202,9 @@ public partial class ParameterResolverTests : ComponentTestBase
         AssertThatViewModelPropertiesAreSet(viewModel);
     }
 
+    /// <summary>
+    /// Tests that duplicate view parameter keys on the view model throw <see cref="InvalidOperationException"/>.
+    /// </summary>
     [Fact]
     public void GivenSetParameters_WhenDuplicateViewParameterKeysOnViewModel_ShouldThrowInvalidOperationException()
     {
@@ -187,6 +220,9 @@ public partial class ParameterResolverTests : ComponentTestBase
         act.Should().Throw<InvalidOperationException>().WithMessage($"Duplicate parameter name 'Parameter1' found on type '{typeof(TestParameterDuplicateKeyViewModel).FullName}'.");
     }
 
+    /// <summary>
+    /// Tests that properties without a setter throw <see cref="InvalidOperationException"/>.
+    /// </summary>
     [Fact]
     public void GivenSetParameters_WhenPropertyDoesNotHaveASetter_ShouldThrowInvalidOperationException()
     {
