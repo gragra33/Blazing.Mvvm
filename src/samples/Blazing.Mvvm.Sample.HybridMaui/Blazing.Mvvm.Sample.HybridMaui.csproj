@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
-    <!-- Enable Central Package Management to leverage conditional versioning -->
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+		<!-- Enable Central Package Management to leverage conditional versioning -->
+		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 
 		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst;net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0;net10.0-windows10.0.19041.0</TargetFrameworks>
@@ -14,9 +14,9 @@
             When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
             The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
             either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
-    <!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
+		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
 
-    <OutputType>Exe</OutputType>
+		<OutputType>Exe</OutputType>
 		<RootNamespace>Blazing.Mvvm.Sample.HybridMaui</RootNamespace>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
@@ -43,6 +43,20 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
+	<!-- Android-specific properties to fix assembly compression issue -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('-android'))">
+		<!-- Disable Fast Deployment to avoid assembly compression issues -->
+		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+		<!-- Ensure assemblies are stored, not compressed -->
+		<AndroidUseAssemblyStore>false</AndroidUseAssemblyStore>
+		<!-- Enable AOT for better Android performance and prevent ANR -->
+		<RunAOTCompilation Condition="'$(Configuration)' == 'Release'">true</RunAOTCompilation>
+		<!-- Increase timeout for app startup -->
+		<AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+		<!-- Prevent directory cleanup errors during multi-targeted builds -->
+		<AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
@@ -66,9 +80,11 @@
 		<PackageReference Include="Microsoft.Maui.Controls" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+		<PackageReference Include="CommunityToolkit.Mvvm" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\Blazing.Mvvm.Base\Blazing.Mvvm.Base.csproj" />
 		<ProjectReference Include="..\..\Blazing.Mvvm\Blazing.Mvvm.csproj" />
 	</ItemGroup>
 
