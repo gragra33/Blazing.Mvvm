@@ -1,11 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
-		<!-- Enable Central Package Management to leverage conditional versioning -->
-		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+<<<<<<< HEAD:src/samples/Blazing.Mvvm.Sample.HybridMaui/Blazing.Mvvm.Sample.HybridMaui.csproj
+    <!-- Enable Central Package Management to leverage conditional versioning -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 
 		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst;net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0;net10.0-windows10.0.19041.0</TargetFrameworks>
+=======
+		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
+>>>>>>> master:src/Blazing.Mvvm.Sample.HybridMaui/Blazing.Mvvm.Sample.HybridMaui.csproj
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen;net10.0-tizen</TargetFrameworks> -->
 
@@ -20,13 +25,19 @@
 		<RootNamespace>Blazing.Mvvm.Sample.HybridMaui</RootNamespace>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
 		<EnableDefaultCssItems>false</EnableDefaultCssItems>
+		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
 		<ApplicationTitle>Blazing.Mvvm.Sample.HybridMaui</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.blazing.mvvm.sample.hybridmaui</ApplicationId>
+
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>None</WindowsPackageType>
@@ -37,20 +48,6 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
-	</PropertyGroup>
-
-	<!-- Android-specific properties to fix assembly compression issue -->
-	<PropertyGroup Condition="$(TargetFramework.Contains('-android'))">
-		<!-- Disable Fast Deployment to avoid assembly compression issues -->
-		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
-		<!-- Ensure assemblies are stored, not compressed -->
-		<AndroidUseAssemblyStore>false</AndroidUseAssemblyStore>
-		<!-- Enable AOT for better Android performance and prevent ANR -->
-		<RunAOTCompilation Condition="'$(Configuration)' == 'Release'">true</RunAOTCompilation>
-		<!-- Increase timeout for app startup -->
-		<AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
-		<!-- Prevent directory cleanup errors during multi-targeted builds -->
-		<AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -76,12 +73,10 @@
 		<PackageReference Include="Microsoft.Maui.Controls" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" />
-		<PackageReference Include="CommunityToolkit.Mvvm" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Blazing.Mvvm.Base\Blazing.Mvvm.Base.csproj" />
-		<ProjectReference Include="..\..\Blazing.Mvvm\Blazing.Mvvm.csproj" />
+		<ProjectReference Include="..\Blazing.Mvvm\Blazing.Mvvm.csproj" />
 	</ItemGroup>
 
 </Project>
