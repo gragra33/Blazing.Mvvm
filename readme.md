@@ -713,8 +713,8 @@ Modernises the Microsoft's [Xamarin Sample](https://github.com/CommunityToolkit/
 
 #### Specialized Samples
 
-- **[Blazing.SubpathHosting.Server](samples/Blazing.SubpathHosting.Server)** - Demonstrates subpath hosting configuration
-- **[Blazing.Mvvm.ParentChildSample](samples/ParentChildSample)** - Demonstrates dynamic parent-child component communication using Messenger. [Original](https://github.com/gragra33/Blazing.Mvvm.ParentChildSample)  repo is now archived.
+- **[Blazing.SubpathHosting.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.SubpathHosting.Server)** - Demonstrates subpath hosting configuration
+- **[Blazing.Mvvm.ParentChildSample](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParentChildSample)** - Demonstrates dynamic parent-child component communication using Messenger. [Original](https://github.com/gragra33/Blazing.Mvvm.ParentChildSample)  repo is now archived.
 
 #### Running Samples with Different .NET Target Frameworks
 
