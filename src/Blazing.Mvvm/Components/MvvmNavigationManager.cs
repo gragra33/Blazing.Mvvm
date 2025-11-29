@@ -185,6 +185,35 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     #region Internals
 
     /// <summary>
+    /// Gets the base path for URI resolution, supporting both configured and dynamic detection.
+    /// </summary>
+    /// <returns>The base path to use for route resolution, or null if hosting at root.</returns>
+    private string? GetBasePathForResolution()
+    {
+        // 1. Check for explicitly configured BasePath (backward compatibility)
+#pragma warning disable CS0618 // Type or member is obsolete
+        string? configuredBasePath = _libraryConfiguration.Value.BasePath?.Trim('/');
+#pragma warning restore CS0618 // Type or member is obsolete
+        if (!string.IsNullOrEmpty(configuredBasePath))
+        {
+            LogConfiguredBasePath(configuredBasePath);
+            return configuredBasePath;
+        }
+        
+        // 2. Extract from NavigationManager.BaseUri (dynamic YARP support)
+        var baseUri = new Uri(_navigationManager.BaseUri);
+        string localPath = baseUri.LocalPath.Trim('/');
+        string? dynamicBasePath = string.IsNullOrEmpty(localPath) ? null : localPath;
+        
+        if (dynamicBasePath != null)
+        {
+            LogDynamicBasePath(dynamicBasePath);
+        }
+        
+        return dynamicBasePath;
+    }
+
+    /// <summary>
     /// Resolves a route template to a navigation URI at runtime, handling base path and root path scenarios.
     /// </summary>
     /// <param name="routeTemplate">The route template from the cache to resolve.</param>
@@ -201,19 +230,18 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             return rootPath;
         }
 
-        // Get configured BasePath for subpath hosting scenarios
-        string? configuredBasePath = _libraryConfiguration.Value.BasePath?.Trim('/');
-        LogBasePath(configuredBasePath);
+        // Get base path for subpath hosting scenarios (configured or dynamic)
+        string? basePath = GetBasePathForResolution();
 
         // Handle absolute paths
         if (routeTemplate.StartsWith("/"))
         {
             string workingUri = routeTemplate;
             
-            // If we have a configured BasePath and the route template starts with it, remove it
-            if (!string.IsNullOrEmpty(configuredBasePath))
+            // If we have a BasePath and the route template starts with it, remove it
+            if (!string.IsNullOrEmpty(basePath))
             {
-                string basePathWithSlash = "/" + configuredBasePath;
+                string basePathWithSlash = "/" + basePath;
                 if (workingUri.StartsWith(basePathWithSlash + "/", StringComparison.OrdinalIgnoreCase))
                 {
                     // Remove BasePath prefix: "/test/counter" -> "/counter"
@@ -360,6 +388,20 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     /// <param name="basePath">The configured BasePath value.</param>
     [LoggerMessage(LogLevel.Debug, Message = "Configured BasePath: '{BasePath}'")]
     private partial void LogBasePath(string? basePath);
+
+    /// <summary>
+    /// Logs configured BasePath being used for resolution.
+    /// </summary>
+    /// <param name="basePath">The configured BasePath value.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Using configured BasePath: '{BasePath}'")]
+    private partial void LogConfiguredBasePath(string basePath);
+
+    /// <summary>
+    /// Logs dynamically detected BasePath from NavigationManager.
+    /// </summary>
+    /// <param name="basePath">The dynamically detected BasePath value.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Detected dynamic BasePath from NavigationManager: '{BasePath}'")]
+    private partial void LogDynamicBasePath(string basePath);
 
     /// <summary>
     /// Logs root path resolution.

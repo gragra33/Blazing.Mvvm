@@ -1,5 +1,27 @@
 ﻿# Version History
 
+### V3.1.0 - 30 November 2025
+
+This release adds automatic base path detection for YARP reverse proxy scenarios and simplifies configuration.
+
+**New Features:**
+- **Automatic Base Path Detection:** Base path is now automatically detected from `NavigationManager.BaseUri`, eliminating the need for manual `BasePath` configuration in most scenarios. [@gragra33](https://github.com/gragra33)
+- **YARP Support:** Full support for YARP (Yet Another Reverse Proxy) with automatic detection of dynamically assigned paths via `PathBase`. [@gragra33](https://github.com/gragra33)
+- **Dynamic Per-Request Base Paths:** Supports scenarios where different requests have different base paths, ideal for multi-tenant applications. [@gragra33](https://github.com/gragra33)
+
+**Improvements:**
+- `BasePath` property is now marked as `[Obsolete]` but remains functional for backward compatibility. [@gragra33](https://github.com/gragra33)
+- Added 15 new unit tests and integration tests for dynamic base path scenarios (total 867 tests). [@gragra33](https://github.com/gragra33)
+- Enhanced logging for base path detection to aid in diagnostics. [@gragra33](https://github.com/gragra33)
+- Updated documentation with YARP configuration examples and best practices. [@gragra33](https://github.com/gragra33)
+
+**Configuration:**
+- **No configuration required** for most scenarios - base path is automatically detected
+- For YARP scenarios, simply use `app.UseForwardedHeaders()` and optionally handle `X-Forwarded-Prefix` header
+- Existing code using `BasePath` continues to work without changes
+
+See the [Subpath Hosting](../readme.md#subpath-hosting) section in the readme for updated configuration examples.
+
 ### V3.0.0 - 18 November 2025
 
 This is a major release with new features and enhancements.

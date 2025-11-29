@@ -1,6 +1,8 @@
 using System.Reflection;
 using Blazing.Mvvm.Components;
 
+#pragma warning disable CS0618 // Type or member is obsolete - Testing obsolete BasePath property
+
 namespace Blazing.Mvvm.Tests.UnitTests;
 
 /// <summary>

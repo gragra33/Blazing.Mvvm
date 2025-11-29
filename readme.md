@@ -36,6 +36,7 @@
     - [Sample Projects](#sample-projects)
       - [Running Samples with Different .NET Target Frameworks](#running-samples-with-different-net-target-frameworks)
   - [History](#history)
+    - [V3.1.0](#v310)
     - [V3.0.0](#v300)
     - [V2.0.0](#v200)
 <!-- TOC -->
@@ -72,6 +73,8 @@ builder.Services.AddMvvm(options =>
     options.HostingModelType = BlazorHostingModelType.WebApp;
 });
 ```
+
+> **Note:** Since v3.1.0, the `BasePath` property is automatically detected from the application's base URI and is no longer required for subpath hosting or YARP scenarios. See the [Subpath Hosting](#subpath-hosting) section for details.
 
 If you are using a different hosting model, set the `HostingModelType` property to the appropriate value. The available options are:
 
@@ -574,63 +577,212 @@ public sealed partial class EditContactViewModel : ViewModelBase, IDisposable
 
 Blazing.Mvvm supports hosting your Blazor application under a subpath of a web server. This is useful when you want to serve your application from a specific URL segment rather than the root of the domain (e.g., `https://example.com/myapp` instead of `https://example.com`).
 
-#### Configuration Steps
+#### Automatic Base Path Detection (Recommended)
+
+**Since v3.1.0**, Blazing.Mvvm automatically detects the base path from `NavigationManager.BaseUri`. In most scenarios, including YARP reverse proxy setups, **no manual `BasePath` configuration is required**.
+
+The base path is dynamically extracted at navigation time, making your application work seamlessly in:
+- Standard subpath hosting
+- YARP reverse proxy scenarios
+- Multi-tenant applications with dynamic paths
+- Development and production environments without configuration changes
+
+#### Standard Subpath Hosting
+
+For traditional subpath hosting (without YARP), configure your application as follows:
 
 **1. Configure `launchSettings.json`**
 
 Add the `launchUrl` property to specify the subpath:
 
 ```json
-"https": {
-  "commandName": "Project",
-  "dotnetRunMessages": true,
-  "launchBrowser": true,
-  "launchUrl": "fu/bar",
-  "applicationUrl": "https://localhost:7037;http://localhost:5272",
-  "environmentVariables": {
-    "ASPNETCORE_ENVIRONMENT": "Development"
+{
+  "profiles": {
+    "https": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "fu/bar",
+      "applicationUrl": "https://localhost:7037;http://localhost:5272",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
   }
 }
 ```
 
-**2. Configure Blazing.Mvvm in `Program.cs`**
+**2. Configure ASP.NET Core Middleware in `Program.cs`**
 
-Set the `BasePath` property in the `AddMvvm` configuration:
+```csharp
+app.UsePathBase("/fu/bar/");
+app.UseRouting();
+```
+
+**3. Update `App.razor` or `_Host.cshtml` for dynamic base href**
+
+```razor
+@{
+    var baseHref = HttpContext?.Request?.PathBase.HasValue == true
+        ? HttpContext?.Request.PathBase.Value!.TrimEnd('/') + "/"
+        : "/";
+}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <base href="@baseHref" />
+    <!-- rest of head -->
+</head>
+```
+
+**4. Configure Blazing.Mvvm (No BasePath needed)**
 
 ```csharp
 builder.Services.AddMvvm(options =>
 {
     options.HostingModelType = BlazorHostingModelType.Server;
     options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
-    options.BasePath = "/fu/bar/"; // Set the base path for the application
+    // BasePath is automatically detected - no configuration needed!
 });
 ```
 
-**3. Configure ASP.NET Core Middleware**
+#### YARP (Yet Another Reverse Proxy) Support
 
-Add the path base middleware in `Program.cs`:
+YARP scenarios are automatically supported. When YARP sets the `PathBase` on incoming requests, Blazing.Mvvm automatically detects and uses it for navigation.
+
+**1. Configure YARP in `appsettings.json`**
+
+```json
+{
+  "ReverseProxy": {
+    "Routes": {
+      "blazor-route": {
+        "ClusterId": "blazor-cluster",
+        "Match": {
+          "Path": "/fu/bar/{**catch-all}"
+        },
+        "Transforms": [
+          { "PathRemovePrefix": "/fu/bar" }
+        ]
+      }
+    },
+    "Clusters": {
+      "blazor-cluster": {
+        "Destinations": {
+          "blazor-destination": {
+            "Address": "http://localhost:5005/"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+**2. Configure YARP in `Program.cs`**
 
 ```csharp
-app.UsePathBase("/fu/bar/"); // Set the base path for the application
+// Enable forwarded headers support
+app.UseForwardedHeaders();
 
-app.UseRouting();
-app.UseEndpoints(endpoints =>
+// Optional: Handle X-Forwarded-Prefix header for custom YARP configurations
+app.Use((ctx, next) =>
 {
-    endpoints.MapRazorPages();
+    if (ctx.Request.Headers.TryGetValue("X-Forwarded-Prefix", out StringValues prefix) &&
+        !StringValues.IsNullOrEmpty(prefix))
+    {
+        var p = prefix.ToString();
+        if (!string.IsNullOrEmpty(p))
+            ctx.Request.PathBase = p;  
+    }
+    return next();
 });
 
-app.Run();
+// For testing/development: Force a specific base path
+app.Use((ctx, next) =>
+{
+    ctx.Request.PathBase = "/fu/bar"; 
+    return next();
+});
 ```
 
-**4. Update the Base Href**
+**3. Update `App.razor` or `_Host.cshtml` for dynamic base href**
 
-Set the `<base>` element in your `index.html` (WebAssembly) or `_Host.cshtml` (Server):
+```razor
+@{
+    var baseHref = HttpContext?.Request?.PathBase.HasValue == true
+        ? HttpContext?.Request.PathBase.Value!.TrimEnd('/') + "/"
+        : "/";
+}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <base href="@baseHref" />
+    <!-- rest of head -->
+</head>
+```
+
+**4. Configure Blazing.Mvvm (No BasePath needed)**
+
+```csharp
+builder.Services.AddMvvm(options =>
+{
+    options.HostingModelType = BlazorHostingModelType.Server;
+    options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
+    // BasePath is automatically detected from YARP's PathBase!
+});
+```
+
+#### Legacy Configuration (Backward Compatible)
+
+If you need to explicitly override the detected base path, you can still set the `BasePath` property (marked as `[Obsolete]` but fully functional):
+
+**Configure Blazing.Mvvm in `Program.cs`**
+
+```csharp
+builder.Services.AddMvvm(options =>
+{
+    options.HostingModelType = BlazorHostingModelType.Server;
+    options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
+    options.BasePath = "/fu/bar/"; // Optional override - typically not needed
+});
+```
+
+**Configure ASP.NET Core Middleware**
+
+```csharp
+app.UsePathBase("/fu/bar/");
+app.UseRouting();
+```
+
+**Set static base href**
 
 ```html
 <base href="/fu/bar/" />
 ```
 
-For a complete working example, see the [Blazing.SubpathHosting.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.SubpathHosting.Server) sample project.
+#### Configuration Priority
+
+The base path resolution follows this priority order:
+1. **Configured `BasePath`** (if explicitly set in `AddMvvm` options)
+2. **Dynamic detection** from `NavigationManager.BaseUri` (recommended)
+
+This ensures backward compatibility while enabling zero-configuration for most scenarios.
+
+#### Working Examples
+
+For complete working examples, see:
+- **[Blazing.SubpathHosting.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.SubpathHosting.Server)** - Traditional subpath hosting sample with `launchSettings.json` configuration
+- YARP configuration samples (coming soon)
+
+#### Further Reading
+
+For more information about ASP.NET Core subpath hosting and YARP configuration, see:
+- **[ASP.NET Core Path Base Middleware](https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer#path-base)** - Official documentation on configuring path base for subpath hosting
+- **[YARP - Yet Another Reverse Proxy](https://microsoft.github.io/reverse-proxy/)** - Official YARP documentation and getting started guide
+- **[YARP Configuration](https://microsoft.github.io/reverse-proxy/articles/config-files.html)** - Detailed configuration options for routes, clusters, and transforms
+- **[YARP Path Transforms](https://microsoft.github.io/reverse-proxy/articles/transforms.html)** - Path manipulation and header forwarding in YARP
+- **[ASP.NET Core Forwarded Headers](https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer)** - Configuring forwarded headers middleware for reverse proxy scenarios
 
 ### Complex Multi-Project ViewModel Registration
 
@@ -730,6 +882,26 @@ All sample projects in this repository support multi-targeting across .NET 8, .N
 For detailed instructions on switching between .NET target frameworks and troubleshooting multi-targeting scenarios, see the [Running Samples with Different .NET Versions](docs/Running_Different_NET_Versions.md) guide.
 
 ## History
+
+### V3.1.0 - [Current Date]
+
+This release adds automatic base path detection for YARP reverse proxy scenarios and simplifies configuration.
+
+**New Features:**
+- **Automatic Base Path Detection:** Base path is now automatically detected from `NavigationManager.BaseUri`, eliminating the need for manual `BasePath` configuration in most scenarios. [@gragra33](https://github.com/gragra33)
+- **YARP Support:** Full support for YARP (Yet Another Reverse Proxy) with automatic detection of dynamically assigned paths via `PathBase`. [@gragra33](https://github.com/gragra33)
+- **Dynamic Per-Request Base Paths:** Supports scenarios where different requests have different base paths, ideal for multi-tenant applications. [@gragra33](https://github.com/gragra33)
+
+**Improvements:**
+- `BasePath` property is now marked as `[Obsolete]` but remains functional for backward compatibility. [@gragra33](https://github.com/gragra33)
+- Added 15 new unit tests and integration tests for dynamic base path scenarios (total 867 tests). [@gragra33](https://github.com/gragra33)
+- Enhanced logging for base path detection to aid in diagnostics. [@gragra33](https://github.com/gragra33)
+- Updated documentation with YARP configuration examples and best practices. [@gragra33](https://github.com/gragra33)
+
+**Configuration:**
+- **No configuration required** for most scenarios - base path is automatically detected
+- For YARP scenarios, simply use `app.UseForwardedHeaders()` and optionally handle `X-Forwarded-Prefix` header
+- Existing code using `BasePath` continues to work without changes
 
 ### V3.0.0 - 18 November 2025
 

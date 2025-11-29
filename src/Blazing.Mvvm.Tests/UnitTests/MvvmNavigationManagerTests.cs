@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+#pragma warning disable CS0618 // Type or member is obsolete - Testing obsolete BasePath property
+
 namespace Blazing.Mvvm.Tests.UnitTests;
 
 /// <summary>
@@ -624,6 +626,210 @@ public class MvvmNavigationManagerTests
 
         // Assert - Should still strip leading slash and navigate to relative path
         navigationManager.VerifyNavigateTo("different/counter", false, false);
+    }
+
+    #endregion
+
+    #region Dynamic Base Path Detection Tests
+
+    /// <summary>
+    /// Tests that dynamic base path is detected from NavigationManager.BaseUri when no BasePath is configured.
+    /// </summary>
+    [Fact]
+    public void NavigateTo_DynamicBasePath_NoConfiguredBasePath_ShouldDetectFromNavigationManager()
+    {
+        // Arrange - NavigationManager has base path, but config doesn't
+        var navigationManager = new TestNavigationManager("https://localhost:7037/fu/bar/");
+        Mock<ILogger<MvvmNavigationManager>> loggerMock = new();
+        Mock<IViewModelRouteCache> routeCacheMock = new();
+        Mock<IOptions<LibraryConfiguration>> configMock = new();
+        
+        var routes = new Dictionary<Type, string> { [typeof(TestViewModel)] = "/fu/bar/counter" };
+        routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(routes);
+        configMock.Setup(x => x.Value).Returns(new LibraryConfiguration { BasePath = null }); // No configured base path
+        
+        MvvmNavigationManager mvvmNavigationManager = new(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object);
+
+        // Act
+        mvvmNavigationManager.NavigateTo<TestViewModel>();
+
+        // Assert - Should detect "fu/bar" from NavigationManager and navigate to "counter"
+        navigationManager.VerifyNavigateTo("counter", false, false);
+    }
+
+    /// <summary>
+    /// Tests that dynamic base path detection works with YARP-style subpath hosting.
+    /// </summary>
+    [Fact]
+    public void NavigateTo_DynamicBasePath_YarpStyleHosting_ShouldDetectCorrectly()
+    {
+        // Arrange - Simulating YARP reverse proxy with subpath
+        var navigationManager = new TestNavigationManager("https://localhost:7037/api/v1/");
+        Mock<ILogger<MvvmNavigationManager>> loggerMock = new();
+        Mock<IViewModelRouteCache> routeCacheMock = new();
+        Mock<IOptions<LibraryConfiguration>> configMock = new();
+        
+        var routes = new Dictionary<Type, string> { [typeof(TestViewModel)] = "/api/v1/users" };
+        routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(routes);
+        configMock.Setup(x => x.Value).Returns(new LibraryConfiguration()); // No configured base path
+        
+        MvvmNavigationManager mvvmNavigationManager = new(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object);
+
+        // Act
+        mvvmNavigationManager.NavigateTo<TestViewModel>();
+
+        // Assert - Should detect "api/v1" and navigate to "users"
+        navigationManager.VerifyNavigateTo("users", false, false);
+    }
+
+    /// <summary>
+    /// Tests that configured BasePath takes priority over dynamically detected base path.
+    /// </summary>
+    [Fact]
+    public void NavigateTo_DynamicBasePath_ConfiguredBasePathTakesPriority_ShouldUseConfigured()
+    {
+        // Arrange - Both NavigationManager and config have base paths (config should win)
+        var navigationManager = new TestNavigationManager("https://localhost:7037/detected/path/");
+        Mock<ILogger<MvvmNavigationManager>> loggerMock = new();
+        Mock<IViewModelRouteCache> routeCacheMock = new();
+        Mock<IOptions<LibraryConfiguration>> configMock = new();
+        
+        var routes = new Dictionary<Type, string> { [typeof(TestViewModel)] = "/configured/path/counter" };
+        routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(routes);
+        configMock.Setup(x => x.Value).Returns(new LibraryConfiguration { BasePath = "/configured/path/" });
+        
+        MvvmNavigationManager mvvmNavigationManager = new(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object);
+
+        // Act
+        mvvmNavigationManager.NavigateTo<TestViewModel>();
+
+        // Assert - Should use configured path, resulting in "counter"
+        navigationManager.VerifyNavigateTo("counter", false, false);
+    }
+
+    /// <summary>
+    /// Tests that dynamic base path detection handles root hosting correctly.
+    /// </summary>
+    [Fact]
+    public void NavigateTo_DynamicBasePath_RootHosting_ShouldNavigateCorrectly()
+    {
+        // Arrange - Root hosting (no subpath)
+        var navigationManager = new TestNavigationManager("https://localhost:7037/");
+        Mock<ILogger<MvvmNavigationManager>> loggerMock = new();
+        Mock<IViewModelRouteCache> routeCacheMock = new();
+        Mock<IOptions<LibraryConfiguration>> configMock = new();
+        
+        var routes = new Dictionary<Type, string> { [typeof(TestViewModel)] = "/counter" };
+        routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(routes);
+        configMock.Setup(x => x.Value).Returns(new LibraryConfiguration()); // No configured base path
+        
+        MvvmNavigationManager mvvmNavigationManager = new(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object);
+
+        // Act
+        mvvmNavigationManager.NavigateTo<TestViewModel>();
+
+        // Assert - Should detect no base path and navigate to "counter"
+        navigationManager.VerifyNavigateTo("counter", false, false);
+    }
+
+    /// <summary>
+    /// Tests that dynamic base path detection works with deeply nested paths.
+    /// </summary>
+    [Fact]
+    public void NavigateTo_DynamicBasePath_DeeplyNestedPath_ShouldDetectCorrectly()
+    {
+        // Arrange - Multi-level base path
+        var navigationManager = new TestNavigationManager("https://localhost:7037/app/tenant/123/");
+        Mock<ILogger<MvvmNavigationManager>> loggerMock = new();
+        Mock<IViewModelRouteCache> routeCacheMock = new();
+        Mock<IOptions<LibraryConfiguration>> configMock = new();
+        
+        var routes = new Dictionary<Type, string> { [typeof(TestViewModel)] = "/app/tenant/123/dashboard" };
+        routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(routes);
+        configMock.Setup(x => x.Value).Returns(new LibraryConfiguration()); // No configured base path
+        
+        MvvmNavigationManager mvvmNavigationManager = new(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object);
+
+        // Act
+        mvvmNavigationManager.NavigateTo<TestViewModel>();
+
+        // Assert - Should detect "app/tenant/123" and navigate to "dashboard"
+        navigationManager.VerifyNavigateTo("dashboard", false, false);
+    }
+
+    /// <summary>
+    /// Tests that dynamic base path detection works with keyed navigation.
+    /// </summary>
+    [Fact]
+    public void NavigateTo_DynamicBasePath_KeyedNavigation_ShouldDetectCorrectly()
+    {
+        // Arrange
+        var navigationManager = new TestNavigationManager("https://localhost:7037/fu/bar/");
+        Mock<ILogger<MvvmNavigationManager>> loggerMock = new();
+        Mock<IViewModelRouteCache> routeCacheMock = new();
+        Mock<IOptions<LibraryConfiguration>> configMock = new();
+        
+        var keyedRoutes = new Dictionary<object, string> { ["TestKey"] = "/fu/bar/keyed-route" };
+        routeCacheMock.Setup(x => x.KeyedViewModelRoutes).Returns(keyedRoutes);
+        configMock.Setup(x => x.Value).Returns(new LibraryConfiguration()); // No configured base path
+        
+        MvvmNavigationManager mvvmNavigationManager = new(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object);
+
+        // Act
+        mvvmNavigationManager.NavigateTo("TestKey");
+
+        // Assert - Should detect "fu/bar" and navigate to "keyed-route"
+        navigationManager.VerifyNavigateTo("keyed-route", false, false);
+    }
+
+    /// <summary>
+    /// Tests that dynamic base path detection handles empty configured BasePath as null.
+    /// </summary>
+    [Fact]
+    public void NavigateTo_DynamicBasePath_EmptyConfiguredBasePath_ShouldDetectFromNavigationManager()
+    {
+        // Arrange - Empty string BasePath should be treated as not configured
+        var navigationManager = new TestNavigationManager("https://localhost:7037/fu/bar/");
+        Mock<ILogger<MvvmNavigationManager>> loggerMock = new();
+        Mock<IViewModelRouteCache> routeCacheMock = new();
+        Mock<IOptions<LibraryConfiguration>> configMock = new();
+        
+        var routes = new Dictionary<Type, string> { [typeof(TestViewModel)] = "/fu/bar/counter" };
+        routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(routes);
+        configMock.Setup(x => x.Value).Returns(new LibraryConfiguration { BasePath = "" }); // Empty string
+        
+        MvvmNavigationManager mvvmNavigationManager = new(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object);
+
+        // Act
+        mvvmNavigationManager.NavigateTo<TestViewModel>();
+
+        // Assert - Should fall back to dynamic detection
+        navigationManager.VerifyNavigateTo("counter", false, false);
+    }
+
+    /// <summary>
+    /// Tests that dynamic base path detection handles the root route correctly.
+    /// </summary>
+    [Fact]
+    public void NavigateTo_DynamicBasePath_RootRoute_ShouldNavigateToBaseUri()
+    {
+        // Arrange
+        var navigationManager = new TestNavigationManager("https://localhost:7037/fu/bar/");
+        Mock<ILogger<MvvmNavigationManager>> loggerMock = new();
+        Mock<IViewModelRouteCache> routeCacheMock = new();
+        Mock<IOptions<LibraryConfiguration>> configMock = new();
+        
+        var routes = new Dictionary<Type, string> { [typeof(TestViewModel)] = "/" };
+        routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(routes);
+        configMock.Setup(x => x.Value).Returns(new LibraryConfiguration()); // No configured base path
+        
+        MvvmNavigationManager mvvmNavigationManager = new(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object);
+
+        // Act
+        mvvmNavigationManager.NavigateTo<TestViewModel>();
+
+        // Assert - Should navigate to the base path
+        navigationManager.VerifyNavigateTo("/fu/bar/", false, false);
     }
 
     #endregion

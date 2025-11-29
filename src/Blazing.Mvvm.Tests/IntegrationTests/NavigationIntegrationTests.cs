@@ -352,4 +352,178 @@ public class NavigationIntegrationTests : ComponentTestBase
     }
 
     public interface IInvalidViewModel : IViewModelBase { }
+
+    #region YARP and Dynamic Base Path Integration Tests
+
+    /// <summary>
+    /// Tests that dynamic base path detection works in integration scenario with YARP-style subpath.
+    /// </summary>
+    [Fact]
+    public void DynamicBasePath_YarpStyleHosting_ShouldNavigateCorrectly()
+    {
+        // Arrange
+        var navigationManager = Services.GetService<FakeNavigationManager>()!;
+        navigationManager.NavigateTo("http://localhost/api/v1/", false);
+        
+        var routeCache = new Mock<IViewModelRouteCache>();
+        var routes = new Dictionary<Type, string> { [typeof(IProductViewModel)] = "/api/v1/products" };
+        routeCache.Setup(x => x.ViewModelRoutes).Returns(routes);
+        
+        var config = Options.Create(new LibraryConfiguration()); // No configured BasePath
+        var logger = new Mock<ILogger<MvvmNavigationManager>>();
+        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config);
+
+        // Act
+        mvvmNavManager.NavigateTo<IProductViewModel>();
+
+        // Assert - Should detect "api/v1" from NavigationManager and navigate to "products"
+        navigationManager.Uri.Should().Be("http://localhost/api/v1/products");
+    }
+
+    /// <summary>
+    /// Tests that dynamic base path detection works with deeply nested paths.
+    /// </summary>
+    [Fact]
+    public void DynamicBasePath_DeeplyNestedPath_ShouldNavigateCorrectly()
+    {
+        // Arrange
+        var navigationManager = Services.GetService<FakeNavigationManager>()!;
+        navigationManager.NavigateTo("http://localhost/app/tenant/123/", false);
+        
+        var routeCache = new Mock<IViewModelRouteCache>();
+        var routes = new Dictionary<Type, string> { [typeof(IHomeViewModel)] = "/app/tenant/123/dashboard" };
+        routeCache.Setup(x => x.ViewModelRoutes).Returns(routes);
+        
+        var config = Options.Create(new LibraryConfiguration()); // No configured BasePath
+        var logger = new Mock<ILogger<MvvmNavigationManager>>();
+        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config);
+
+        // Act
+        mvvmNavManager.NavigateTo<IHomeViewModel>();
+
+        // Assert - Should detect "app/tenant/123" and navigate to "dashboard"
+        navigationManager.Uri.Should().Be("http://localhost/app/tenant/123/dashboard");
+    }
+
+    /// <summary>
+    /// Tests that configured BasePath takes priority over dynamically detected base path.
+    /// </summary>
+    [Fact]
+    public void DynamicBasePath_ConfiguredTakesPriority_ShouldUseConfigured()
+    {
+        // Arrange
+        var navigationManager = Services.GetService<FakeNavigationManager>()!;
+        navigationManager.NavigateTo("http://localhost/detected/path/", false);
+        
+        var routeCache = new Mock<IViewModelRouteCache>();
+        var routes = new Dictionary<Type, string> { [typeof(IProductViewModel)] = "/configured/path/products" };
+        routeCache.Setup(x => x.ViewModelRoutes).Returns(routes);
+        
+#pragma warning disable CS0618 // Type or member is obsolete
+        var config = Options.Create(new LibraryConfiguration { BasePath = "/configured/path/" });
+#pragma warning restore CS0618 // Type or member is obsolete
+        var logger = new Mock<ILogger<MvvmNavigationManager>>();
+        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config);
+
+        // Act
+        mvvmNavManager.NavigateTo<IProductViewModel>();
+
+        // Assert - Should use configured BasePath to strip "/configured/path" prefix, resulting in "products" relative navigation
+        navigationManager.Uri.Should().Be("http://localhost/products");
+    }
+
+    /// <summary>
+    /// Tests complete user journey with dynamic base path detection.
+    /// </summary>
+    [Fact]
+    public void DynamicBasePath_CompleteUserJourney_ShouldWorkCorrectly()
+    {
+        // Arrange - Simulating YARP reverse proxy scenario
+        var navigationManager = Services.GetService<FakeNavigationManager>()!;
+        navigationManager.NavigateTo("http://localhost/myapp/", false);
+        
+        var routeCache = new Mock<IViewModelRouteCache>();
+        var routes = new Dictionary<Type, string>
+        {
+            [typeof(IHomeViewModel)] = "/myapp",
+            [typeof(IProductViewModel)] = "/myapp/products",
+            [typeof(IAdminViewModel)] = "/myapp/admin"
+        };
+        routeCache.Setup(x => x.ViewModelRoutes).Returns(routes);
+        routeCache.Setup(x => x.KeyedViewModelRoutes).Returns(new Dictionary<object, string>());
+        
+        var config = Options.Create(new LibraryConfiguration()); // No configured BasePath
+        var logger = new Mock<ILogger<MvvmNavigationManager>>();
+        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config);
+
+        // Act & Assert - Simulate user journey
+        // 1. Navigate to home
+        mvvmNavManager.NavigateTo<IHomeViewModel>();
+        navigationManager.Uri.Should().Be("http://localhost/myapp");
+
+        // 2. Navigate to products
+        mvvmNavManager.NavigateTo<IProductViewModel>();
+        navigationManager.Uri.Should().Be("http://localhost/myapp/products");
+
+        // 3. Navigate with query parameters
+        mvvmNavManager.NavigateTo<IProductViewModel>("?filter=active");
+        navigationManager.Uri.Should().Be("http://localhost/myapp/products?filter=active");
+
+        // 4. Navigate to admin
+        mvvmNavManager.NavigateTo<IAdminViewModel>();
+        navigationManager.Uri.Should().Be("http://localhost/myapp/admin");
+    }
+
+    /// <summary>
+    /// Tests that dynamic base path detection handles root hosting correctly in integration scenario.
+    /// </summary>
+    [Fact]
+    public void DynamicBasePath_RootHosting_ShouldNavigateCorrectly()
+    {
+        // Arrange
+        var navigationManager = Services.GetService<FakeNavigationManager>()!;
+        // NavigationManager already at root: http://localhost/
+        
+        var routeCache = new Mock<IViewModelRouteCache>();
+        var routes = new Dictionary<Type, string> { [typeof(IProductViewModel)] = "/products" };
+        routeCache.Setup(x => x.ViewModelRoutes).Returns(routes);
+        
+        var config = Options.Create(new LibraryConfiguration()); // No configured BasePath
+        var logger = new Mock<ILogger<MvvmNavigationManager>>();
+        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config);
+
+        // Act
+        mvvmNavManager.NavigateTo<IProductViewModel>();
+
+        // Assert - Should detect no base path and navigate normally
+        navigationManager.Uri.Should().Be("http://localhost/products");
+    }
+
+    /// <summary>
+    /// Tests that keyed navigation works with dynamic base path detection.
+    /// </summary>
+    [Fact]
+    public void DynamicBasePath_KeyedNavigation_ShouldNavigateCorrectly()
+    {
+        // Arrange
+        var navigationManager = Services.GetService<FakeNavigationManager>()!;
+        navigationManager.NavigateTo("http://localhost/app/", false);
+        
+        var routeCache = new Mock<IViewModelRouteCache>();
+        var keyedRoutes = new Dictionary<object, string> { ["AdminKey"] = "/app/admin" };
+        routeCache.Setup(x => x.ViewModelRoutes).Returns(new Dictionary<Type, string>());
+        routeCache.Setup(x => x.KeyedViewModelRoutes).Returns(keyedRoutes);
+        
+        var config = Options.Create(new LibraryConfiguration()); // No configured BasePath
+        var logger = new Mock<ILogger<MvvmNavigationManager>>();
+        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config);
+
+        // Act
+        mvvmNavManager.NavigateTo("AdminKey");
+
+        // Assert - Should detect "app" and navigate to "admin"
+        navigationManager.Uri.Should().Be("http://localhost/app/admin");
+    }
+
+    #endregion
 }
