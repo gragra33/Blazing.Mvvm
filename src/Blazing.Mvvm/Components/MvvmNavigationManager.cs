@@ -47,7 +47,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         LogUriResolution(typeof(TViewModel).Name, uriFromCache);
         string resolvedUri = ResolveNavigationUri(uriFromCache);
         LogResolvedUri(typeof(TViewModel).Name, uriFromCache, resolvedUri);
-        return resolvedUri;
+        return ResolveNavigationUri(uriFromCache);
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         LogKeyedUriResolution(key, uriFromCache);
         string resolvedUri = ResolveNavigationUri(uriFromCache);
         LogResolvedKeyedUri(key, uriFromCache, resolvedUri);
-        return resolvedUri;
+        return ResolveNavigationUri(uriFromCache);
     }
 
     /// <inheritdoc/>
