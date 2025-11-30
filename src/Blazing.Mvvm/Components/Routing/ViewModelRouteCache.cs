@@ -96,12 +96,6 @@ public class ViewModelRouteCache : IViewModelRouteCache
                 }
 
                 string uri = routeAttribute.Template;
-#pragma warning disable CS0618 // Type or member is obsolete
-                if (!string.IsNullOrWhiteSpace(_configuration.BasePath))
-                {
-                    uri = $"{_configuration.BasePath.TrimEnd('/')}/{uri.TrimStart('/')}";
-                }
-#pragma warning restore CS0618 // Type or member is obsolete
                 
                 if (item.Argument != null && _viewModelRoutes.TryAdd(item.Argument, uri))
                 {
