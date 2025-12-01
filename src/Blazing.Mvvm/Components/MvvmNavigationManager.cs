@@ -168,7 +168,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             throw new ViewModelRouteNotFoundException(typeof(TViewModel));
         }
 
-        return uriFromCache;
+        return ResolveNavigationUri(uriFromCache); //uriFromCache;
     }
 
     /// <inheritdoc/>
@@ -179,7 +179,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             throw new ViewModelRouteNotFoundException(key);
         }
 
-        return uriFromCache;
+        return ResolveNavigationUri(uriFromCache); //uriFromCache;
     }
 
     #region Internals

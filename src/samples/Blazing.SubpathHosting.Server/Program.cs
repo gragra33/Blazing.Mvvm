@@ -15,9 +15,6 @@ builder.Services.AddMvvm(options =>
 {
     options.HostingModelType = BlazorHostingModelType.Server;
     options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
-#pragma warning disable CS0618 // Type or member is obsolete - Demonstrating backward compatibility
-    options.BasePath = "/fu/bar/"; // Set the base path for the application
-#pragma warning restore CS0618 // Type or member is obsolete
 });
 
 #if DEBUG
