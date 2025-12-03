@@ -159,7 +159,7 @@ public class MvvmNavigationManagerTests
         string uri = mvvmNavigationManager.GetUri<CounterViewModel>();
 
         // Assert
-        uri.Should().Be("/counter");
+        uri.Should().Be("counter");
     }
 
     /// <summary>
@@ -184,7 +184,7 @@ public class MvvmNavigationManagerTests
         string uri = mvvmNavigationManager.GetUri<FetchDataViewModel>();
 
         // Assert
-        uri.Should().Be("/fetchdata");
+        uri.Should().Be("fetchdata");
     }
 
     /// <summary>
@@ -209,7 +209,7 @@ public class MvvmNavigationManagerTests
         string uri = mvvmNavigationManager.GetUri<Blazing.Mvvm.Tests.Infrastructure.Fakes.ITestNavigationViewModel>();
 
         // Assert
-        uri.Should().Be("/test");
+        uri.Should().Be("test");
     }
 
     /// <summary>
@@ -266,8 +266,8 @@ public class MvvmNavigationManagerTests
     /// Tests that getting a URI for a valid key returns the expected route.
     /// </summary>
     [Theory]
-    [InlineData(nameof(SingletonTestViewModel), "/singleton")]
-    [InlineData(nameof(SingletonKeyedTestViewModel), "/singleton-keyed")]
+    [InlineData(nameof(SingletonTestViewModel), "singleton")]
+    [InlineData(nameof(SingletonKeyedTestViewModel), "singleton-keyed")]
     public void GetUri_GivenValidKey_ShouldReturnUri(string key, string expectedRoute)
     {
         // Arrange

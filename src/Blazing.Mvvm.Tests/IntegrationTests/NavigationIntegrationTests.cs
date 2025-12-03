@@ -142,8 +142,8 @@ public class NavigationIntegrationTests : ComponentTestBase
         // Assert
         using var _ = new AssertionScope();
         homeUri.Should().Be("/");
-        productUri.Should().Be("/products");
-        adminUri.Should().Be("/admin");
+        productUri.Should().Be("products");
+        adminUri.Should().Be("admin");
     }
 
     /// <summary>
