@@ -58,7 +58,7 @@ public class MvvmNavLinkTests : ComponentTestBase
         var uri = mvvmNavigationManager.GetUri<ITestViewModel>();
 
         // Assert
-        uri.Should().Be("/test");
+        uri.Should().Be("test");
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public class MvvmNavLinkTests : ComponentTestBase
         var uri = mvvmNavigationManager.GetUri("TestKey");
 
         // Assert
-        uri.Should().Be("/keyed-test");
+        uri.Should().Be("keyed-test");
     }
 
     /// <summary>

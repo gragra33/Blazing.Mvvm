@@ -31,6 +31,8 @@ public class LibraryConfiguration
     /// <summary>
     /// Gets or sets the optional base path for the Blazor application, used for subpath hosting scenarios.
     /// </summary>
+    [Obsolete("BasePath is no longer required and will be removed in a future version. The base path is now automatically detected from NavigationManager.BaseUri. " +
+              "This property is only retained for backward compatibility and explicit override scenarios.", false)]
     public string? BasePath { get; set; }
 
     /// <summary>

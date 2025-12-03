@@ -5,13 +5,12 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<PackageId>Blazing.Mvvm</PackageId>
-		<Title>MVVM for Blazor using CommunityToolkit.Mvvm</Title>
-		<Description>A simple, and easy-to-use implementation of Mvvm for Blazor wrapping the CommunityToolkit.Mvvm</Description>
-		<Description>MVVM for Blazor using CommunityToolkit.Mvvm</Description>
+		<Title>MVVM for Blazor using CommunityToolkit.Mvvm with YARP Support</Title>
+		<Description>A simple and easy-to-use MVVM implementation for Blazor wrapping CommunityToolkit.Mvvm. Features automatic ViewModel discovery, strongly-typed navigation, parameter resolution, validation support, and dynamic base path detection for YARP and subpath hosting scenarios.</Description>
 		<PackageProjectUrl>https://github.com/gragra33/Blazing.Mvvm</PackageProjectUrl>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
-		<PackageTags>Blazor,Wasm,Web Assembly,Blazor Server,Blazor Web App,Blazor Hybid MAUI,Mvvm,CommunityToolkit</PackageTags>
-		<PackageReleaseNotes>Support for Blazor Web App, Blazor Server, Blazor WebAssembly, Blazor Hybrid, Blazor Hybid MAUI</PackageReleaseNotes>
+		<PackageTags>Blazor,Wasm,Web Assembly,Blazor Server,Blazor Web App,Blazor Hybrid MAUI,Mvvm,CommunityToolkit,YARP,Reverse Proxy,Subpath Hosting</PackageTags>
+		<PackageReleaseNotes>V3.1.0: Added automatic base path detection for YARP reverse proxy scenarios. BasePath configuration is now optional and automatically detected from NavigationManager. Full backward compatibility maintained.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>
