@@ -619,20 +619,45 @@ app.UsePathBase("/fu/bar/");
 app.UseRouting();
 ```
 
-**3. Update `App.razor` or `_Host.cshtml` for dynamic base href**
+**3. Update `_Host.cshtml` (legacy) or `App.razor` for dynamic base href**
+
+You can hard-code the path, eg: `<base href="/fu/bar/" />`, however, it's better to set it dynamically based on the incoming request's `PathBase`.
+
+**_Host.cshtml (Razor Pages) Example:_**
 
 ```razor
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="@baseHref" />
+    <!-- rest of head -->
+</head>
+
 @{
     var baseHref = HttpContext?.Request?.PathBase.HasValue == true
         ? HttpContext?.Request.PathBase.Value!.TrimEnd('/') + "/"
         : "/";
 }
+```
+
+**_App.razor (Razor Components) Example:_**
+
+```razor
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="en">
 <head>
     <base href="@baseHref" />
     <!-- rest of head -->
 </head>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string baseHref => HttpContext?.Request.PathBase.HasValue == true
+        ? HttpContext.Request.PathBase.Value!.TrimEnd('/') + "/"
+        : "/";
+}
 ```
 
 **4. Configure Blazing.Mvvm (No BasePath needed)**
@@ -706,20 +731,45 @@ app.Use((ctx, next) =>
 });
 ```
 
-**3. Update `App.razor` or `_Host.cshtml` for dynamic base href**
+**3. Update `_Host.cshtml` (legacy) or `App.razor` for dynamic base href**
+
+Do not hard-code the path. Yarp will use a dynamic `PathBase` for `baseHref`, so set it based on the incoming request's `PathBase`.
+
+**_Host.cshtml (Razor Pages) Example:_**
 
 ```razor
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="@baseHref" />
+    <!-- rest of head -->
+</head>
+
 @{
     var baseHref = HttpContext?.Request?.PathBase.HasValue == true
         ? HttpContext?.Request.PathBase.Value!.TrimEnd('/') + "/"
         : "/";
 }
+```
+
+**_App.razor (Razor Components) Example:_**
+
+```razor
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="en">
 <head>
     <base href="@baseHref" />
     <!-- rest of head -->
 </head>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string baseHref => HttpContext?.Request.PathBase.HasValue == true
+        ? HttpContext.Request.PathBase.Value!.TrimEnd('/') + "/"
+        : "/";
+}
 ```
 
 **4. Configure Blazing.Mvvm (No BasePath needed)**
@@ -773,7 +823,6 @@ This ensures backward compatibility while enabling zero-configuration for most s
 
 For complete working examples, see:
 - **[Blazing.SubpathHosting.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.SubpathHosting.Server)** - Traditional subpath hosting sample with `launchSettings.json` configuration
-- YARP configuration samples (coming soon)
 
 #### Further Reading
 
@@ -883,13 +932,13 @@ For detailed instructions on switching between .NET target frameworks and troubl
 
 ## History
 
-### V3.1.0 - [Current Date]
+### V3.1.0 - 3 December 2025
 
 This release adds automatic base path detection for YARP reverse proxy scenarios and simplifies configuration.
 
 **New Features:**
 - **Automatic Base Path Detection:** Base path is now automatically detected from `NavigationManager.BaseUri`, eliminating the need for manual `BasePath` configuration in most scenarios. [@gragra33](https://github.com/gragra33)
-- **YARP Support:** Full support for YARP (Yet Another Reverse Proxy) with automatic detection of dynamically assigned paths via `PathBase`. [@gragra33](https://github.com/gragra33)
+- **YARP Support:** Full support for YARP (Yet Another Reverse Proxy) with automatic detection of dynamically assigned paths via `PathBase`. [@gragra33](https://github.com/gragra33) & [@teunlielu](https://github.com/teunlielu)
 - **Dynamic Per-Request Base Paths:** Supports scenarios where different requests have different base paths, ideal for multi-tenant applications. [@gragra33](https://github.com/gragra33)
 
 **Improvements:**
@@ -897,11 +946,12 @@ This release adds automatic base path detection for YARP reverse proxy scenarios
 - Added 15 new unit tests and integration tests for dynamic base path scenarios (total 867 tests). [@gragra33](https://github.com/gragra33)
 - Enhanced logging for base path detection to aid in diagnostics. [@gragra33](https://github.com/gragra33)
 - Updated documentation with YARP configuration examples and best practices. [@gragra33](https://github.com/gragra33)
+- Updated `Blazing.SubpathHosting.Server` to support new base path detection features.[@gragra33](https://github.com/gragra33)
 
 **Configuration:**
 - **No configuration required** for most scenarios - base path is automatically detected
 - For YARP scenarios, simply use `app.UseForwardedHeaders()` and optionally handle `X-Forwarded-Prefix` header
-- Existing code using `BasePath` continues to work without changes
+- Existing code using `BasePath` is now marked `obsolete`, but continues to work without changes. Will be removed in a future release.
 
 ### V3.0.0 - 18 November 2025
 
