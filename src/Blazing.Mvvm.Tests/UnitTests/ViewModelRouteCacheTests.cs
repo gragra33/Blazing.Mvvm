@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Moq;
 
+#pragma warning disable CS0618 // Type or member is obsolete - Testing obsolete BasePath property
+
 namespace Blazing.Mvvm.Tests.UnitTests;
 
 /// <summary>

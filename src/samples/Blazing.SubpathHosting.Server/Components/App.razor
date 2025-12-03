@@ -1,22 +1,17 @@
-﻿@page "/"
-@using Microsoft.AspNetCore.Components.Web
-@namespace Blazing.SubpathHosting.Server.Pages
-@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/fu/bar/" />
+    <base href="@baseHref" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
     <link href="Blazing.SubpathHosting.Server.styles.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="favicon.png"/>
-    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+    <HeadOutlet @rendermode="@RenderMode.InteractiveServer" />
 </head>
 <body>
-    <component type="typeof(App)" render-mode="ServerPrerendered" />
+    <Routes @rendermode="@RenderMode.InteractiveServer" />
 
     <div id="blazor-error-ui">
         <environment include="Staging,Production">
@@ -29,6 +24,15 @@
         <a class="dismiss">🗙</a>
     </div>
 
-    <script src="_framework/blazor.server.js"></script>
+    <script src="_framework/blazor.web.js"></script>
 </body>
 </html>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string baseHref => HttpContext?.Request.PathBase.HasValue == true
+        ? HttpContext.Request.PathBase.Value!.TrimEnd('/') + "/"
+        : "/";
+}
