@@ -82,6 +82,9 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Blazing.Mvvm.Base\Blazing.Mvvm.Base.csproj" />
 		<ProjectReference Include="..\..\Blazing.Mvvm\Blazing.Mvvm.csproj" />
+		<ProjectReference Include="..\..\Blazing.Mvvm.Analyzers\Blazing.Mvvm.Analyzers.csproj" 
+		                  PrivateAssets="all" 
+		                  ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 </Project>

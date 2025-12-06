@@ -15,6 +15,9 @@
     - [Installation](#installation)
       - [.NET CLI](#net-cli)
       - [NuGet Package Manager](#nuget-package-manager)
+    - [Optional: Blazing.Mvvm.Analyzers](#optional-blazingmvvmanalyzers)
+      - [.NET CLI](#net-cli-1)
+      - [NuGet Package Manager](#nuget-package-manager-1)
     - [Configuration](#configuration)
       - [Registering ViewModels in a Different Assembly](#registering-viewmodels-in-a-different-assembly)
     - [Usage](#usage)
@@ -22,6 +25,13 @@
       - [Create your Page inheriting the `MvvmComponentBase<TViewModel>` component](#create-your-page-inheriting-the-mvvmcomponentbasetviewmodel-component)
   - [Give a ⭐](#give-a-)
   - [Documentation](#documentation)
+    - [Code Quality with Blazing.Mvvm.Analyzers](#code-quality-with-blazingmvvmanalyzers)
+      - [What are Roslyn Analyzers?](#what-are-roslyn-analyzers)
+      - [Features](#features)
+      - [Installation](#installation-1)
+      - [Getting Started](#getting-started)
+      - [Disabling Specific Analyzers](#disabling-specific-analyzers)
+      - [Learn More](#learn-more)
     - [View Model](#view-model)
       - [Lifecycle Methods](#lifecycle-methods)
       - [Service Registration](#service-registration)
@@ -36,9 +46,10 @@
     - [Sample Projects](#sample-projects)
       - [Running Samples with Different .NET Target Frameworks](#running-samples-with-different-net-target-frameworks)
   - [History](#history)
-    - [V3.1.0](#v310)
-    - [V3.0.0](#v300)
-    - [V2.0.0](#v200)
+    - [V3.2.0 - 8 December 2024](#v320---8-december-2024)
+    - [V3.1.0 - 3 December 2025](#v310---3-december-2025)
+    - [V3.0.0 - 18 November 2025](#v300---18-november-2025)
+    - [V2.0.0 - 30 November, 2024](#v200---30-november-2024)
 <!-- TOC -->
 
 ## Quick Start
@@ -60,6 +71,24 @@ dotnet add package Blazing.Mvvm
 ```powershell
 Install-Package Blazing.Mvvm
 ```
+
+### Optional: Blazing.Mvvm.Analyzers
+
+For enhanced code quality and compile-time validation, install the optional **[Blazing.Mvvm.Analyzers](https://www.nuget.org/packages/Blazing.Mvvm.Analyzers)** package:
+
+#### .NET CLI
+
+```bash
+dotnet add package Blazing.Mvvm.Analyzers
+```
+
+#### NuGet Package Manager
+
+```powershell
+Install-Package Blazing.Mvvm.Analyzers
+```
+
+This analyzer package provides 20 Roslyn analyzers and 13 code fix providers to help you follow MVVM best practices. See the [Code Quality with Blazing.Mvvm.Analyzers](#code-quality-with-blazingmvvmanalyzers) section for details.
 
 ### Configuration
 
@@ -199,6 +228,52 @@ The library package includes:
 - `ViewModelBase`, `RecipientViewModelBase`, & `ValidatorViewModelBase` wrappers for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/).
 - `MvvmNavigationManager` class, `MvvmNavLink`, and `MvvmKeyNavLink` component for MVVM-style navigation, no more hard-coded paths.
 - Sample applications for getting started quickly with all hosting models.
+
+### Code Quality with Blazing.Mvvm.Analyzers
+
+#### What are Roslyn Analyzers?
+
+Roslyn Analyzers are code analysis tools that integrate with the .NET compiler to provide real-time feedback and suggestions in your code editor. They help you adhere to best practices and detect potential issues early in the development process.
+
+#### Features
+
+The **Blazing.Mvvm.Analyzers** package includes:
+
+- **20 Roslyn Analyzers** that provide live feedback in your IDE as you code.
+- **13 Code Fix Providers** that suggest automatic fixes for common issues.
+
+#### Installation
+
+To install the analyzers, add the **Blazing.Mvvm.Analyzers** NuGet package to your project:
+
+```bash
+dotnet add package Blazing.Mvvm.Analyzers
+```
+
+#### Getting Started
+
+Once installed, the analyzers will automatically begin analyzing your code. You can view any issues in the **Error List** window in Visual Studio or your preferred IDE.
+
+#### Disabling Specific Analyzers
+
+If you need to disable specific analyzers, you can do so in your `.csproj` file:
+
+```xml
+<PropertyGroup>
+  <WarningsAsErrors></WarningsAsErrors>
+  <NoWarn>BLAZMVVM0001;BLAZMVVM0002</NoWarn>
+</PropertyGroup>
+```
+
+Replace `BLAZMVVM0001;BLAZMVVM0002` with the IDs of the analyzers you want to disable.
+
+#### Learn More
+
+For more information about using Roslyn Analyzers, check out the following resources:
+
+- [Introduction to Roslyn Analyzers](https://docs.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/analyzers-and-code-fix-packages)
+- [Creating a NuGet Package for Roslyn Analyzers](https://docs.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/create-an-analyzer-with-code-fix)
+- [Using code analyzers in Visual Studio](https://docs.microsoft.com/en-us/visualstudio/ide/configure-analyzers-visual-studio?view=vs-2022)
 
 ### View Model
 
@@ -931,6 +1006,30 @@ All sample projects in this repository support multi-targeting across .NET 8, .N
 For detailed instructions on switching between .NET target frameworks and troubleshooting multi-targeting scenarios, see the [Running Samples with Different .NET Versions](docs/Running_Different_NET_Versions.md) guide.
 
 ## History
+
+### V3.2.0 - 8 December 2024
+
+This release introduces the new **Blazing.Mvvm.Analyzers** package for compile-time code quality validation.
+
+**New Features:**
+- **Blazing.Mvvm.Analyzers Package:** New optional NuGet package with 20 Roslyn analyzers to help write better Blazing.Mvvm code. [@gragra33](https://github.com/gragra33)
+- **13 Code Fix Providers:** Automatic code fixes for common MVVM patterns and best practices. [@gragra33](https://github.com/gragra33)
+
+**Analyzer Categories:**
+- **Core MVVM Pattern (6 analyzers):** ViewModelBase inheritance, ViewModelDefinition attribute, MvvmComponentBase usage, navigation type safety, MvvmOwningComponentBase usage, and RelayCommand async patterns
+- **Best Practices (6 analyzers):** ViewParameter validation, observable properties, dispose patterns, messenger registration lifetime, property change notifications, and route parameter binding
+- **Code Quality (5 analyzers):** Lifecycle method overrides, route-ViewModel mapping, command patterns, StateHasChanged optimization, and CascadingParameter vs Inject suggestions
+- **Advanced (3 analyzers):** ViewModelKey consistency, service injection validation, and MvvmNavLink type safety
+
+**Code Fix Providers:**
+- Automatic corrections for ViewModelBase inheritance, ViewModelDefinition attributes, component base classes, async patterns, dispose implementations, messenger cleanup, property notifications, lifecycle methods, command patterns, and dependency injection
+
+**Documentation:**
+- Complete analyzer documentation with examples and best practices
+- All 7 sample projects updated to demonstrate analyzer usage
+- Comprehensive implementation guide in [Blazing.Mvvm.Analyzers README](src/Blazing.Mvvm.Analyzers/README.md)
+
+**Note:** The analyzers package is completely optional and can be installed separately from the main Blazing.Mvvm package.
 
 ### V3.1.0 - 3 December 2025
 

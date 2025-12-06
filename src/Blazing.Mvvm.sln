@@ -7,8 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazing.Mvvm", "Blazing.Mvv
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{225ACB45-5BBE-48D0-A1FB-802E767F6D21}"
 	ProjectSection(SolutionItems) = preProject
+		..\.gitattributes = ..\.gitattributes
+		..\.gitignore = ..\.gitignore
 		..\CODE_OF_CONDUCT.md = ..\CODE_OF_CONDUCT.md
 		..\CONTRIBUTING.md = ..\CONTRIBUTING.md
+		..\.github\copilot-instructions.md = ..\.github\copilot-instructions.md
 		Directory.Build.props = Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props
 		..\HISTORY.md = ..\HISTORY.md
@@ -80,6 +83,38 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HybridSample.MAUI", "sample
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazing.Mvvm.ParentChildSample", "samples\ParentChildSample\Blazing.Mvvm.ParentChildSample.csproj", "{15DD103E-C43B-3E64-1062-C4EE0854AAC8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazing.Mvvm.Analyzers", "Blazing.Mvvm.Analyzers\Blazing.Mvvm.Analyzers.csproj", "{9503CC1E-DDD5-9918-4A47-214AEB05C247}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazing.Mvvm.Analyzers.Tests", "Blazing.Mvvm.Analyzers.Tests\Blazing.Mvvm.Analyzers.Tests.csproj", "{CE8853D3-B02B-EE0F-2CCA-E0762EF6B1D1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E6D5D94F-B618-4FD9-91BA-3D9B7325CFFE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Src", "Src", "{D8E19EB4-6DBE-43A0-84B4-2975B474E447}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "Analyzers", "{A9CD41B6-749D-4E42-9D6B-524DBAB6609C}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\analyzers\BLAZMVVM0001.md = ..\docs\analyzers\BLAZMVVM0001.md
+		..\docs\analyzers\BLAZMVVM0002.md = ..\docs\analyzers\BLAZMVVM0002.md
+		..\docs\analyzers\BLAZMVVM0003.md = ..\docs\analyzers\BLAZMVVM0003.md
+		..\docs\analyzers\BLAZMVVM0004.md = ..\docs\analyzers\BLAZMVVM0004.md
+		..\docs\analyzers\BLAZMVVM0005.md = ..\docs\analyzers\BLAZMVVM0005.md
+		..\docs\analyzers\BLAZMVVM0006.md = ..\docs\analyzers\BLAZMVVM0006.md
+		..\docs\analyzers\BLAZMVVM0007.md = ..\docs\analyzers\BLAZMVVM0007.md
+		..\docs\analyzers\BLAZMVVM0008.md = ..\docs\analyzers\BLAZMVVM0008.md
+		..\docs\analyzers\BLAZMVVM0009.md = ..\docs\analyzers\BLAZMVVM0009.md
+		..\docs\analyzers\BLAZMVVM0010.md = ..\docs\analyzers\BLAZMVVM0010.md
+		..\docs\analyzers\BLAZMVVM0011.md = ..\docs\analyzers\BLAZMVVM0011.md
+		..\docs\analyzers\BLAZMVVM0012.md = ..\docs\analyzers\BLAZMVVM0012.md
+		..\docs\analyzers\BLAZMVVM0013.md = ..\docs\analyzers\BLAZMVVM0013.md
+		..\docs\analyzers\BLAZMVVM0014.md = ..\docs\analyzers\BLAZMVVM0014.md
+		..\docs\analyzers\BLAZMVVM0015.md = ..\docs\analyzers\BLAZMVVM0015.md
+		..\docs\analyzers\BLAZMVVM0016.md = ..\docs\analyzers\BLAZMVVM0016.md
+		..\docs\analyzers\BLAZMVVM0017.md = ..\docs\analyzers\BLAZMVVM0017.md
+		..\docs\analyzers\BLAZMVVM0018.md = ..\docs\analyzers\BLAZMVVM0018.md
+		..\docs\analyzers\BLAZMVVM0019.md = ..\docs\analyzers\BLAZMVVM0019.md
+		..\docs\analyzers\BLAZMVVM0020.md = ..\docs\analyzers\BLAZMVVM0020.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -138,6 +173,7 @@ Global
 		{4C125972-6717-4417-87D6-EE6CA8C820F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C125972-6717-4417-87D6-EE6CA8C820F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C125972-6717-4417-87D6-EE6CA8C820F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C125972-6717-4417-87D6-EE6CA8C820F5}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{90F56C10-762C-873C-00F8-A7B6A0E28849}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{90F56C10-762C-873C-00F8-A7B6A0E28849}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90F56C10-762C-873C-00F8-A7B6A0E28849}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -168,14 +204,25 @@ Global
 		{15DD103E-C43B-3E64-1062-C4EE0854AAC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15DD103E-C43B-3E64-1062-C4EE0854AAC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15DD103E-C43B-3E64-1062-C4EE0854AAC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9503CC1E-DDD5-9918-4A47-214AEB05C247}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9503CC1E-DDD5-9918-4A47-214AEB05C247}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9503CC1E-DDD5-9918-4A47-214AEB05C247}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9503CC1E-DDD5-9918-4A47-214AEB05C247}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE8853D3-B02B-EE0F-2CCA-E0762EF6B1D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE8853D3-B02B-EE0F-2CCA-E0762EF6B1D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE8853D3-B02B-EE0F-2CCA-E0762EF6B1D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE8853D3-B02B-EE0F-2CCA-E0762EF6B1D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{D190EF3E-D605-45DE-8004-81082AD746E0} = {D8E19EB4-6DBE-43A0-84B4-2975B474E447}
+		{9B328C0C-904A-4CEA-BF5E-4F31F93F66BA} = {E6D5D94F-B618-4FD9-91BA-3D9B7325CFFE}
 		{0736A974-8960-4DE2-B73C-B8B0C4D0E352} = {FEBE74EB-CC2E-485F-AA6D-7E21F7191E95}
 		{F517F8B5-53D1-43DB-B0FE-A603C8BD343F} = {FEBE74EB-CC2E-485F-AA6D-7E21F7191E95}
 		{8BEC7F26-63FA-4B22-9B55-53D138AFF17D} = {FEBE74EB-CC2E-485F-AA6D-7E21F7191E95}
+		{C1A78AAE-5BA3-4C2C-91AF-8A362BAF755E} = {D8E19EB4-6DBE-43A0-84B4-2975B474E447}
 		{7BDFBB0C-33C2-4A60-8899-3E8E93D842A8} = {FEBE74EB-CC2E-485F-AA6D-7E21F7191E95}
 		{A048F40B-E503-A877-1AF7-2A1BC5340796} = {0736A974-8960-4DE2-B73C-B8B0C4D0E352}
 		{4A5EB697-A84D-4BC9-BA24-00D14B575FDE} = {FEBE74EB-CC2E-485F-AA6D-7E21F7191E95}
@@ -199,6 +246,9 @@ Global
 		{5417429F-E3F6-AC65-6175-29BF27AD491B} = {4A5EB697-A84D-4BC9-BA24-00D14B575FDE}
 		{56B617AC-60F6-79C3-0B25-70D8F39461C1} = {4A5EB697-A84D-4BC9-BA24-00D14B575FDE}
 		{15DD103E-C43B-3E64-1062-C4EE0854AAC8} = {F517F8B5-53D1-43DB-B0FE-A603C8BD343F}
+		{9503CC1E-DDD5-9918-4A47-214AEB05C247} = {D8E19EB4-6DBE-43A0-84B4-2975B474E447}
+		{CE8853D3-B02B-EE0F-2CCA-E0762EF6B1D1} = {E6D5D94F-B618-4FD9-91BA-3D9B7325CFFE}
+		{A9CD41B6-749D-4E42-9D6B-524DBAB6609C} = {225ACB45-5BBE-48D0-A1FB-802E767F6D21}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2D6F818A-4305-467B-BB8E-E1AB2BEAC979}

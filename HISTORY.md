@@ -1,5 +1,29 @@
 ﻿# Version History
 
+### V3.2.0 - 8 December 2024
+
+This release introduces the new **Blazing.Mvvm.Analyzers** package for compile-time code quality validation.
+
+**New Features:**
+- **Blazing.Mvvm.Analyzers Package:** New optional NuGet package with 20 Roslyn analyzers to help write better Blazing.Mvvm code. [@gragra33](https://github.com/gragra33)
+- **13 Code Fix Providers:** Automatic code fixes for common MVVM patterns and best practices. [@gragra33](https://github.com/gragra33)
+
+**Analyzer Categories:**
+- **Core MVVM Pattern (6 analyzers):** ViewModelBase inheritance, ViewModelDefinition attribute, MvvmComponentBase usage, navigation type safety, MvvmOwningComponentBase usage, and RelayCommand async patterns
+- **Best Practices (6 analyzers):** ViewParameter validation, observable properties, dispose patterns, messenger registration lifetime, property change notifications, and route parameter binding
+- **Code Quality (5 analyzers):** Lifecycle method overrides, route-ViewModel mapping, command patterns, StateHasChanged optimization, and CascadingParameter vs Inject suggestions
+- **Advanced (3 analyzers):** ViewModelKey consistency, service injection validation, and MvvmNavLink type safety
+
+**Code Fix Providers:**
+- Automatic corrections for ViewModelBase inheritance, ViewModelDefinition attributes, component base classes, async patterns, dispose implementations, messenger cleanup, property notifications, lifecycle methods, command patterns, and dependency injection
+
+**Documentation:**
+- Complete analyzer documentation with examples and best practices
+- All 7 sample projects updated to demonstrate analyzer usage
+- Comprehensive implementation guide in [Blazing.Mvvm.Analyzers README](src/Blazing.Mvvm.Analyzers/README.md)
+
+**Note:** The analyzers package is completely optional and can be installed separately from the main Blazing.Mvvm package.
+
 ### V3.1.0 - 3 December 2025
 
 This release adds automatic base path detection for YARP reverse proxy scenarios and simplifies configuration.
