@@ -1,0 +1,7 @@
+# Analyzer configuration for Blazing.Mvvm.Analyzers
+root = true
+
+[*.cs]
+# RS1038: Workspaces is required for CodeFixProviders
+# Suppressable via this configuration since CodeFix providers must be in same assembly as analyzers
+dotnet_diagnostic.RS1038.severity = none
