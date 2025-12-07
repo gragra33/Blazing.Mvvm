@@ -10,8 +10,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Blazing.Mvvm\Blazing.Mvvm.csproj" />
-    <ProjectReference Include="..\..\..\Blazing.Mvvm.Analyzers\Blazing.Mvvm.Analyzers.csproj" 
-                      PrivateAssets="all" 
+    <ProjectReference Include="..\..\..\Blazing.Mvvm.Analyzers\Blazing.Mvvm.Analyzers.csproj"
+                      OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Blazing.Mvvm.Sample.WebApp.Client\Blazing.Mvvm.Sample.WebApp.Client.csproj" />
   </ItemGroup>
