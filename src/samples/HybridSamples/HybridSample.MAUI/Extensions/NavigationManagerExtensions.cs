@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Blazing.Mvvm.Components;
 using Microsoft.AspNetCore.Components;
@@ -14,6 +15,8 @@ public static class NavigationManagerExtensions
     /// </summary>
     /// <param name="mvvmNavManager">The MVVM navigation manager to update.</param>
     /// <param name="navManager">The navigation manager to set.</param>
+    [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2075:UnrecognizedReflectionPattern",
+        Justification = "The private _navigationManager field is guaranteed to exist in MvvmNavigationManager implementation.")]
     public static void ForceNavigationManagerUpdate(this IMvvmNavigationManager mvvmNavManager, NavigationManager navManager)
     {
         FieldInfo? prop = mvvmNavManager.GetType().GetField("_navigationManager", BindingFlags.NonPublic | BindingFlags.Instance);
