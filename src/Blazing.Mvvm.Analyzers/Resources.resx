@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" msdata:Ordinal="5" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- BLAZMVVM0001: ViewModelBase Inheritance Analyzer -->
+  <data name="BLAZMVVM0001_Title" xml:space="preserve">
+    <value>ViewModel should inherit from ViewModelBase</value>
+  </data>
+  <data name="BLAZMVVM0001_MessageFormat" xml:space="preserve">
+    <value>Type '{0}' should inherit from ViewModelBase, RecipientViewModelBase, or ValidatorViewModelBase</value>
+  </data>
+  <data name="BLAZMVVM0001_Description" xml:space="preserve">
+    <value>Classes ending with 'ViewModel' should inherit from one of the Blazing.Mvvm base classes to ensure proper MVVM pattern implementation and lifecycle management.</value>
+  </data>
+
+  <!-- BLAZMVVM0002: ViewModelDefinition Attribute Analyzer -->
+  <data name="BLAZMVVM0002_Title" xml:space="preserve">
+    <value>ViewModel must have ViewModelDefinition attribute</value>
+  </data>
+  <data name="BLAZMVVM0002_MessageFormat" xml:space="preserve">
+    <value>Type '{0}' must be decorated with [ViewModelDefinition] attribute for dependency injection registration</value>
+  </data>
+  <data name="BLAZMVVM0002_Description" xml:space="preserve">
+    <value>ViewModels that inherit from ViewModelBase must be decorated with the [ViewModelDefinition] attribute to ensure proper dependency injection registration and service lifetime configuration.</value>
+  </data>
+
+  <!-- BLAZMVVM0003: MvvmComponentBase Usage Analyzer -->
+  <data name="BLAZMVVM0003_Title" xml:space="preserve">
+    <value>Component should inherit from MvvmComponentBase</value>
+  </data>
+  <data name="BLAZMVVM0003_MessageFormat" xml:space="preserve">
+    <value>Component '{0}' with ViewModel property should inherit from MvvmComponentBase&lt;TViewModel&gt;</value>
+  </data>
+  <data name="BLAZMVVM0003_Description" xml:space="preserve">
+    <value>Blazor components that have a ViewModel property should inherit from MvvmComponentBase&lt;TViewModel&gt; to ensure automatic ViewModel injection, proper lifecycle management, and state synchronization.</value>
+  </data>
+
+  <!-- BLAZMVVM0004: ViewParameter Attribute Analyzer -->
+  <data name="BLAZMVVM0004_Title" xml:space="preserve">
+    <value>ViewParameter must have matching Component parameter</value>
+  </data>
+  <data name="BLAZMVVM0004_MessageFormat" xml:space="preserve">
+    <value>Property '{0}' with [ViewParameter] attribute must have a matching [Parameter] property in the associated component</value>
+  </data>
+  <data name="BLAZMVVM0004_Description" xml:space="preserve">
+    <value>Properties decorated with [ViewParameter] attribute must have corresponding [Parameter] properties in the associated component to maintain proper data flow between Views and ViewModels.</value>
+  </data>
+
+  <!-- BLAZMVVM0005: Navigation Type Safety Analyzer -->
+  <data name="BLAZMVVM0005_Title" xml:space="preserve">
+    <value>Navigation target must be a registered ViewModel</value>
+  </data>
+  <data name="BLAZMVVM0005_MessageFormat" xml:space="preserve">
+    <value>NavigateTo&lt;{0}&gt;() references a type that is not registered with [ViewModelDefinition] or has no associated route</value>
+  </data>
+  <data name="BLAZMVVM0005_Description" xml:space="preserve">
+    <value>Navigation calls must reference ViewModels that are properly registered with [ViewModelDefinition] and have associated routable components to prevent runtime navigation failures.</value>
+  </data>
+
+  <!-- BLAZMVVM0006: ViewModelKey Consistency Analyzer -->
+  <data name="BLAZMVVM0006_Title" xml:space="preserve">
+    <value>ViewModelKey must match registered ViewModel name</value>
+  </data>
+  <data name="BLAZMVVM0006_MessageFormat" xml:space="preserve">
+    <value>[ViewModelKey] attribute value '{0}' does not match any registered ViewModel type name</value>
+  </data>
+  <data name="BLAZMVVM0006_Description" xml:space="preserve">
+    <value>The [ViewModelKey] attribute value must exactly match the name of a registered ViewModel type to ensure proper ViewModel resolution at runtime.</value>
+  </data>
+
+  <!-- BLAZMVVM0007: Lifecycle Method Override Analyzer -->
+  <data name="BLAZMVVM0007_Title" xml:space="preserve">
+    <value>Consider overriding lifecycle methods in ViewModel</value>
+  </data>
+  <data name="BLAZMVVM0007_MessageFormat" xml:space="preserve">
+    <value>Component '{0}' overrides lifecycle method '{1}' - consider moving logic to ViewModel lifecycle methods</value>
+  </data>
+  <data name="BLAZMVVM0007_Description" xml:space="preserve">
+    <value>Business logic in component lifecycle methods should be moved to corresponding ViewModel lifecycle methods to maintain proper separation of concerns in MVVM architecture.</value>
+  </data>
+
+  <!-- BLAZMVVM0008: Observable Property Analyzer -->
+  <data name="BLAZMVVM0008_Title" xml:space="preserve">
+    <value>Property should use ObservableProperty attribute</value>
+  </data>
+  <data name="BLAZMVVM0008_MessageFormat" xml:space="preserve">
+    <value>Property '{0}' with backing field should use [ObservableProperty] attribute instead of manual SetProperty calls</value>
+  </data>
+  <data name="BLAZMVVM0008_Description" xml:space="preserve">
+    <value>Properties with backing fields and manual SetProperty calls should use the [ObservableProperty] attribute from CommunityToolkit.Mvvm to reduce boilerplate code and improve maintainability.</value>
+  </data>
+
+  <!-- BLAZMVVM0009: Service Injection Analyzer -->
+  <data name="BLAZMVVM0009_Title" xml:space="preserve">
+    <value>Service may not be registered in DI container</value>
+  </data>
+  <data name="BLAZMVVM0009_MessageFormat" xml:space="preserve">
+    <value>Constructor parameter '{0}' of type '{1}' may not be registered in the dependency injection container</value>
+  </data>
+  <data name="BLAZMVVM0009_Description" xml:space="preserve">
+    <value>Constructor parameters in ViewModels should reference services that are registered in the dependency injection container to prevent runtime resolution failures.</value>
+  </data>
+
+  <!-- BLAZMVVM0010: Route-ViewModel Mapping Analyzer -->
+  <data name="BLAZMVVM0010_Title" xml:space="preserve">
+    <value>Page should have associated ViewModel</value>
+  </data>
+  <data name="BLAZMVVM0010_MessageFormat" xml:space="preserve">
+    <value>Page component '{0}' with @page directive should have an associated ViewModel</value>
+  </data>
+  <data name="BLAZMVVM0010_Description" xml:space="preserve">
+    <value>Blazor page components with @page directive should have an associated ViewModel to maintain consistent MVVM architecture across routable pages.</value>
+  </data>
+
+  <!-- BLAZMVVM0011: MvvmNavLink Type Safety Analyzer -->
+  <data name="BLAZMVVM0011_Title" xml:space="preserve">
+    <value>MvvmNavLink must reference valid ViewModel</value>
+  </data>
+  <data name="BLAZMVVM0011_MessageFormat" xml:space="preserve">
+    <value>MvvmNavLink references ViewModel '{0}' that is not registered or has no associated route</value>
+  </data>
+  <data name="BLAZMVVM0011_Description" xml:space="preserve">
+    <value>MvvmNavLink components must reference ViewModels that are properly registered with [ViewModelDefinition] and have associated routable components for type-safe navigation.</value>
+  </data>
+
+  <!-- BLAZMVVM0012: Command Pattern Analyzer -->
+  <data name="BLAZMVVM0012_Title" xml:space="preserve">
+    <value>Method should be converted to RelayCommand</value>
+  </data>
+  <data name="BLAZMVVM0012_MessageFormat" xml:space="preserve">
+    <value>Method '{0}' called from View should be converted to a command using [RelayCommand] attribute</value>
+  </data>
+  <data name="BLAZMVVM0012_Description" xml:space="preserve">
+    <value>Methods called directly from Views should be converted to commands using the [RelayCommand] attribute to follow MVVM command pattern and enable features like CanExecute logic.</value>
+  </data>
+
+  <!-- BLAZMVVM0013: MvvmOwningComponentBase Usage Analyzer -->
+  <data name="BLAZMVVM0013_Title" xml:space="preserve">
+    <value>Consider using MvvmOwningComponentBase for scoped services</value>
+  </data>
+  <data name="BLAZMVVM0013_MessageFormat" xml:space="preserve">
+    <value>Component '{0}' with ViewModel '{1}' that implements IDisposable should inherit from MvvmOwningComponentBase&lt;TViewModel&gt;</value>
+  </data>
+  <data name="BLAZMVVM0013_Description" xml:space="preserve">
+    <value>Components with ViewModels that implement IDisposable or use scoped services should inherit from MvvmOwningComponentBase&lt;TViewModel&gt; to ensure proper service scope and disposal management.</value>
+  </data>
+
+  <!-- BLAZMVVM0014: StateHasChanged Overuse Analyzer -->
+  <data name="BLAZMVVM0014_Title" xml:space="preserve">
+    <value>Unnecessary StateHasChanged call detected</value>
+  </data>
+  <data name="BLAZMVVM0014_MessageFormat" xml:space="preserve">
+    <value>StateHasChanged call after '{0}' is unnecessary when using ObservableProperty - automatic UI updates are handled by the framework</value>
+  </data>
+  <data name="BLAZMVVM0014_Description" xml:space="preserve">
+    <value>Manual StateHasChanged calls are unnecessary when using ObservableProperty attributes, as the MVVM framework automatically triggers UI updates when observable properties change.</value>
+  </data>
+
+  <!-- BLAZMVVM0015: Dispose Pattern Analyzer -->
+  <data name="BLAZMVVM0015_Title" xml:space="preserve">
+    <value>ViewModel should implement IDisposable</value>
+  </data>
+  <data name="BLAZMVVM0015_MessageFormat" xml:space="preserve">
+    <value>ViewModel '{0}' uses disposable resources but does not implement IDisposable pattern</value>
+  </data>
+  <data name="BLAZMVVM0015_Description" xml:space="preserve">
+    <value>ViewModels that use disposable resources such as subscriptions, timers, or unmanaged resources should implement IDisposable to ensure proper cleanup and prevent memory leaks.</value>
+  </data>
+
+  <!-- BLAZMVVM0016: Messenger Registration Lifetime Analyzer -->
+  <data name="BLAZMVVM0016_Title" xml:space="preserve">
+    <value>Messenger registration may cause memory leak</value>
+  </data>
+  <data name="BLAZMVVM0016_MessageFormat" xml:space="preserve">
+    <value>Messenger.Register call in '{0}' is not unregistered - consider calling Unregister in Dispose or use RecipientViewModelBase</value>
+  </data>
+  <data name="BLAZMVVM0016_Description" xml:space="preserve">
+    <value>Messenger registrations should be unregistered when the ViewModel is disposed to prevent memory leaks. Consider using RecipientViewModelBase which handles registration lifetime automatically.</value>
+  </data>
+
+  <!-- BLAZMVVM0017: RelayCommand Async Pattern Analyzer -->
+  <data name="BLAZMVVM0017_Title" xml:space="preserve">
+    <value>Async method should use AsyncRelayCommand</value>
+  </data>
+  <data name="BLAZMVVM0017_MessageFormat" xml:space="preserve">
+    <value>Async method '{0}' with [RelayCommand] should use AsyncRelayCommand instead of async void to properly handle exceptions</value>
+  </data>
+  <data name="BLAZMVVM0017_Description" xml:space="preserve">
+    <value>Asynchronous command methods should return Task and use AsyncRelayCommand instead of async void to enable proper exception handling, cancellation support, and execution state tracking.</value>
+  </data>
+
+  <!-- BLAZMVVM0018: NotifyPropertyChangedFor Analyzer -->
+  <data name="BLAZMVVM0018_Title" xml:space="preserve">
+    <value>Consider using NotifyPropertyChangedFor attribute</value>
+  </data>
+  <data name="BLAZMVVM0018_MessageFormat" xml:space="preserve">
+    <value>Property '{0}' is referenced in '{1}' - consider adding [NotifyPropertyChangedFor(nameof({1}))] to '{0}' for automatic notification</value>
+  </data>
+  <data name="BLAZMVVM0018_Description" xml:space="preserve">
+    <value>When one property change affects another computed property, use the [NotifyPropertyChangedFor] attribute to automatically notify dependents instead of manually calling OnPropertyChanged.</value>
+  </data>
+
+  <!-- BLAZMVVM0019: CascadingParameter vs Inject Analyzer -->
+  <data name="BLAZMVVM0019_Title" xml:space="preserve">
+    <value>Prefer Inject over CascadingParameter for services</value>
+  </data>
+  <data name="BLAZMVVM0019_MessageFormat" xml:space="preserve">
+    <value>Property '{0}' with [CascadingParameter] should use [Inject] instead for dependency injection services</value>
+  </data>
+  <data name="BLAZMVVM0019_Description" xml:space="preserve">
+    <value>Dependency injection services should be injected using [Inject] attribute in ViewModels rather than [CascadingParameter] to maintain clear separation between component hierarchy state and service dependencies.</value>
+  </data>
+
+  <!-- BLAZMVVM0020: Route Parameter Binding Analyzer -->
+  <data name="BLAZMVVM0020_Title" xml:space="preserve">
+    <value>Route parameter should be bound to ViewModel</value>
+  </data>
+  <data name="BLAZMVVM0020_MessageFormat" xml:space="preserve">
+    <value>Route parameter '{0}' in @page directive should have matching [ViewParameter] property in ViewModel '{1}'</value>
+  </data>
+  <data name="BLAZMVVM0020_Description" xml:space="preserve">
+    <value>Route parameters defined in @page directive should have corresponding [ViewParameter] properties in the ViewModel to ensure proper parameter binding and maintain MVVM data flow.</value>
+  </data>
+</root>
