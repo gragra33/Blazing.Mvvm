@@ -23,7 +23,7 @@
     <!-- MAUI packages - using version 8.0.90 as baseline -->
     <PackageVersion Include="Microsoft.Maui.Controls" Version="8.0.90" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.90" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="8.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
     
     <!-- WebAssembly packages - using version 8.0.10 as baseline for multi-targeting -->
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.10" />

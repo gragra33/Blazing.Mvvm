@@ -1,8 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Blazing.Mvvm.Sample.HybridMaui.Models;
 
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | 
+                             DynamicallyAccessedMemberTypes.NonPublicProperties)]
 public class ContactInfo : ObservableValidator
 {
     private string? _name;
