@@ -34,6 +34,9 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+    
+    <!-- Suppress IL2111 warnings from generated Razor files - this is a known issue with LayoutView.Layout.set in .NET MAUI -->
+    <NoWarn>$(NoWarn);IL2111</NoWarn>
   </PropertyGroup>
 
   <!-- Android-specific properties to fix assembly compression issue -->
