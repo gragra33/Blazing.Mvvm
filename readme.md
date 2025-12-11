@@ -28,6 +28,7 @@
         - [Registering ViewModels with Interfaces or Abstract Classes](#registering-viewmodels-with-interfaces-or-abstract-classes)
         - [Registering Keyed ViewModels](#registering-keyed-viewmodels)
       - [Parameter Resolution](#parameter-resolution)
+      - [Automatic Two-Way Binding](#automatic-two-way-binding)
     - [MVVM Navigation](#mvvm-navigation)
       - [Navigate by abstraction](#navigate-by-abstraction)
     - [MVVM Validation](#mvvm-validation)
@@ -335,7 +336,110 @@ In the `View` component, the parameters should be defined as properties with the
 }
 ```
 
-> **Working Example:** For a complete working demonstration of Parameter Resolution, see the **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** sample project.
+#### Automatic Two-Way Binding
+
+**Added v3.2.0**, Blazing.Mvvm automatically handles two-way binding between View components and ViewModels when using the `@bind-` syntax, eliminating the need for manual `PropertyChanged` event handling.
+
+When a component has:
+- An `EventCallback<T>` parameter following Blazor's `{PropertyName}Changed` naming convention (e.g., `CounterChanged`)
+- A corresponding ViewModel property marked with `[ViewParameter]` (e.g., `Counter`)
+
+The two-way binding is **automatically wired up**. When the ViewModel property changes, the EventCallback is invoked automatically with **zero configuration** and **automatic memory leak prevention**.
+
+**Before (Manual Event Handling):**
+
+*ViewModel:*
+```csharp
+public partial class CounterComponentViewModel : ViewModelBase
+{
+    [ObservableProperty]
+    [property: ViewParameter]
+    private int _counter;
+}
+```
+
+*Component (Required 30+ lines of boilerplate):*
+```razor
+@using System.ComponentModel
+@inherits MvvmComponentBase<CounterComponentViewModel>
+
+<p role="status">Current count: <strong>@ViewModel.Counter</strong></p>
+
+@code {
+    [Parameter]
+    public int Counter { get; set; }
+
+    [Parameter]
+    public EventCallback<int> CounterChanged { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+    }
+
+    private async void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.Counter) && ViewModel.Counter != Counter)
+        {
+            await CounterChanged.InvokeAsync(ViewModel.Counter);
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        }
+        base.Dispose(disposing);
+    }
+}
+```
+
+**After (Automatic Two-Way Binding):**
+
+*ViewModel (unchanged):*
+```csharp
+public partial class CounterComponentViewModel : ViewModelBase
+{
+    [ObservableProperty]
+    [property: ViewParameter]
+    private int _counter;
+}
+```
+
+*Component (Just 9 lines!):*
+```razor
+@inherits MvvmComponentBase<CounterComponentViewModel>
+
+<p role="status">Current count: <strong>@ViewModel.Counter</strong></p>
+
+@code {
+    [Parameter]
+    public int Counter { get; set; }
+
+    [Parameter]
+    public EventCallback<int> CounterChanged { get; set; }
+}
+```
+
+**Usage in Parent Component:**
+```razor
+<CounterComponent @bind-Counter="@ViewModel.Counter" />
+```
+
+**Benefits:**
+- ✅ **Zero Configuration** - No setup required, works automatically
+- ✅ **No Boilerplate** - Eliminates 20+ lines of event handling code per component
+- ✅ **Memory Safe** - Automatic subscription cleanup prevents memory leaks
+- ✅ **Convention-Based** - Follows Blazor's standard `@bind-` naming pattern
+- ✅ **Type-Safe** - Compile-time checking for parameter types
+- ✅ **Works Everywhere** - Supported in `MvvmComponentBase`, `MvvmOwningComponentBase`, and `MvvmLayoutComponentBase`
+
+The feature automatically detects matching EventCallback parameters and wires them up during component initialization, with proper disposal when the component is removed.
+
+> **Working Example:** For a complete working demonstration of Parameter Resolution and Automatic Two-Way Binding, see the **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** sample project.
 
 ### MVVM Navigation
 
@@ -926,8 +1030,8 @@ Modernises the Microsoft's [Xamarin Sample](https://github.com/CommunityToolkit/
 #### Specialized Samples
 
 - **[Blazing.SubpathHosting.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.SubpathHosting.Server)** - Demonstrates subpath hosting configuration
-- **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute
-- **[Blazing.Mvvm.ParentChildSample](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParentChildSample)** - Demonstrates dynamic parent-child component communication using Messenger. [Original](https://github.com/gragra33/Blazing.Mvvm.ParentChildSample)  repo is now archived.
+- **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute, and automatic two-way binding with `@bind-` syntax
+- **[Blazing.Mvvm.ParentChildSample](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParentChildSample)** - Demonstrates dynamic parent-child component communication using Messenger. [Original](https://github.com/gragra33/Blazing.Mvvm.ParentChildSample) repo is now archived.
 
 #### Running Samples with Different .NET Target Frameworks
 
@@ -942,6 +1046,16 @@ All sample projects in this repository support multi-targeting across .NET 8, .N
 For detailed instructions on switching between .NET target frameworks and troubleshooting multi-targeting scenarios, see the [Running Samples with Different .NET Versions](docs/Running_Different_NET_Versions.md) guide.
 
 ## History
+
+### V3.2.0 - TBD
+
+This release adds automatic two-way binding support, eliminating the need for manual PropertyChanged event handling in components.
+
+**New Sample:** 
+- [ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute, and automatic two-way binding with `@bind-` syntax
+
+**New Features:**
+- **Automatic Two-Way Binding:** Components with `EventCallback<T>` parameters following the `{PropertyName}Changed` convention and corresponding `[ViewParameter]` properties in ViewModels now automatically wire up two-way binding. [@gragra33](https://github.com/gragra33)
 
 ### V3.1.0 - 3 December 2025
 

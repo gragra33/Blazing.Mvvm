@@ -1,5 +1,15 @@
 ﻿# Version History
 
+### V3.2.0 - TBD
+
+This release adds automatic two-way binding support, eliminating the need for manual PropertyChanged event handling in components.
+
+**New Sample:** 
+- [ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute, and automatic two-way binding with `@bind-` syntax
+
+**New Features:**
+- **Automatic Two-Way Binding:** Components with `EventCallback<T>` parameters following the `{PropertyName}Changed` convention and corresponding `[ViewParameter]` properties in ViewModels now automatically wire up two-way binding. [@gragra33](https://github.com/gragra33)
+
 ### V3.1.0 - 3 December 2025
 
 This release adds automatic base path detection for YARP reverse proxy scenarios and simplifies configuration.
