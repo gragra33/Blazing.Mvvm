@@ -139,14 +139,10 @@ public sealed class TwoWayBindingHelper<TViewModel> : IDisposable
         try
         {
             // Use reflection to call InvokeAsync on the EventCallback<T>
-            var invokeMethod = callbackInfo.EventCallbackType.GetMethod("InvokeAsync", new[] { callbackInfo.ValueType });
-            if (invokeMethod != null)
+            var invokeMethod = callbackInfo.EventCallbackType.GetMethod("InvokeAsync", [callbackInfo.ValueType]);
+            if (invokeMethod != null && invokeMethod.Invoke(callbackInfo.EventCallback, [value]) is Task task)
             {
-                var task = invokeMethod.Invoke(callbackInfo.EventCallback, new[] { value }) as Task;
-                if (task != null)
-                {
-                    await task;
-                }
+                await task;
             }
         }
         catch (Exception)
@@ -166,7 +162,9 @@ public sealed class TwoWayBindingHelper<TViewModel> : IDisposable
     public void Dispose()
     {
         if (_isDisposed)
+        {
             return;
+        }
 
         _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
         _eventCallbacks.Clear();
@@ -176,19 +174,15 @@ public sealed class TwoWayBindingHelper<TViewModel> : IDisposable
     /// <summary>
     /// Holds information about an EventCallback that should be invoked when a property changes.
     /// </summary>
-    private sealed class EventCallbackInfo
+    private sealed class EventCallbackInfo(
+        string propertyName,
+        object eventCallback,
+        Type valueType,
+        Type eventCallbackType)
     {
-        public string PropertyName { get; }
-        public object EventCallback { get; }
-        public Type ValueType { get; }
-        public Type EventCallbackType { get; }
-
-        public EventCallbackInfo(string propertyName, object eventCallback, Type valueType, Type eventCallbackType)
-        {
-            PropertyName = propertyName;
-            EventCallback = eventCallback;
-            ValueType = valueType;
-            EventCallbackType = eventCallbackType;
-        }
+        public string PropertyName { get; } = propertyName;
+        public object EventCallback { get; } = eventCallback;
+        public Type ValueType { get; } = valueType;
+        public Type EventCallbackType { get; } = eventCallbackType;
     }
 }
