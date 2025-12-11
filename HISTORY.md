@@ -1,12 +1,16 @@
 ﻿# Version History
 
-### V3.2.0 - 8 December 2024
+### V3.2.0 - 12 December 2024
 
-This release introduces the new **Blazing.Mvvm.Analyzers** package for compile-time code quality validation.
+This release introduces the new **Blazing.Mvvm.Analyzers** package for compile-time code quality validation. We also added automatic two-way binding support, eliminating the need for manual PropertyChanged event handling in components.
 
 **New Features:**
 - **Blazing.Mvvm.Analyzers Package:** New optional NuGet package with 20 Roslyn analyzers to help write better Blazing.Mvvm code. [@gragra33](https://github.com/gragra33)
 - **13 Code Fix Providers:** Automatic code fixes for common MVVM patterns and best practices. [@gragra33](https://github.com/gragra33)
+- **Automatic Two-Way Binding:** Components with `EventCallback<T>` parameters following the `{PropertyName}Changed` convention and corresponding `[ViewParameter]` properties in ViewModels now automatically wire up two-way binding. [@gragra33](https://github.com/gragra33)
+
+**New Sample:** 
+- **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute, and automatic two-way binding with `@bind-` syntax
 
 **Analyzer Categories:**
 - **Core MVVM Pattern (6 analyzers):** ViewModelBase inheritance, ViewModelDefinition attribute, MvvmComponentBase usage, navigation type safety, MvvmOwningComponentBase usage, and RelayCommand async patterns
