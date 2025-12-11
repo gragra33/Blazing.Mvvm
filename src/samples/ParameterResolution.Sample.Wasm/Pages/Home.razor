@@ -1,6 +1,6 @@
 @page "/"
+@using ParameterResolution.Sample.Wasm.ViewModels
 @inherits MvvmComponentBase<HomeViewModel>
-@inject NavigationManager NavigationManager
 
 <PageTitle>Parameter Resolution Sample</PageTitle>
 
@@ -54,20 +54,3 @@
         </ul>
     </div>
 </div>
-
-@code {
-    private void NavigateWithBasicParams()
-    {
-        NavigationManager.NavigateTo("/demo?Title=Hello%20World&Count=42&Content=Sample%20Content");
-    }
-
-    private void NavigateWithDifferentParams()
-    {
-        NavigationManager.NavigateTo("/demo?Title=Different%20Title&Count=100&Content=New%20Content%20Here");
-    }
-
-    private void NavigateWithNullContent()
-    {
-        NavigationManager.NavigateTo("/demo?Title=No%20Content&Count=5");
-    }
-}
