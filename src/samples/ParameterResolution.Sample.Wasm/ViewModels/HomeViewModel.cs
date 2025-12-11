@@ -36,7 +36,7 @@ public sealed partial class HomeViewModel : ViewModelBase
     /// </example>
     [RelayCommand]
     private void NavigateWithParams(string queryString)
-    {
+{
         _navigationManager.NavigateTo<ParameterDemoViewModel>(queryString);
     }
 }
