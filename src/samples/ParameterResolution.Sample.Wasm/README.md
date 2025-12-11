@@ -1,6 +1,6 @@
 # Parameter Resolution Sample (WASM)
 
-This sample project demonstrates the **Parameter Resolution** feature in Blazing.Mvvm with interactive commands.
+This sample project demonstrates the **Parameter Resolution** feature in Blazing.Mvvm with interactive commands and MVVM navigation.
 
 ## What is Parameter Resolution?
 
@@ -12,9 +12,10 @@ Parameter Resolution allows you to pass parameter values from a Blazor View comp
 2. **Custom Name Mapping**: Using `[ViewParameter("ParamName")]` to map to a different parameter name
 3. **ObservableProperty Support**: Integration with `[ObservableProperty]` from CommunityToolkit.Mvvm
 4. **RelayCommand Support**: Using `[RelayCommand]` to generate command properties for View interaction
-5. **Nullable Support**: Handling nullable parameter types
-6. **Query String Parameters**: Resolving parameters from URL query strings using `[SupplyParameterFromQuery]`
-7. **Interactive UI**: Increment/Decrement buttons demonstrating ViewModel-to-View binding
+5. **MVVM Navigation**: Using `MvvmNavigationManager` with `RelayCommand` for type-safe, ViewModel-first navigation
+6. **Nullable Support**: Handling nullable parameter types
+7. **Query String Parameters**: Resolving parameters from URL query strings using `[SupplyParameterFromQuery]`
+8. **Interactive UI**: Increment/Decrement buttons demonstrating ViewModel-to-View binding
 
 ## How to Run
 
@@ -27,8 +28,8 @@ Parameter Resolution allows you to pass parameter values from a Blazor View comp
 
 - **ViewModels/ParameterDemoViewModel.cs** - Demonstrates ViewParameter usage with different mapping strategies and RelayCommand
 - **ViewModels/MainLayoutViewModel.cs** - Tracks navigation count
-- **ViewModels/HomeViewModel.cs** - Simple ViewModel for the home page
-- **Pages/Home.razor** - Landing page with navigation examples
+- **ViewModels/HomeViewModel.cs** - Demonstrates MVVM navigation with MvvmNavigationManager and RelayCommand
+- **Pages/Home.razor** - Landing page with MVVM navigation examples
 - **Pages/ParameterDemo.razor** - Shows parameter resolution with interactive counter buttons
 - **Layout/MainLayout.razor** - Main layout with navigation counter
 - **Layout/NavMenu.razor** - Navigation menu
@@ -45,6 +46,37 @@ builder.Services.AddMvvm(options =>
     options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
 });
 ```
+
+## MVVM Navigation Pattern
+
+The Home page demonstrates the recommended MVVM navigation pattern:
+
+**ViewModel (HomeViewModel.cs):**
+
+```csharp
+[RelayCommand]
+private void NavigateWithParams(string queryString)
+{
+    _navigationManager.NavigateTo<ParameterDemoViewModel>(queryString);
+}
+```
+
+**View (Home.razor):**
+
+```razor
+<button class="btn btn-primary" 
+        @onclick="@(() => ViewModel.NavigateWithParamsCommand.Execute("?Title=Hello%20World&Count=42&Content=Sample%20Content"))">
+    Navigate with Basic Parameters
+</button>
+```
+
+This approach:
+
+- ? Keeps navigation logic in the ViewModel
+- ? Uses strongly-typed navigation with `MvvmNavigationManager`
+- ? Leverages `RelayCommand` for command pattern
+- ? Passes query string parameters from View to ViewModel
+- ? Maintains proper separation of concerns
 
 ## Interactive Features
 

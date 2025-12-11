@@ -16,9 +16,27 @@
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="demo?Title=Example&Count=10&Content=Hello">
-                <span class="oi oi-cog" aria-hidden="true"></span> Parameter Demo
-            </NavLink>
+            <MvvmNavLink class="nav-link"
+                         RelativeUri="?Title=Hello%20World&Count=42&Content=Sample%20Content"
+                         TViewModel="ParameterDemoViewModel">
+                <span class="oi oi-cog" aria-hidden="true"></span> Parameter Basic
+            </MvvmNavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link"
+                         RelativeUri="?Title=Different%20Title&Count=100&Content=New%20Content%20Here"
+                         TViewModel="ParameterDemoViewModel">
+                <span class="oi oi-cog" aria-hidden="true"></span> Parameter Differeent
+            </MvvmNavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <MvvmNavLink class="nav-link"
+                         RelativeUri="?Title=No%20Content&Count=5"
+                         TViewModel="ParameterDemoViewModel">
+                <span class="oi oi-cog" aria-hidden="true"></span> Parameter Null Content
+            </MvvmNavLink>
         </div>
     </nav>
 </div>

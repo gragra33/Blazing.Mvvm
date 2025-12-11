@@ -1,6 +1,6 @@
 @page "/"
+@using ParameterResolution.Sample.Wasm.ViewModels
 @inherits MvvmComponentBase<HomeViewModel>
-@inject NavigationManager NavigationManager
 
 <PageTitle>Parameter Resolution Sample</PageTitle>
 
@@ -27,13 +27,13 @@
         <p>Click the buttons below to navigate to the demo page with different parameter values:</p>
         
         <div class="d-grid gap-2">
-            <button class="btn btn-primary" @onclick="NavigateWithBasicParams">
+            <button class="btn btn-primary" @onclick="@(() => ViewModel.NavigateWithParamsCommand.Execute("?Title=Hello%20World&Count=42&Content=Sample%20Content"))">
                 <span class="oi oi-arrow-right" aria-hidden="true"></span> Navigate with Basic Parameters
             </button>
-            <button class="btn btn-success" @onclick="NavigateWithDifferentParams">
+            <button class="btn btn-success" @onclick="@(() => ViewModel.NavigateWithParamsCommand.Execute("?Title=Different%20Title&Count=100&Content=New%20Content%20Here"))">
                 <span class="oi oi-arrow-right" aria-hidden="true"></span> Navigate with Different Parameters
             </button>
-            <button class="btn btn-warning" @onclick="NavigateWithNullContent">
+            <button class="btn btn-warning" @onclick="@(() => ViewModel.NavigateWithParamsCommand.Execute("?Title=No%20Content&Count=5"))">
                 <span class="oi oi-arrow-right" aria-hidden="true"></span> Navigate with Null Content
             </button>
         </div>
@@ -50,23 +50,7 @@
             <li><strong>Custom Name Mapping:</strong> Use <code>[ViewParameter("ParamName")]</code> to map to a different parameter name</li>
             <li><strong>ObservableProperty Support:</strong> Works with <code>[ObservableProperty]</code> from CommunityToolkit.Mvvm</li>
             <li><strong>Nullable Support:</strong> Parameters can be nullable types</li>
+            <li><strong>MVVM Navigation:</strong> Uses <code>MvvmNavigationManager</code> with <code>RelayCommand</code> for type-safe navigation</li>
         </ul>
     </div>
 </div>
-
-@code {
-    private void NavigateWithBasicParams()
-    {
-        NavigationManager.NavigateTo("/demo?Title=Hello%20World&Count=42&Content=Sample%20Content");
-    }
-
-    private void NavigateWithDifferentParams()
-    {
-        NavigationManager.NavigateTo("/demo?Title=Different%20Title&Count=100&Content=New%20Content%20Here");
-    }
-
-    private void NavigateWithNullContent()
-    {
-        NavigationManager.NavigateTo("/demo?Title=No%20Content&Count=5");
-    }
-}
