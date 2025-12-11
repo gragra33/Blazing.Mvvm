@@ -110,28 +110,34 @@ builder.Services.AddMvvm(options =>
 #### Create a `ViewModel` inheriting the `ViewModelBase` class
 
 ```csharp
-public partial class FetchDataViewModel : ViewModelBase
+[ViewModelDefinition(Lifetime = ServiceLifetime.Scoped)]
+public sealed partial class FetchDataViewModel : ViewModelBase, IDisposable
 {
-    private static readonly string[] Summaries = [
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    ];
+    private readonly IWeatherService _weatherService;
+    private readonly ILogger<FetchDataViewModel> _logger;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     [ObservableProperty]
-    private ObservableCollection<WeatherForecast> _weatherForecasts = new();
+    private IEnumerable<WeatherForecast>? _weatherForecasts;
 
     public string Title => "Weather forecast";
 
-    public override void OnInitialized()
-        => WeatherForecasts = new ObservableCollection<WeatherForecast>(Get());
-
-    private IEnumerable<WeatherForecast> Get()
+    public FetchDataViewModel(IWeatherService weatherService, ILogger<FetchDataViewModel> logger)
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateTime.Now.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        });
+        _weatherService = weatherService;
+        _logger = logger;
+    }
+
+    public override async Task OnInitializedAsync()
+    {
+        WeatherForecasts = await _weatherService.GetForecastAsync() ?? [];
+    }
+
+    public void Dispose()
+    {
+        _logger.LogInformation("Disposing {VMName}.", nameof(FetchDataViewModel));
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
     }
 }
 ```
@@ -148,7 +154,7 @@ public partial class FetchDataViewModel : ViewModelBase
 
 <h1>@ViewModel.Title</h1>
 
-@if (!ViewModel.WeatherForecasts.Any())
+@if (ViewModel.WeatherForecasts is null)
 {
     <p><em>Loading...</em></p>
 }
@@ -300,32 +306,36 @@ public partial class SampleViewModel : ViewModelBase
 {
     [ObservableProperty]
     [property: ViewParameter]
-    private string _title;
+    private string _title = default!;
+
+    [ObservableProperty]
+    [property: ViewParameter("Count")]
+    private int _counter;
 
     [ViewParameter]
-    public int Count { get; set; }
-
-    [ViewParameter("Content")]
-    private string Body { get; set; }
+    public string? Content { get; set; }
 }
 ```
 
 In the `View` component, the parameters should be defined as properties with the `Parameter` attribute:
 
 ```xml
+@page "/sample"
 @inherits MvvmComponentBase<SampleViewModel>
 
 @code {
     [Parameter]
-    public string Title { get; set; }
+    public string Title { get; set; } = default!;
 
     [Parameter]
     public int Count { get; set; }
 
     [Parameter]
-    public string Content { get; set; }
+    public string? Content { get; set; }
 }
 ```
+
+> **Working Example:** For a complete working demonstration of Parameter Resolution, see the **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** sample project.
 
 ### MVVM Navigation
 
@@ -916,6 +926,7 @@ Modernises the Microsoft's [Xamarin Sample](https://github.com/CommunityToolkit/
 #### Specialized Samples
 
 - **[Blazing.SubpathHosting.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.SubpathHosting.Server)** - Demonstrates subpath hosting configuration
+- **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute
 - **[Blazing.Mvvm.ParentChildSample](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParentChildSample)** - Demonstrates dynamic parent-child component communication using Messenger. [Original](https://github.com/gragra33/Blazing.Mvvm.ParentChildSample)  repo is now archived.
 
 #### Running Samples with Different .NET Target Frameworks
