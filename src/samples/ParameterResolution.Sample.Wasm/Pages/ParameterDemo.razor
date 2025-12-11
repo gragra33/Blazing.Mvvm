@@ -17,8 +17,8 @@
         <h3 class="mb-0">Interactive Counter Demo</h3>
     </div>
     <div class="card-body">
-        <p role="status">Current count: <strong>@ViewModel.Counter</strong></p>
-        
+        <CounterComponent @bind-Counter=@ViewModel.Counter />
+
         <div class="btn-group" role="group">
             <button class="btn btn-primary" @onclick="ViewModel.IncrementCounterCommand.Execute">
                 <span class="oi oi-plus" aria-hidden="true"></span> Increment

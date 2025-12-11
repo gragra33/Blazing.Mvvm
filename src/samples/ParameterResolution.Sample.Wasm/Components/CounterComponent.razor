@@ -1,0 +1,11 @@
+@inherits MvvmComponentBase<CounterComponentViewModel>
+
+<p role="status">Current count: <strong>@ViewModel.Counter</strong></p>
+
+@code {
+    [Parameter]
+    public int Counter { get; set; }
+
+    [Parameter]
+    public EventCallback<int> CounterChanged { get; set; }
+}
