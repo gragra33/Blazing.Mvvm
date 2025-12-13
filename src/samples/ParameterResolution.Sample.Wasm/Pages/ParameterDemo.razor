@@ -17,17 +17,24 @@
         <h3 class="mb-0">Interactive Counter Demo</h3>
     </div>
     <div class="card-body">
-        <CounterComponent @bind-Counter=@ViewModel.Counter />
 
-        <div class="btn-group" role="group">
-            <button class="btn btn-primary" @onclick="ViewModel.IncrementCounterCommand.Execute">
-                <span class="oi oi-plus" aria-hidden="true"></span> Increment
-            </button>
-            <button class="btn btn-danger" @onclick="ViewModel.DecrementCounterCommand.Execute">
-                <span class="oi oi-minus" aria-hidden="true"></span> Decrement
-            </button>
+        <div class="card mb-3">
+            <div class="card-header">
+                <h4 class="mb-0">ParameterDemo (Host Page)</h4>
+            </div>
+            <div class="card-body">
+                <CounterComponent @bind-Counter=@ViewModel.Counter />
+                <div class="btn-group" role="group">
+                    <button class="btn btn-primary" @onclick="ViewModel.IncrementCounterCommand.Execute">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Increment
+                    </button>
+                    <button class="btn btn-danger" @onclick="ViewModel.DecrementCounterCommand.Execute">
+                        <span class="oi oi-minus" aria-hidden="true"></span> Decrement
+                    </button>
+                </div>
+            </div>
         </div>
-        
+
         <div class="mt-3 alert alert-info">
             <p class="mb-0">
                 <strong>Note:</strong> The counter value is bound to the <code>Counter</code> property in the ViewModel, 

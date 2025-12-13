@@ -108,6 +108,17 @@ public sealed partial class ParameterDemoViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Invoked when the counter value changes to allow for custom handling of the new value.
+    /// </summary>
+    /// <remarks>Implement this partial method to perform additional actions when the counter value changes.
+    /// This method is called automatically whenever the counter property is updated.</remarks>
+    /// <param name="value">The new value of the counter after the change.</param>
+    partial void OnCounterChanged(int value)
+    {
+        UpdateDisplayMessage();
+    }
+
+    /// <summary>
     /// Updates the display message with the current parameter values.
     /// </summary>
     /// <remarks>
