@@ -50,7 +50,6 @@
     - [V3.2.0 - 8 December 2024](#v320---8-december-2024)
     - [V3.1.0 - 3 December 2025](#v310---3-december-2025)
     - [V3.0.0 - 18 November 2025](#v300---18-november-2025)
-    - [V2.0.0 - 30 November, 2024](#v200---30-november-2024)
 <!-- TOC -->
 
 ## Quick Start
