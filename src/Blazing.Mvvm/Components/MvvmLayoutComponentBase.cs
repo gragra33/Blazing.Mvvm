@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using Blazing.Mvvm.ComponentModel;
+using Blazing.Mvvm.Components.TwoWayBinding;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.Components;
 
@@ -13,6 +14,11 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
     where TViewModel : IViewModelBase
 {
     private TViewModel? _viewModel;
+
+    /// <summary>
+    /// Helper for automatic two-way binding between View parameters and ViewModel properties.
+    /// </summary>
+    private TwoWayBindingHelper<TViewModel>? _bindingHelper;
 
     /// <summary>
     /// Indicates if the component has been disposed.
@@ -57,6 +63,11 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
     {
         ViewModel.PropertyChanged += OnPropertyChanged;
         ViewModel.OnInitialized();
+
+        // Automatically initialize two-way binding helper
+        // It will detect and wire up EventCallback<T> parameters that follow the {PropertyName}Changed convention
+        _bindingHelper = new TwoWayBindingHelper<TViewModel>(this, ViewModel);
+        _bindingHelper.Initialize();
     }
 
     /// <inheritdoc/>
@@ -101,6 +112,10 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
             {
                 observableRecipient.IsActive = false;
             }
+
+            // Dispose two-way binding helper if it was initialized
+            _bindingHelper?.Dispose();
+            _bindingHelper = null;
         }
 
         IsDisposed = true;
