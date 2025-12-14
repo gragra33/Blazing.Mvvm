@@ -120,6 +120,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{34B4
 		samples\Directory.Packages.props = samples\Directory.Packages.props
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParameterResolution.Sample.Wasm", "samples\ParameterResolution.Sample.Wasm\ParameterResolution.Sample.Wasm.csproj", "{A2204F72-C6C8-1060-7AD3-6696365081AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -218,6 +220,10 @@ Global
 		{CE8853D3-B02B-EE0F-2CCA-E0762EF6B1D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE8853D3-B02B-EE0F-2CCA-E0762EF6B1D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE8853D3-B02B-EE0F-2CCA-E0762EF6B1D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2204F72-C6C8-1060-7AD3-6696365081AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2204F72-C6C8-1060-7AD3-6696365081AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2204F72-C6C8-1060-7AD3-6696365081AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2204F72-C6C8-1060-7AD3-6696365081AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -256,6 +262,7 @@ Global
 		{CE8853D3-B02B-EE0F-2CCA-E0762EF6B1D1} = {E6D5D94F-B618-4FD9-91BA-3D9B7325CFFE}
 		{A9CD41B6-749D-4E42-9D6B-524DBAB6609C} = {225ACB45-5BBE-48D0-A1FB-802E767F6D21}
 		{34B436F7-FD8E-4FD2-AD4C-27A47025A5E1} = {225ACB45-5BBE-48D0-A1FB-802E767F6D21}
+		{A2204F72-C6C8-1060-7AD3-6696365081AF} = {F517F8B5-53D1-43DB-B0FE-A603C8BD343F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2D6F818A-4305-467B-BB8E-E1AB2BEAC979}
