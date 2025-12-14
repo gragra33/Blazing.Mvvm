@@ -44,7 +44,7 @@ The binding is automatically wired up - when the ViewModel property changes, the
 - **Pages/Home.razor** - Landing page with MVVM navigation examples
 - **Pages/ParameterDemo.razor** - Shows parameter resolution with interactive counter buttons and child component
 - **Layout/MainLayout.razor** - Main layout with navigation counter
-- **Layout/NavMenu.raz** - Navigation menu
+- **Layout/NavMenu.razor** - Navigation menu
 - **Program.cs** - Configuration with `ParameterResolutionMode.ViewAndViewModel`
 
 ## Configuration
