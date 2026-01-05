@@ -5,7 +5,7 @@
 /// Supports optional naming for parameter mapping.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-public class ViewParameterAttribute : Attribute
+public sealed class ViewParameterAttribute : Attribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ViewParameterAttribute"/> class.

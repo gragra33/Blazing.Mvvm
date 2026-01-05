@@ -12,6 +12,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddSingleton<IWeatherService, ServerWeatherService>();
+builder.Services.AddSingleton<IUsersService, ServerUsersService>();
+builder.Services.AddSingleton<IPostsService, ServerPostsService>();
 builder.Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
 
 // Add Blazing.Mvvm
@@ -49,4 +51,16 @@ app.MapRazorComponents<App>()
 app.MapGet("/api/weatherforecast", (IWeatherService weatherService, CancellationToken cancellationToken)
     => weatherService.GetForecastAsync(cancellationToken));
 
-await app.RunAsync();
+app.MapGet("/api/users", (IUsersService usersService) 
+    => usersService.GetAllUsersAsync());
+
+app.MapGet("/api/users/{userId}", (string userId, IUsersService usersService) 
+    => usersService.GetUserByIdAsync(userId));
+
+app.MapGet("/api/users/{userId}/posts", (string userId, IPostsService postsService) 
+    => postsService.GetPostsByUserIdAsync(userId));
+
+app.MapGet("/api/users/{userId}/posts/{postId}", (string userId, string postId, IPostsService postsService) 
+    => postsService.GetPostByIdAsync(userId, postId));
+
+await app.RunAsync();await app.RunAsync();

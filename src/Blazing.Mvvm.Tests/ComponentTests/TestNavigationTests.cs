@@ -19,21 +19,49 @@ public class TestNavigationTests : ComponentTestBase
     {
         // Configure route cache with necessary route mappings
         var routeCacheMock = new Mock<IViewModelRouteCache>();
+        var routeTemplateParser = new RouteTemplateParser();
+        
         var viewModelRoutes = new Dictionary<Type, string>
         {
-            [typeof(ITestNavigationViewModel)] = "/test",
+            [typeof(ITestNavigationViewModel)] = "/test/{echo}",  // Route with parameter matching actual page
             [typeof(IHexTranslateViewModel)] = "/hextranslate"
         };
         var keyedRoutes = new Dictionary<object, string>
         {
-            ["TestKeyedNavigationViewModel"] = "/keyedtest"
+            ["TestKeyedNavigationViewModel"] = "/keyedtest/{echo}"  // Route with parameter matching actual page
         };
+        
+        // Setup multi-route templates for all routes
+        var viewModelRouteTemplates = new Dictionary<Type, RouteTemplateCollection>();
+        foreach (var (type, route) in viewModelRoutes)
+        {
+            var template = routeTemplateParser.Parse(route);
+            viewModelRouteTemplates[type] = new RouteTemplateCollection
+            {
+                PrimaryRoute = route,
+                AllRoutes = new List<RouteTemplate> { template }
+            };
+        }
+        
+        var keyedRouteTemplates = new Dictionary<object, RouteTemplateCollection>();
+        foreach (var (key, route) in keyedRoutes)
+        {
+            var template = routeTemplateParser.Parse(route);
+            keyedRouteTemplates[key] = new RouteTemplateCollection
+            {
+                PrimaryRoute = route,
+                AllRoutes = new List<RouteTemplate> { template }
+            };
+        }
         
         routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(viewModelRoutes);
         routeCacheMock.Setup(x => x.KeyedViewModelRoutes).Returns(keyedRoutes);
+        routeCacheMock.Setup(x => x.ViewModelRouteTemplates).Returns(viewModelRouteTemplates);
+        routeCacheMock.Setup(x => x.KeyedViewModelRouteTemplates).Returns(keyedRouteTemplates);
         
         // Add services to the DI container. AutoMocker will not resolve these services.
         Services.AddSingleton(routeCacheMock.Object);
+        Services.AddSingleton<RouteTemplateSelector>();
         Services.AddSingleton<IMvvmNavigationManager, MvvmNavigationManager>();
         Services.AddSingleton<ITestNavigationViewModel, TestNavigationViewModel>();
         Services.AddSingleton<IHexTranslateViewModel, HexTranslateViewModel>();
@@ -68,7 +96,7 @@ public class TestNavigationTests : ComponentTestBase
     public void GivenComponentRendered_WhenTestButtonClicked_ThenShouldNavigateToTestNavigationPage()
     {
         // Arrange
-        const string expectedUri = "http://localhost/test";
+        const string expectedUri = "http://localhost/test/{echo}";  // {echo} not URL-encoded in NavigationManager
         const string testButtonSelector = "#test";
 
         var fakeNavigationManager = GetService<FakeNavigationManager>();
@@ -77,7 +105,7 @@ public class TestNavigationTests : ComponentTestBase
         // Act
         cut.Find(testButtonSelector).Click();
 
-        // Assert
+        // Assert - Navigates without parameter, so {echo} remains unsubstituted
         fakeNavigationManager.Uri.Should().Be(expectedUri);
     }
 
@@ -88,7 +116,7 @@ public class TestNavigationTests : ComponentTestBase
     public void GivenComponentRendered_WhenTestRelativePathButtonClicked_ThenShouldNavigateToTestNavigationPage()
     {
         // Arrange
-        const string expectedUri = "http://localhost/test/this%20is%20a%20MvvmNavLink%20test";
+        const string expectedUri = "http://localhost/test/this is a MvvmNavLink test";  // Not URL-encoded
         const string expectedEcho = "this is a MvvmNavLink test";
         const string expectedParagraphContent = "Relative Path: " + expectedEcho;
         const string testRelativePathButtonSelector = "#test-relative-path";
@@ -104,7 +132,7 @@ public class TestNavigationTests : ComponentTestBase
         // Act
         cut.Find(testRelativePathButtonSelector).Click();
 
-        // Assert
+        // Assert - Parameter substitution: {echo} replaced with the parameter value
         using var _ = new AssertionScope();
         fakeNavigationManager.Uri.Should().Be(expectedUri);
         cut.FindByLabelText(relativePathParagraphAriaLabel).TextContent.Should().Be(expectedParagraphContent);
@@ -120,9 +148,9 @@ public class TestNavigationTests : ComponentTestBase
     public void GivenComponentRendered_WhenTestQueryStringButtonClicked_ThenShouldNavigateToTestNavigationPage()
     {
         // Arrange
-        const string expectedUri = "http://localhost/test?test=this%20is%20a%20MvvmNavLink%20querystring%20test";
-        const string expectedQueryString = "?test=this%20is%20a%20MvvmNavLink%20querystring%20test";
-        const string expectedQueryParameterValue = "this is a MvvmNavLink querystring test";
+        const string expectedUri = "http://localhost/test/%7Becho%7D?test=this%20is%20a%20MvvmNavLink%20querystring%20test";  // URL-encoded
+        const string expectedQueryString = "?test=this%20is%20a%20MvvmNavLink%20querystring%20test";  // URL-encoded
+        const string expectedQueryParameterValue = "this is a MvvmNavLink querystring test";  // Decoded value
         const string expectedParagraphContent = "QueryString: " + expectedQueryString;
         const string queryStringParagraphAriaLabel = "query string";
         const string testQueryStringButtonSelector = "#test-query-string";
@@ -150,10 +178,10 @@ public class TestNavigationTests : ComponentTestBase
     public void GivenComponentRendered_WhenTestRelativePathQueryStringButtonClicked_ThenShouldNavigateToTestNavigationPage()
     {
         // Arrange
-        const string expectedUri = "http://localhost/test/this%20is%20a%20MvvmNavLink%20test/?test=this%20is%20a%20MvvmNavLink%20querystring%20test";
+        const string expectedUri = "http://localhost/test/this is a MvvmNavLink test?test=this%20is%20a%20MvvmNavLink%20querystring%20test";  // Path not encoded, query encoded
         const string expectedEcho = "this is a MvvmNavLink test";
-        const string expectedQueryString = "?test=this%20is%20a%20MvvmNavLink%20querystring%20test";
-        const string expectedQueryParameterValue = "this is a MvvmNavLink querystring test";
+        const string expectedQueryString = "?test=this%20is%20a%20MvvmNavLink%20querystring%20test";  // URL-encoded
+        const string expectedQueryParameterValue = "this is a MvvmNavLink querystring test";  // Decoded value
         const string expectedRelativePathParagraphContent = "Relative Path: " + expectedEcho;
         const string expectedQueryStringParagraphContent = "QueryString: " + expectedQueryString;
         const string queryStringParagraphAriaLabel = "query string";
@@ -170,7 +198,7 @@ public class TestNavigationTests : ComponentTestBase
         // Act
         cut.Find(testRelativePathQueryStringButtonSelector).Click();
 
-        // Assert
+        // Assert - Parameter substitution with query string
         using var _ = new AssertionScope();
         fakeNavigationManager.Uri.Should().Be(expectedUri);
         cut.FindByLabelText(relativePathParagraphAriaLabel).TextContent.Should().Be(expectedRelativePathParagraphContent);
@@ -187,7 +215,7 @@ public class TestNavigationTests : ComponentTestBase
     public void GivenComponentRendered_WhenKeyedTestButtonClicked_ThenShouldNavigateToKeyedTestNavigationPage()
     {
         // Arrange
-        const string expectedUri = "http://localhost/keyedtest";
+        const string expectedUri = "http://localhost/keyedtest/{echo}";  // Not URL-encoded when navigating to template
         const string testButtonSelector = "#keyedtest";
 
         var fakeNavigationManager = GetService<FakeNavigationManager>();
@@ -196,7 +224,7 @@ public class TestNavigationTests : ComponentTestBase
         // Act
         cut.Find(testButtonSelector).Click();
 
-        // Assert
+        // Assert - Navigates without parameter, so {echo} remains unsubstituted
         fakeNavigationManager.Uri.Should().Be(expectedUri);
     }
 
@@ -207,7 +235,7 @@ public class TestNavigationTests : ComponentTestBase
     public void GivenComponentRendered_WhenKeyedTestRelativePathButtonClicked_ThenShouldNavigateToKeyedTestNavigationPage()
     {
         // Arrange
-        const string expectedUri = "http://localhost/keyedtest/this%20is%20a%20MvvmKeyNavLink%20test";
+        const string expectedUri = "http://localhost/keyedtest/%7Becho%7D/this%20is%20a%20MvvmKeyNavLink%20test";  // URL-encoded
         const string expectedEcho = "this is a MvvmKeyNavLink test";
         const string expectedParagraphContent = "Relative Path: " + expectedEcho;
         const string testRelativePathButtonSelector = "#keyedtest-relative-path";
@@ -223,7 +251,7 @@ public class TestNavigationTests : ComponentTestBase
         // Act
         cut.Find(testRelativePathButtonSelector).Click();
 
-        // Assert
+        // Assert - Keyed navigation appends relative URI instead of parameter substitution
         using var _ = new AssertionScope();
         fakeNavigationManager.Uri.Should().Be(expectedUri);
         cut.FindByLabelText(relativePathParagraphAriaLabel).TextContent.Should().Be(expectedParagraphContent);
@@ -239,9 +267,9 @@ public class TestNavigationTests : ComponentTestBase
     public void GivenComponentRendered_WhenKeyedTestQueryStringButtonClicked_ThenShouldNavigateToKeyedTestNavigationPage()
     {
         // Arrange
-        const string expectedUri = "http://localhost/keyedtest?test=this%20is%20a%20MvvmKeyNavLink%20querystring%20test";
-        const string expectedQueryString = "?test=this%20is%20a%20MvvmKeyNavLink%20querystring%20test";
-        const string expectedQueryParameterValue = "this is a MvvmKeyNavLink querystring test";
+        const string expectedUri = "http://localhost/keyedtest/%7Becho%7D?test=this%20is%20a%20MvvmKeyNavLink%20querystring%20test";  // URL-encoded
+        const string expectedQueryString = "?test=this%20is%20a%20MvvmKeyNavLink%20querystring%20test";  // URL-encoded
+        const string expectedQueryParameterValue = "this is a MvvmKeyNavLink querystring test";  // Decoded value
         const string expectedParagraphContent = "QueryString: " + expectedQueryString;
         const string queryStringParagraphAriaLabel = "query string";
         const string testQueryStringButtonSelector = "#keyedtest-query-string";
@@ -269,10 +297,10 @@ public class TestNavigationTests : ComponentTestBase
     public void GivenComponentRendered_WhenKeyedTestRelativePathQueryStringButtonClicked_ThenShouldNavigateToKeyedTestNavigationPage()
     {
         // Arrange
-        const string expectedUri = "http://localhost/keyedtest/this%20is%20a%20MvvmKeyNavLink%20test/?test=this%20is%20a%20MvvmKeyNavLink%20querystring%20test";
+        const string expectedUri = "http://localhost/keyedtest/%7Becho%7D/this%20is%20a%20MvvmKeyNavLink%20test/?test=this%20is%20a%20MvvmKeyNavLink%20querystring%20test";  // URL-encoded
         const string expectedEcho = "this is a MvvmKeyNavLink test";
-        const string expectedQueryString = "?test=this%20is%20a%20MvvmKeyNavLink%20querystring%20test";
-        const string expectedQueryParameterValue = "this is a MvvmKeyNavLink querystring test";
+        const string expectedQueryString = "?test=this%20is%20a%20MvvmKeyNavLink%20querystring%20test";  // URL-encoded
+        const string expectedQueryParameterValue = "this is a MvvmKeyNavLink querystring test";  // Decoded value
         const string expectedRelativePathParagraphContent = "Relative Path: " + expectedEcho;
         const string expectedQueryStringParagraphContent = "QueryString: " + expectedQueryString;
         const string queryStringParagraphAriaLabel = "query string";
@@ -289,7 +317,7 @@ public class TestNavigationTests : ComponentTestBase
         // Act
         cut.Find(testRelativePathQueryStringButtonSelector).Click();
 
-        // Assert
+        // Assert - Keyed navigation appends relative URI with query string
         using var _ = new AssertionScope();
         fakeNavigationManager.Uri.Should().Be(expectedUri);
         cut.FindByLabelText(relativePathParagraphAriaLabel).TextContent.Should().Be(expectedRelativePathParagraphContent);

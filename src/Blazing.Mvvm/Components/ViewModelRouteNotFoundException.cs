@@ -3,7 +3,7 @@
 /// <summary>
 /// Exception thrown when a ViewModel or key has no associated page route in the navigation cache.
 /// </summary>
-public class ViewModelRouteNotFoundException : ArgumentException
+public sealed class ViewModelRouteNotFoundException : ArgumentException
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ViewModelRouteNotFoundException"/> class for a ViewModel type.

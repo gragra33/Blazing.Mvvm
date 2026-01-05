@@ -1,0 +1,108 @@
+@page "/users/{userId}/posts/{postId}"
+@inject NavigationManager NavigationManager
+@inherits MvvmComponentBase<UserPostViewModel>
+
+<PageTitle>Post Details</PageTitle>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <button class="btn btn-link p-0" @onclick="ViewModel.BackToUsersCommand.Execute">Users</button>
+        </li>
+        <li class="breadcrumb-item">
+            <button class="btn btn-link p-0" @onclick="ViewModel.BackToUserCommand.Execute">@(ViewModel.User?.Name ?? UserId)</button>
+        </li>
+        <li class="breadcrumb-item">
+            <button class="btn btn-link p-0" @onclick="ViewModel.BackToPostsCommand.Execute">Posts</button>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Post #@PostId</li>
+    </ol>
+</nav>
+
+@* Debug Information *@
+<div class="alert alert-info mb-3">
+    <strong><i class="bi bi-bug"></i> Route Parameter Debug:</strong>
+    <ul class="mb-0">
+        <li><strong>UserId Parameter:</strong> @(UserId ?? "null")</li>
+        <li><strong>PostId Parameter:</strong> @(PostId ?? "null")</li>
+        <li><strong>ViewModel.UserId:</strong> @(ViewModel.UserId ?? "null")</li>
+        <li><strong>ViewModel.PostId:</strong> @(ViewModel.PostId ?? "null")</li>
+        <li><strong>User Loaded:</strong> @(ViewModel.User?.Name ?? "Not loaded")</li>
+        <li><strong>Post Loaded:</strong> @(ViewModel.Post?.Title ?? "Not loaded")</li>
+        <li><strong>Current URL:</strong> @NavigationManager.Uri</li>
+    </ul>
+</div>
+
+@if (ViewModel.IsLoading)
+{
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else if (ViewModel.PostNotFound)
+{
+    <div class="alert alert-danger">
+        <h4 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Post Not Found</h4>
+        <p>The post with ID <strong>@PostId</strong> could not be found for user <strong>@UserId</strong>.</p>
+        <hr>
+        <div class="btn-group" role="group">
+            <button class="btn btn-primary" @onclick="ViewModel.BackToPostsCommand.Execute">
+                <i class="bi bi-list-ul"></i> Back to Posts
+            </button>
+            <button class="btn btn-secondary" @onclick="ViewModel.BackToUserCommand.Execute">
+                <i class="bi bi-person"></i> Back to User
+            </button>
+        </div>
+    </div>
+}
+else if (ViewModel.Post != null && ViewModel.User != null)
+{
+    <article>
+        <header class="mb-4">
+            <h1><i class="bi bi-chat-left-quote"></i> @ViewModel.Post.Title</h1>
+            <div class="text-muted mb-2">
+                <span><i class="bi bi-person-circle"></i> By <strong>@ViewModel.User.Name</strong></span>
+                <span class="ms-3"><i class="bi bi-hash"></i> Post ID: @ViewModel.Post.Id</span>
+                <span class="ms-3"><i class="bi bi-person-badge"></i> User ID: @ViewModel.User.Id</span>
+            </div>
+        </header>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="post-content">
+                    @ViewModel.Post.Content
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+                <i class="bi bi-calendar3"></i> Published: @ViewModel.Post.CreatedAt.ToString("MMMM dd, yyyy")
+            </div>
+        </div>
+
+        <div class="mt-4 btn-group" role="group">
+            <button class="btn btn-primary" @onclick="ViewModel.BackToPostsCommand.Execute">
+                <i class="bi bi-list-ul"></i> Back to All Posts
+            </button>
+            <button class="btn btn-secondary" @onclick="ViewModel.BackToUserCommand.Execute">
+                <i class="bi bi-person"></i> Back to User Profile
+            </button>
+            <button class="btn btn-outline-secondary" @onclick="ViewModel.BackToUsersCommand.Execute">
+                <i class="bi bi-people"></i> Back to Users List
+            </button>
+        </div>
+    </article>
+}
+
+<style>
+    .post-content {
+        line-height: 1.8;
+        font-size: 1.1rem;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public string? UserId { get; set; }
+
+    [Parameter]
+    public string? PostId { get; set; }
+}

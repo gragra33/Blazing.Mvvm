@@ -7,6 +7,8 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.Services.AddSingleton(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddSingleton<IWeatherService, ClientWeatherService>();
+builder.Services.AddSingleton<IUsersService, ClientUsersService>();
+builder.Services.AddSingleton<IPostsService, ClientPostsService>();
 builder.Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
 
 // Add Blazing.Mvvm

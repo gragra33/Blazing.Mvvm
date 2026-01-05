@@ -7,6 +7,7 @@ using Bunit.TestDoubles;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
 
@@ -20,6 +21,8 @@ public class NavigationIntegrationTests : ComponentTestBase
     private readonly Mock<ILogger<ViewModelRouteCache>> _routeCacheLoggerMock;
     private readonly Mock<ILogger<MvvmNavigationManager>> _navManagerLoggerMock;
     private readonly Mock<IViewModelRouteCache> _routeCacheMock;
+    private readonly RouteTemplateParser _routeTemplateParser;
+    private readonly RouteTemplateSelector _routeTemplateSelector;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NavigationIntegrationTests"/> class and sets up test services and route cache mocks.
@@ -29,6 +32,9 @@ public class NavigationIntegrationTests : ComponentTestBase
         _routeCacheLoggerMock = new Mock<ILogger<ViewModelRouteCache>>();
         _navManagerLoggerMock = new Mock<ILogger<MvvmNavigationManager>>();
         _routeCacheMock = new Mock<IViewModelRouteCache>();
+        _routeTemplateParser = new RouteTemplateParser();
+        var selectorLogger = new NullLogger<RouteTemplateSelector>();
+        _routeTemplateSelector = new RouteTemplateSelector(selectorLogger);
 
         // Setup mock route cache with test routes
         var viewModelRoutes = new Dictionary<Type, string>
@@ -42,18 +48,61 @@ public class NavigationIntegrationTests : ComponentTestBase
             ["Admin"] = "/admin"
         };
 
+        // Setup multi-route templates
+        var viewModelRouteTemplates = new Dictionary<Type, RouteTemplateCollection>
+        {
+            [typeof(IHomeViewModel)] = CreateRouteTemplateCollection("/"),
+            [typeof(IProductViewModel)] = CreateRouteTemplateCollection("/products", "/products/{id}"),
+            [typeof(IAdminViewModel)] = CreateRouteTemplateCollection("/admin")
+        };
+        var keyedRouteTemplates = new Dictionary<object, RouteTemplateCollection>
+        {
+            ["Admin"] = CreateRouteTemplateCollection("/admin")
+        };
+
         _routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(viewModelRoutes);
         _routeCacheMock.Setup(x => x.KeyedViewModelRoutes).Returns(keyedRoutes);
+        _routeCacheMock.Setup(x => x.ViewModelRouteTemplates).Returns(viewModelRouteTemplates);
+        _routeCacheMock.Setup(x => x.KeyedViewModelRouteTemplates).Returns(keyedRouteTemplates);
 
         // Setup services
         Services.AddSingleton(Options.Create(new LibraryConfiguration()));
         Services.AddSingleton(_routeCacheLoggerMock.Object);
         Services.AddSingleton(_navManagerLoggerMock.Object);
         Services.AddSingleton(_routeCacheMock.Object);
+        Services.AddSingleton(_routeTemplateSelector);
         Services.AddSingleton<IMvvmNavigationManager, MvvmNavigationManager>();
         Services.AddSingleton<IHomeViewModel, HomeViewModel>();
         Services.AddSingleton<IProductViewModel, ProductViewModel>();
         Services.AddKeyedSingleton<IAdminViewModel, AdminViewModel>("Admin");
+    }
+
+    /// <summary>
+    /// Helper method to create a RouteTemplateCollection from a single route pattern.
+    /// </summary>
+    private RouteTemplateCollection CreateRouteTemplateCollection(string pattern)
+    {
+        var template = _routeTemplateParser.Parse(pattern);
+        return new RouteTemplateCollection
+        {
+            PrimaryRoute = pattern,
+            AllRoutes = new List<RouteTemplate> { template }
+        };
+    }
+
+    /// <summary>
+    /// Helper method to create a RouteTemplateCollection from multiple route patterns.
+    /// </summary>
+    private RouteTemplateCollection CreateRouteTemplateCollection(params string[] patterns)
+    {
+        var templates = _routeTemplateParser.ParseMany(patterns);
+        // Primary route is the first one without parameters or the first one
+        var primaryRoute = patterns.FirstOrDefault(p => !p.Contains('{')) ?? patterns[0];
+        return new RouteTemplateCollection
+        {
+            PrimaryRoute = primaryRoute,
+            AllRoutes = templates
+        };
     }
 
     /// <summary>
@@ -369,9 +418,20 @@ public class NavigationIntegrationTests : ComponentTestBase
         var routes = new Dictionary<Type, string> { [typeof(IProductViewModel)] = "/api/v1/products" };
         routeCache.Setup(x => x.ViewModelRoutes).Returns(routes);
         
-        var config = Options.Create(new LibraryConfiguration()); // No configured BasePath
+        // Setup multi-route templates
+        var routeTemplates = new Dictionary<Type, RouteTemplateCollection>
+        {
+            [typeof(IProductViewModel)] = CreateRouteTemplateCollection("/api/v1/products")
+        };
+        routeCache.Setup(x => x.ViewModelRouteTemplates).Returns(routeTemplates);
+        routeCache.Setup(x => x.KeyedViewModelRouteTemplates).Returns(new Dictionary<object, RouteTemplateCollection>());
+        
+        // Enable multi-route templates
+        var config = Options.Create(new LibraryConfiguration { EnableMultiRouteTemplates = true });
         var logger = new Mock<ILogger<MvvmNavigationManager>>();
-        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config);
+        var selectorLogger = new NullLogger<RouteTemplateSelector>();
+        var routeTemplateSelector = new RouteTemplateSelector(selectorLogger);
+        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config, routeTemplateSelector);
 
         // Act
         mvvmNavManager.NavigateTo<IProductViewModel>();
@@ -394,9 +454,20 @@ public class NavigationIntegrationTests : ComponentTestBase
         var routes = new Dictionary<Type, string> { [typeof(IHomeViewModel)] = "/app/tenant/123/dashboard" };
         routeCache.Setup(x => x.ViewModelRoutes).Returns(routes);
         
-        var config = Options.Create(new LibraryConfiguration()); // No configured BasePath
+        // Setup multi-route templates
+        var routeTemplates = new Dictionary<Type, RouteTemplateCollection>
+        {
+            [typeof(IHomeViewModel)] = CreateRouteTemplateCollection("/app/tenant/123/dashboard")
+        };
+        routeCache.Setup(x => x.ViewModelRouteTemplates).Returns(routeTemplates);
+        routeCache.Setup(x => x.KeyedViewModelRouteTemplates).Returns(new Dictionary<object, RouteTemplateCollection>());
+        
+        // Enable multi-route templates
+        var config = Options.Create(new LibraryConfiguration { EnableMultiRouteTemplates = true });
         var logger = new Mock<ILogger<MvvmNavigationManager>>();
-        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config);
+        var selectorLogger = new NullLogger<RouteTemplateSelector>();
+        var routeTemplateSelector = new RouteTemplateSelector(selectorLogger);
+        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config, routeTemplateSelector);
 
         // Act
         mvvmNavManager.NavigateTo<IHomeViewModel>();
@@ -419,11 +490,21 @@ public class NavigationIntegrationTests : ComponentTestBase
         var routes = new Dictionary<Type, string> { [typeof(IProductViewModel)] = "/configured/path/products" };
         routeCache.Setup(x => x.ViewModelRoutes).Returns(routes);
         
+        // Setup multi-route templates
+        var routeTemplates = new Dictionary<Type, RouteTemplateCollection>
+        {
+            [typeof(IProductViewModel)] = CreateRouteTemplateCollection("/configured/path/products")
+        };
+        routeCache.Setup(x => x.ViewModelRouteTemplates).Returns(routeTemplates);
+        routeCache.Setup(x => x.KeyedViewModelRouteTemplates).Returns(new Dictionary<object, RouteTemplateCollection>());
+        
 #pragma warning disable CS0618 // Type or member is obsolete
-        var config = Options.Create(new LibraryConfiguration { BasePath = "/configured/path/" });
+        var config = Options.Create(new LibraryConfiguration { BasePath = "/configured/path/", EnableMultiRouteTemplates = true });
 #pragma warning restore CS0618 // Type or member is obsolete
         var logger = new Mock<ILogger<MvvmNavigationManager>>();
-        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config);
+        var selectorLogger = new NullLogger<RouteTemplateSelector>();
+        var routeTemplateSelector = new RouteTemplateSelector(selectorLogger);
+        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config, routeTemplateSelector);
 
         // Act
         mvvmNavManager.NavigateTo<IProductViewModel>();
@@ -452,9 +533,22 @@ public class NavigationIntegrationTests : ComponentTestBase
         routeCache.Setup(x => x.ViewModelRoutes).Returns(routes);
         routeCache.Setup(x => x.KeyedViewModelRoutes).Returns(new Dictionary<object, string>());
         
-        var config = Options.Create(new LibraryConfiguration()); // No configured BasePath
+        // Setup multi-route templates
+        var routeTemplates = new Dictionary<Type, RouteTemplateCollection>
+        {
+            [typeof(IHomeViewModel)] = CreateRouteTemplateCollection("/myapp"),
+            [typeof(IProductViewModel)] = CreateRouteTemplateCollection("/myapp/products"),
+            [typeof(IAdminViewModel)] = CreateRouteTemplateCollection("/myapp/admin")
+        };
+        routeCache.Setup(x => x.ViewModelRouteTemplates).Returns(routeTemplates);
+        routeCache.Setup(x => x.KeyedViewModelRouteTemplates).Returns(new Dictionary<object, RouteTemplateCollection>());
+        
+        // Enable multi-route templates
+        var config = Options.Create(new LibraryConfiguration { EnableMultiRouteTemplates = true });
         var logger = new Mock<ILogger<MvvmNavigationManager>>();
-        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config);
+        var selectorLogger = new NullLogger<RouteTemplateSelector>();
+        var routeTemplateSelector = new RouteTemplateSelector(selectorLogger);
+        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config, routeTemplateSelector);
 
         // Act & Assert - Simulate user journey
         // 1. Navigate to home
@@ -488,9 +582,20 @@ public class NavigationIntegrationTests : ComponentTestBase
         var routes = new Dictionary<Type, string> { [typeof(IProductViewModel)] = "/products" };
         routeCache.Setup(x => x.ViewModelRoutes).Returns(routes);
         
-        var config = Options.Create(new LibraryConfiguration()); // No configured BasePath
+        // Setup multi-route templates
+        var routeTemplates = new Dictionary<Type, RouteTemplateCollection>
+        {
+            [typeof(IProductViewModel)] = CreateRouteTemplateCollection("/products")
+        };
+        routeCache.Setup(x => x.ViewModelRouteTemplates).Returns(routeTemplates);
+        routeCache.Setup(x => x.KeyedViewModelRouteTemplates).Returns(new Dictionary<object, RouteTemplateCollection>());
+        
+        // Enable multi-route templates
+        var config = Options.Create(new LibraryConfiguration { EnableMultiRouteTemplates = true });
         var logger = new Mock<ILogger<MvvmNavigationManager>>();
-        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config);
+        var selectorLogger = new NullLogger<RouteTemplateSelector>();
+        var routeTemplateSelector = new RouteTemplateSelector(selectorLogger);
+        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config, routeTemplateSelector);
 
         // Act
         mvvmNavManager.NavigateTo<IProductViewModel>();
@@ -514,9 +619,20 @@ public class NavigationIntegrationTests : ComponentTestBase
         routeCache.Setup(x => x.ViewModelRoutes).Returns(new Dictionary<Type, string>());
         routeCache.Setup(x => x.KeyedViewModelRoutes).Returns(keyedRoutes);
         
-        var config = Options.Create(new LibraryConfiguration()); // No configured BasePath
+        // Setup multi-route templates
+        var keyedRouteTemplates = new Dictionary<object, RouteTemplateCollection>
+        {
+            ["AdminKey"] = CreateRouteTemplateCollection("/app/admin")
+        };
+        routeCache.Setup(x => x.ViewModelRouteTemplates).Returns(new Dictionary<Type, RouteTemplateCollection>());
+        routeCache.Setup(x => x.KeyedViewModelRouteTemplates).Returns(keyedRouteTemplates);
+        
+        // Enable multi-route templates
+        var config = Options.Create(new LibraryConfiguration { EnableMultiRouteTemplates = true });
         var logger = new Mock<ILogger<MvvmNavigationManager>>();
-        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config);
+        var selectorLogger = new NullLogger<RouteTemplateSelector>();
+        var routeTemplateSelector = new RouteTemplateSelector(selectorLogger);
+        var mvvmNavManager = new MvvmNavigationManager(navigationManager, logger.Object, routeCache.Object, config, routeTemplateSelector);
 
         // Act
         mvvmNavManager.NavigateTo("AdminKey");

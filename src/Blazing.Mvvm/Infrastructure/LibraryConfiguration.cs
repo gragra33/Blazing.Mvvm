@@ -6,7 +6,7 @@ namespace Blazing.Mvvm;
 /// <summary>
 /// Provides configuration options for the Blazing.Mvvm library, including hosting model, parameter resolution, base path, and view model assembly registration.
 /// </summary>
-public class LibraryConfiguration
+public sealed class LibraryConfiguration
 {
     private readonly HashSet<Assembly> _viewModelAssemblies = [];
 
@@ -21,6 +21,32 @@ public class LibraryConfiguration
     /// and falls back to the default behaviour of the Blazor framework.
     /// </summary>
     public ParameterResolutionMode ParameterResolutionMode { get; set; } = ParameterResolutionMode.None;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether multi-route template support is enabled.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// When enabled (default), components with multiple <c>@page</c> directives can have all their route templates
+    /// cached and used for smart route selection during navigation. The navigation manager will automatically
+    /// select the most appropriate route template based on the parameters provided.
+    /// </para>
+    /// <para>
+    /// When disabled, the library reverts to legacy behavior where only the first (simplest) route template
+    /// is cached per ViewModel. This option is provided for backward compatibility scenarios.
+    /// </para>
+    /// <para><b>Default:</b> <c>true</c> (enabled)</para>
+    /// <para><b>Recommendation:</b> Keep enabled unless experiencing compatibility issues with existing code.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// builder.Services.AddMvvm(options =>
+    /// {
+    ///     options.EnableMultiRouteTemplates = true; // Default behavior
+    /// });
+    /// </code>
+    /// </example>
+    public bool EnableMultiRouteTemplates { get; set; } = true;
 
     /// <summary>
     /// Gets the assemblies containing the view models registered for the application.

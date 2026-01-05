@@ -15,6 +15,7 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     private readonly IViewModelRouteCache _routeCache;
     private readonly ILogger<MvvmNavigationManager> _logger;
     private readonly IOptions<LibraryConfiguration> _libraryConfiguration;
+    private readonly RouteTemplateSelector _routeTemplateSelector;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MvvmNavigationManager"/> class.
@@ -23,29 +24,45 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     /// <param name="logger">The logger for diagnostic information.</param>
     /// <param name="routeCache">The ViewModel route cache containing cached ViewModel-to-route mappings.</param>
     /// <param name="libraryConfiguration">The library configuration containing base path and other settings.</param>
-    public MvvmNavigationManager(NavigationManager navigationManager, ILogger<MvvmNavigationManager> logger, IViewModelRouteCache routeCache, IOptions<LibraryConfiguration> libraryConfiguration)
+    /// <param name="routeTemplateSelector">The route template selector for choosing the best route template based on parameters.</param>
+    public MvvmNavigationManager(NavigationManager navigationManager, ILogger<MvvmNavigationManager> logger, IViewModelRouteCache routeCache, IOptions<LibraryConfiguration> libraryConfiguration, RouteTemplateSelector routeTemplateSelector)
     {
         _navigationManager = navigationManager;
         _logger = logger;
         _routeCache = routeCache;
         _libraryConfiguration = libraryConfiguration;
+        _routeTemplateSelector = routeTemplateSelector;
     }
 
     /// <summary>
     /// Gets the cached URI for the specified ViewModel type and resolves it for navigation.
     /// </summary>
     /// <typeparam name="TViewModel">The ViewModel type to get the URI for.</typeparam>
+    /// <param name="parameters">Optional route parameters to substitute into the template.</param>
     /// <returns>The resolved navigation URI.</returns>
     /// <exception cref="ViewModelRouteNotFoundException">Thrown when the ViewModel type has no associated route.</exception>
-    private string GetResolvedUriForViewModel<TViewModel>() where TViewModel : IViewModelBase
+    private string GetResolvedUriForViewModel<TViewModel>(string? parameters = null) where TViewModel : IViewModelBase
     {
+        // Try multi-route template support first (v1.0 feature)
+        if (_libraryConfiguration.Value.EnableMultiRouteTemplates && 
+            _routeCache.ViewModelRouteTemplates.TryGetValue(typeof(TViewModel), out var templates))
+        {
+            RouteTemplate selectedTemplate = _routeTemplateSelector.SelectBestTemplate(templates, parameters);
+            LogRouteTemplateSelected(typeof(TViewModel).Name, selectedTemplate.Pattern, templates.AllRoutes.Count);
+            
+            string selectedUri = ResolveNavigationUri(selectedTemplate.Pattern, parameters);
+            LogResolvedUri(typeof(TViewModel).Name, selectedTemplate.Pattern, selectedUri);
+            return selectedUri;
+        }
+        
+        // Fallback to legacy single-route cache (backward compatibility)
         if (!_routeCache.ViewModelRoutes.TryGetValue(typeof(TViewModel), out string? uriFromCache))
         {
             throw new ViewModelRouteNotFoundException(typeof(TViewModel));
         }
 
         LogUriResolution(typeof(TViewModel).Name, uriFromCache);
-        string resolvedUri = ResolveNavigationUri(uriFromCache);
+        string resolvedUri = ResolveNavigationUri(uriFromCache, parameters);
         LogResolvedUri(typeof(TViewModel).Name, uriFromCache, resolvedUri);
         return resolvedUri;
     }
@@ -54,17 +71,31 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     /// Gets the cached URI for the specified key and resolves it for navigation.
     /// </summary>
     /// <param name="key">The key to get the URI for.</param>
+    /// <param name="parameters">Optional route parameters to substitute into the template.</param>
     /// <returns>The resolved navigation URI.</returns>
     /// <exception cref="ViewModelRouteNotFoundException">Thrown when the key has no associated route.</exception>
-    private string GetResolvedUriForKey(object key)
+    private string GetResolvedUriForKey(object key, string? parameters = null)
     {
+        // Try multi-route template support first (v1.0 feature)
+        if (_libraryConfiguration.Value.EnableMultiRouteTemplates && 
+            _routeCache.KeyedViewModelRouteTemplates.TryGetValue(key, out var templates))
+        {
+            RouteTemplate selectedTemplate = _routeTemplateSelector.SelectBestTemplate(templates, parameters);
+            LogKeyedRouteTemplateSelected(key, selectedTemplate.Pattern, templates.AllRoutes.Count);
+            
+            string selectedUri = ResolveNavigationUri(selectedTemplate.Pattern, parameters);
+            LogResolvedKeyedUri(key, selectedTemplate.Pattern, selectedUri);
+            return selectedUri;
+        }
+        
+        // Fallback to legacy single-route cache (backward compatibility)
         if (!_routeCache.KeyedViewModelRoutes.TryGetValue(key, out string? uriFromCache))
         {
             throw new ViewModelRouteNotFoundException(key);
         }
 
         LogKeyedUriResolution(key, uriFromCache);
-        string resolvedUri = ResolveNavigationUri(uriFromCache);
+        string resolvedUri = ResolveNavigationUri(uriFromCache, parameters);
         LogResolvedKeyedUri(key, uriFromCache, resolvedUri);
         return resolvedUri;
     }
@@ -93,11 +124,24 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     {
         ArgumentNullException.ThrowIfNull(relativeUri);
 
-        string resolvedUri = GetResolvedUriForViewModel<TViewModel>();
-        string finalUri = BuildUri(_navigationManager.ToAbsoluteUri(resolvedUri).AbsoluteUri, relativeUri);
-
-        LogNavigationEvent(typeof(TViewModel).FullName, finalUri);
-        _navigationManager.NavigateTo(finalUri, forceLoad, replace);
+        // Check if relativeUri is query string only (starts with ?)
+        if (relativeUri.StartsWith('?'))
+        {
+            // Query string only - get base URI and append query string
+            string resolvedUri = GetResolvedUriForViewModel<TViewModel>();
+            string finalUri = BuildUri(_navigationManager.ToAbsoluteUri(resolvedUri).AbsoluteUri, relativeUri);
+            
+            LogNavigationEvent(typeof(TViewModel).FullName, finalUri);
+            _navigationManager.NavigateTo(finalUri, forceLoad, replace);
+        }
+        else
+        {
+            // Path segments (with or without query string) - let ResolveNavigationUri handle parameter substitution
+            string resolvedUri = GetResolvedUriForViewModel<TViewModel>(relativeUri);
+            
+            LogNavigationEvent(typeof(TViewModel).FullName, resolvedUri);
+            _navigationManager.NavigateTo(resolvedUri, forceLoad, replace);
+        }
     }
 
     /// <inheritdoc/>
@@ -106,11 +150,24 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     {
         ArgumentNullException.ThrowIfNull(relativeUri);
 
-        string resolvedUri = GetResolvedUriForViewModel<TViewModel>();
-        string finalUri = BuildUri(_navigationManager.ToAbsoluteUri(resolvedUri).AbsoluteUri, relativeUri);
+        // Check if relativeUri is query string only (starts with ?)
+        if (relativeUri.StartsWith('?'))
+        {
+            // Query string only - get base URI and append query string
+            string resolvedUri = GetResolvedUriForViewModel<TViewModel>();
+            string finalUri = BuildUri(_navigationManager.ToAbsoluteUri(resolvedUri).AbsoluteUri, relativeUri);
 
-        LogNavigationEvent(typeof(TViewModel).FullName, finalUri);
-        _navigationManager.NavigateTo(finalUri, CloneNavigationOptions(options));
+            LogNavigationEvent(typeof(TViewModel).FullName, finalUri);
+            _navigationManager.NavigateTo(finalUri, CloneNavigationOptions(options));
+        }
+        else
+        {
+            // Path segments (with or without query string) - let ResolveNavigationUri handle parameter substitution
+            string resolvedUri = GetResolvedUriForViewModel<TViewModel>(relativeUri);
+
+            LogNavigationEvent(typeof(TViewModel).FullName, resolvedUri);
+            _navigationManager.NavigateTo(resolvedUri, CloneNavigationOptions(options));
+        }
     }
 
     /// <inheritdoc/>
@@ -201,32 +258,51 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         }
         
         // 2. Extract from NavigationManager.BaseUri (dynamic YARP support)
-        var baseUri = new Uri(_navigationManager.BaseUri);
-        string localPath = baseUri.LocalPath.Trim('/');
-        string? dynamicBasePath = string.IsNullOrEmpty(localPath) ? null : localPath;
-        
-        if (dynamicBasePath != null)
+        // Guard: Check if NavigationManager is initialized before accessing BaseUri
+        try
         {
-            LogDynamicBasePath(dynamicBasePath);
+            var baseUri = new Uri(_navigationManager.BaseUri);
+            string localPath = baseUri.LocalPath.Trim('/');
+            string? dynamicBasePath = string.IsNullOrEmpty(localPath) ? null : localPath;
+            
+            if (dynamicBasePath != null)
+            {
+                LogDynamicBasePath(dynamicBasePath);
+            }
+            
+            return dynamicBasePath;
         }
-        
-        return dynamicBasePath;
+        catch (InvalidOperationException)
+        {
+            // NavigationManager not yet initialized - return null to use default behavior
+            LogNavigationManagerNotInitialized();
+            return null;
+        }
     }
 
     /// <summary>
     /// Resolves a route template to a navigation URI at runtime, handling base path and root path scenarios.
     /// </summary>
     /// <param name="routeTemplate">The route template from the cache to resolve.</param>
+    /// <param name="parameters">Optional route parameters to substitute into the template.</param>
     /// <returns>The resolved navigation URI ready for browser navigation.</returns>
-    private string ResolveNavigationUri(string routeTemplate)
+    private string ResolveNavigationUri(string routeTemplate, string? parameters = null)
     {
         LogRouteTemplateResolution(routeTemplate);
         
+        // Substitute route parameters if provided
+        string workingTemplate = routeTemplate;
+        if (!string.IsNullOrWhiteSpace(parameters))
+        {
+            workingTemplate = SubstituteRouteParameters(routeTemplate, parameters);
+            LogRouteParameterSubstitution(routeTemplate, parameters, workingTemplate);
+        }
+        
         // Handle root path
-        if (routeTemplate == "/")
+        if (workingTemplate == "/")
         {
             string rootPath = new Uri(_navigationManager.BaseUri).LocalPath;
-            LogRootPathResolution(routeTemplate, rootPath);
+            LogRootPathResolution(workingTemplate, rootPath);
             return rootPath;
         }
 
@@ -234,9 +310,9 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
         string? basePath = GetBasePathForResolution();
 
         // Handle absolute paths
-        if (routeTemplate.StartsWith("/"))
+        if (workingTemplate.StartsWith("/"))
         {
-            string workingUri = routeTemplate;
+            string workingUri = workingTemplate;
             
             // If we have a BasePath and the route template starts with it, remove it
             if (!string.IsNullOrEmpty(basePath))
@@ -246,13 +322,13 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
                 {
                     // Remove BasePath prefix: "/test/counter" -> "/counter"
                     workingUri = workingUri.Substring(basePathWithSlash.Length);
-                    LogBasePathRemoval(routeTemplate, basePathWithSlash, workingUri);
+                    LogBasePathRemoval(workingTemplate, basePathWithSlash, workingUri);
                 }
                 else if (workingUri.Equals(basePathWithSlash, StringComparison.OrdinalIgnoreCase))
                 {
                     // BasePath root: "/test" -> "/"
                     workingUri = "/";
-                    LogBasePathRootRemoval(routeTemplate, basePathWithSlash, workingUri);
+                    LogBasePathRootRemoval(workingTemplate, basePathWithSlash, workingUri);
                 }
             }
             
@@ -270,8 +346,76 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
             }
         }
         
-        LogUnchangedRouteTemplate(routeTemplate);
-        return routeTemplate;
+        LogUnchangedRouteTemplate(workingTemplate);
+        return workingTemplate;
+    }
+
+    /// <summary>
+    /// Substitutes route parameters in a route template with actual values.
+    /// Supports both single and multiple route parameters, with optional query string.
+    /// </summary>
+    /// <param name="routeTemplate">The route template containing parameter placeholders (e.g., "/accessions/{AccessionNumber}").</param>
+    /// <param name="parameterValues">The parameter value(s) to substitute. Can be a single value, slash-separated values, or values with query string.</param>
+    /// <returns>The route template with parameters substituted and query string appended if present.</returns>
+    /// <remarks>
+    /// Examples:
+    /// - Template: "/accessions/{id}", Value: "123" → "/accessions/123"
+    /// - Template: "/users/{userId}/posts/{postId}", Value: "42/789" → "/users/42/posts/789"
+    /// - Template: "/items/{id}", Value: "123?test=value" → "/items/123?test=value"
+    /// - Template: "/users/{userId}/posts/{postId}", Value: "42/789?test=value" → "/users/42/posts/789?test=value"
+    /// </remarks>
+    private static string SubstituteRouteParameters(string routeTemplate, string parameterValues)
+    {
+        // Separate path parameters from query string if present
+        string pathPart = parameterValues;
+        string? queryPart = null;
+        
+        int queryIndex = parameterValues.IndexOf('?');
+        if (queryIndex >= 0)
+        {
+            pathPart = parameterValues.Substring(0, queryIndex);
+            queryPart = parameterValues.Substring(queryIndex); // includes the '?'
+        }
+        
+        // Find all parameter placeholders in the template
+        var parameterPattern = new System.Text.RegularExpressions.Regex(@"\{([^}]+)\}");
+        var matches = parameterPattern.Matches(routeTemplate);
+        
+        if (matches.Count == 0)
+        {
+            // No parameters in template, return as-is (with query string if present)
+            return queryPart != null ? routeTemplate + queryPart : routeTemplate;
+        }
+
+        // Split parameter values by '/' for multiple parameters
+        string[] values = pathPart.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        
+        string result = routeTemplate;
+        int valueIndex = 0;
+        
+        // Replace each parameter placeholder with its corresponding value
+        foreach (System.Text.RegularExpressions.Match match in matches)
+        {
+            if (valueIndex < values.Length)
+            {
+                // Replace the entire placeholder including braces
+                result = result.Replace(match.Value, values[valueIndex]);
+                valueIndex++;
+            }
+            else
+            {
+                // Not enough parameter values provided - log warning but continue
+                break;
+            }
+        }
+        
+        // Append query string if present
+        if (queryPart != null)
+        {
+            result += queryPart;
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -450,6 +594,39 @@ public partial class MvvmNavigationManager : IMvvmNavigationManager
     /// <param name="routeTemplate">The unchanged route template.</param>
     [LoggerMessage(LogLevel.Debug, Message = "Route template '{RouteTemplate}' returned unchanged")]
     private partial void LogUnchangedRouteTemplate(string routeTemplate);
+
+    /// <summary>
+    /// Logs route parameter substitution.
+    /// </summary>
+    /// <param name="originalTemplate">The original route template with placeholders.</param>
+    /// <param name="parameters">The parameter values being substituted.</param>
+    /// <param name="result">The resulting route after substitution.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Substituted route parameters in '{OriginalTemplate}' with values '{Parameters}' resulting in '{Result}'")]
+    private partial void LogRouteParameterSubstitution(string originalTemplate, string parameters, string result);
+
+    /// <summary>
+    /// Logs when NavigationManager is not yet initialized - using default behavior as fallback.
+    /// </summary>
+    [LoggerMessage(LogLevel.Debug, Message = "NavigationManager not yet initialized - using default behavior")]
+    private partial void LogNavigationManagerNotInitialized();
+
+    /// <summary>
+    /// Logs route template selection for ViewModel navigation.
+    /// </summary>
+    /// <param name="viewModelName">The ViewModel name being navigated to.</param>
+    /// <param name="selectedTemplate">The selected route template pattern.</param>
+    /// <param name="totalTemplates">The total number of available templates.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Selected route template '{SelectedTemplate}' for ViewModel '{ViewModelName}' from {TotalTemplates} available templates")]
+    private partial void LogRouteTemplateSelected(string viewModelName, string selectedTemplate, int totalTemplates);
+
+    /// <summary>
+    /// Logs route template selection for keyed navigation.
+    /// </summary>
+    /// <param name="key">The key being navigated to.</param>
+    /// <param name="selectedTemplate">The selected route template pattern.</param>
+    /// <param name="totalTemplates">The total number of available templates.</param>
+    [LoggerMessage(LogLevel.Debug, Message = "Selected route template '{SelectedTemplate}' for key '{Key}' from {TotalTemplates} available templates")]
+    private partial void LogKeyedRouteTemplateSelected(object key, string selectedTemplate, int totalTemplates);
 
     #endregion Logging Methods
 

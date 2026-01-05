@@ -11,12 +11,15 @@ namespace Blazing.Mvvm.Components.Routing;
 /// <remarks>
 /// This cache is used to efficiently resolve navigation routes for ViewModels and keyed ViewModels, supporting both type-based and key-based navigation.
 /// </remarks>
-public class ViewModelRouteCache : IViewModelRouteCache
+public sealed class ViewModelRouteCache : IViewModelRouteCache
 {
     private readonly ILogger<ViewModelRouteCache> _logger;
-    private readonly LibraryConfiguration _configuration; 
+    private readonly LibraryConfiguration _configuration;
+    private readonly RouteTemplateParser _parser;
     private readonly Dictionary<Type, string> _viewModelRoutes = [];
     private readonly Dictionary<object, string> _keyedViewModelRoutes = [];
+    private readonly Dictionary<Type, RouteTemplateCollection> _viewModelRouteTemplates = [];
+    private readonly Dictionary<object, RouteTemplateCollection> _keyedViewModelRouteTemplates = [];
 
     /// <inheritdoc />
     /// <summary>
@@ -30,6 +33,18 @@ public class ViewModelRouteCache : IViewModelRouteCache
     /// </summary>
     public IReadOnlyDictionary<object, string> KeyedViewModelRoutes => _keyedViewModelRoutes;
 
+    /// <inheritdoc />
+    /// <summary>
+    /// Gets the cached route template collections for ViewModels.
+    /// </summary>
+    public IReadOnlyDictionary<Type, RouteTemplateCollection> ViewModelRouteTemplates => _viewModelRouteTemplates;
+
+    /// <inheritdoc />
+    /// <summary>
+    /// Gets the cached route template collections for keyed ViewModels.
+    /// </summary>
+    public IReadOnlyDictionary<object, RouteTemplateCollection> KeyedViewModelRouteTemplates => _keyedViewModelRouteTemplates;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ViewModelRouteCache"/> class, sets up logging and configuration, and generates the reference cache.
     /// </summary>
@@ -38,7 +53,8 @@ public class ViewModelRouteCache : IViewModelRouteCache
     public ViewModelRouteCache(ILogger<ViewModelRouteCache> logger, LibraryConfiguration configuration) 
     {
         _logger = logger;
-        _configuration = configuration; 
+        _configuration = configuration;
+        _parser = new RouteTemplateParser();
         GenerateReferenceCache(configuration.ViewModelAssemblies);
     }
 
@@ -87,47 +103,145 @@ public class ViewModelRouteCache : IViewModelRouteCache
 
             foreach ((Type Type, Type? Argument) item in items)
             {
-                RouteAttribute? routeAttribute = item.Type.GetCustomAttributes<RouteAttribute>().FirstOrDefault();
+                // Collect ALL RouteAttributes for multi-route template support
+                var routeAttributes = item.Type.GetCustomAttributes<RouteAttribute>().ToList();
 
-                if (routeAttribute is null)
+                if (routeAttributes.Count == 0)
                 {
                     _logger.LogDebug("View {ViewType} does not have a RouteAttribute", item.Type.FullName);
                     continue;
                 }
 
-                string uri = routeAttribute.Template;
-#pragma warning disable CS0618 // Type or member is obsolete
-                if (!string.IsNullOrWhiteSpace(_configuration.BasePath))
+                // Process ViewModel type routes
+                if (item.Argument != null)
                 {
-                    uri = $"{_configuration.BasePath.TrimEnd('/')}/{uri.TrimStart('/')}";
-                }
-#pragma warning restore CS0618 // Type or member is obsolete
-                
-                if (item.Argument != null && _viewModelRoutes.TryAdd(item.Argument, uri))
-                {
-                    _logger.LogDebug("Caching navigation reference '{Argument}' with uri '{Uri}' for '{FullName}'", item.Argument, uri, item.Type.FullName);
-                }
-                else if (item.Argument != null && _viewModelRoutes.ContainsKey(item.Argument))
-                {
-                    _logger.LogWarning("Duplicate ViewModel type {ViewModelType} found. Existing route: '{ExistingRoute}', Ignored route: '{NewRoute}'", 
-                        item.Argument.FullName, _viewModelRoutes[item.Argument], uri);
+                    ProcessViewModelRoutes(item.Type, item.Argument, routeAttributes);
                 }
 
+                // Process keyed ViewModel routes
                 ViewModelKeyAttribute? vmKeyAttribute = item.Type.GetCustomAttribute<ViewModelKeyAttribute>();
-                if (vmKeyAttribute?.Key != null && _keyedViewModelRoutes.TryAdd(vmKeyAttribute.Key, uri))
+                if (vmKeyAttribute?.Key != null)
                 {
-                    _logger.LogDebug("Caching keyed navigation reference '{Key}' with uri '{Uri}' for '{FullName}'", vmKeyAttribute.Key, uri, item.Type.FullName);
-                }
-                else if (vmKeyAttribute?.Key != null && _keyedViewModelRoutes.ContainsKey(vmKeyAttribute.Key))
-                {
-                    _logger.LogWarning("Duplicate ViewModel key {ViewModelKey} found. Existing route: '{ExistingRoute}', Ignored route: '{NewRoute}'", 
-                        vmKeyAttribute.Key, _keyedViewModelRoutes[vmKeyAttribute.Key], uri);
+                    ProcessKeyedViewModelRoutes(item.Type, vmKeyAttribute.Key, routeAttributes);
                 }
             }
         }
         
         _logger.LogDebug("Completed generating the Reference Cache for ViewModelRouteCache. Total ViewModels cached: {ViewModelCount}, Total keyed ViewModels cached: {KeyedViewModelCount}", 
             _viewModelRoutes.Count, _keyedViewModelRoutes.Count);
+        _logger.LogDebug("Multi-template cache: {TemplateCount} ViewModel templates, {KeyedTemplateCount} keyed ViewModel templates",
+            _viewModelRouteTemplates.Count, _keyedViewModelRouteTemplates.Count);
+    }
+
+    /// <summary>
+    /// Processes route attributes for a ViewModel type and populates both legacy and multi-template caches.
+    /// </summary>
+    private void ProcessViewModelRoutes(Type viewType, Type viewModelType, List<RouteAttribute> routeAttributes)
+    {
+        // Apply BasePath to all routes
+        var processedRoutes = routeAttributes
+            .Select(ra => ApplyBasePath(ra.Template))
+            .ToList();
+
+        // Parse all route templates
+        var templates = _parser.ParseMany(processedRoutes);
+
+        // Select primary route (simplest: fewest parameters, then shortest)
+        var primaryTemplate = templates
+            .OrderBy(t => t.ParameterCount)
+            .ThenBy(t => t.Pattern.Length)
+            .First();
+
+        // Populate legacy cache (backward compatibility)
+        if (_viewModelRoutes.TryAdd(viewModelType, primaryTemplate.Pattern))
+        {
+            _logger.LogDebug("Caching navigation reference '{ViewModelType}' with uri '{Uri}' for '{ViewType}'", 
+                viewModelType, primaryTemplate.Pattern, viewType.FullName);
+        }
+        else
+        {
+            _logger.LogWarning("Duplicate ViewModel type {ViewModelType} found. Existing route: '{ExistingRoute}', Ignored route: '{NewRoute}'", 
+                viewModelType.FullName, _viewModelRoutes[viewModelType], primaryTemplate.Pattern);
+            return; // Skip multi-template caching for duplicates
+        }
+
+        // Populate multi-template cache
+        var collection = new RouteTemplateCollection
+        {
+            PrimaryRoute = primaryTemplate.Pattern,
+            AllRoutes = templates
+        };
+
+        _viewModelRouteTemplates[viewModelType] = collection;
+
+        if (templates.Count > 1)
+        {
+            _logger.LogDebug("Cached {RouteCount} route templates for ViewModel '{ViewModelType}'. Primary: '{PrimaryRoute}'",
+                templates.Count, viewModelType, primaryTemplate.Pattern);
+        }
+    }
+
+    /// <summary>
+    /// Processes route attributes for a keyed ViewModel and populates both legacy and multi-template caches.
+    /// </summary>
+    private void ProcessKeyedViewModelRoutes(Type viewType, object key, List<RouteAttribute> routeAttributes)
+    {
+        // Apply BasePath to all routes
+        var processedRoutes = routeAttributes
+            .Select(ra => ApplyBasePath(ra.Template))
+            .ToList();
+
+        // Parse all route templates
+        var templates = _parser.ParseMany(processedRoutes);
+
+        // Select primary route (simplest: fewest parameters, then shortest)
+        var primaryTemplate = templates
+            .OrderBy(t => t.ParameterCount)
+            .ThenBy(t => t.Pattern.Length)
+            .First();
+
+        // Populate legacy cache (backward compatibility)
+        if (_keyedViewModelRoutes.TryAdd(key, primaryTemplate.Pattern))
+        {
+            _logger.LogDebug("Caching keyed navigation reference '{Key}' with uri '{Uri}' for '{ViewType}'", 
+                key, primaryTemplate.Pattern, viewType.FullName);
+        }
+        else
+        {
+            _logger.LogWarning("Duplicate ViewModel key {ViewModelKey} found. Existing route: '{ExistingRoute}', Ignored route: '{NewRoute}'", 
+                key, _keyedViewModelRoutes[key], primaryTemplate.Pattern);
+            return; // Skip multi-template caching for duplicates
+        }
+
+        // Populate multi-template cache
+        var collection = new RouteTemplateCollection
+        {
+            PrimaryRoute = primaryTemplate.Pattern,
+            AllRoutes = templates
+        };
+
+        _keyedViewModelRouteTemplates[key] = collection;
+
+        if (templates.Count > 1)
+        {
+            _logger.LogDebug("Cached {RouteCount} route templates for keyed ViewModel '{Key}'. Primary: '{PrimaryRoute}'",
+                templates.Count, key, primaryTemplate.Pattern);
+        }
+    }
+
+    /// <summary>
+    /// Applies the configured BasePath to a route template if configured.
+    /// </summary>
+    private string ApplyBasePath(string template)
+    {
+#pragma warning disable CS0618 // Type or member is obsolete
+        if (!string.IsNullOrWhiteSpace(_configuration.BasePath))
+        {
+            return $"{_configuration.BasePath.TrimEnd('/')}/{template.TrimStart('/')}";
+        }
+#pragma warning restore CS0618 // Type or member is obsolete
+        
+        return template;
     }
 
     /// <summary>

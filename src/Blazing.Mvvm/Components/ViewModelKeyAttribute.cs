@@ -5,7 +5,7 @@
 /// This attribute should only be used on <c>View</c> components.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-public class ViewModelKeyAttribute : Attribute
+public sealed class ViewModelKeyAttribute : Attribute
 {
     /// <summary>
     /// Gets the key associated with the ViewModel for keyed navigation.

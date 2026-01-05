@@ -5,6 +5,7 @@ using Blazing.Mvvm.Components.Routing;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
 
@@ -31,9 +32,12 @@ public class ErrorScenarioTests
 
         var routes = new Dictionary<Type, string> { [typeof(TestViewModel)] = "/test" };
         routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(routes);
+        routeCacheMock.Setup(x => x.ViewModelRouteTemplates).Returns(new Dictionary<Type, RouteTemplateCollection>());
         configMock.Setup(x => x.Value).Returns(new LibraryConfiguration());
 
-        var mvvmNavigationManager = new MvvmNavigationManager(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object);
+        var selectorLogger = new NullLogger<RouteTemplateSelector>();
+        var routeTemplateSelector = new RouteTemplateSelector(selectorLogger);
+        var mvvmNavigationManager = new MvvmNavigationManager(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object, routeTemplateSelector);
 
         // Act & Assert
         var act = () => mvvmNavigationManager.NavigateTo<TestViewModel>(null!, false, false);
@@ -53,9 +57,12 @@ public class ErrorScenarioTests
         var configMock = new Mock<IOptions<LibraryConfiguration>>();
 
         routeCacheMock.Setup(x => x.KeyedViewModelRoutes).Returns(new Dictionary<object, string>());
+        routeCacheMock.Setup(x => x.KeyedViewModelRouteTemplates).Returns(new Dictionary<object, RouteTemplateCollection>());
         configMock.Setup(x => x.Value).Returns(new LibraryConfiguration());
 
-        var mvvmNavigationManager = new MvvmNavigationManager(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object);
+        var selectorLogger = new NullLogger<RouteTemplateSelector>();
+        var routeTemplateSelector = new RouteTemplateSelector(selectorLogger);
+        var mvvmNavigationManager = new MvvmNavigationManager(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object, routeTemplateSelector);
 
         // Act & Assert
         var act = () => mvvmNavigationManager.NavigateTo((object)null!, false, false);
@@ -191,9 +198,12 @@ public class ErrorScenarioTests
         // Setup route cache to return malformed route that could cause URI issues
         var routes = new Dictionary<Type, string> { [typeof(TestViewModel)] = "invalid://route" };
         routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(routes);
+        routeCacheMock.Setup(x => x.ViewModelRouteTemplates).Returns(new Dictionary<Type, RouteTemplateCollection>());
         configMock.Setup(x => x.Value).Returns(new LibraryConfiguration());
 
-        var mvvmNavigationManager = new MvvmNavigationManager(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object);
+        var selectorLogger = new NullLogger<RouteTemplateSelector>();
+        var routeTemplateSelector = new RouteTemplateSelector(selectorLogger);
+        var mvvmNavigationManager = new MvvmNavigationManager(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object, routeTemplateSelector);
 
         // Act & Assert - Should handle internal URI creation gracefully
         var act = () => mvvmNavigationManager.NavigateTo<TestViewModel>();
@@ -271,9 +281,12 @@ public class ErrorScenarioTests
 
         var routes = new Dictionary<Type, string> { [typeof(TestViewModel)] = "/test" };
         routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(routes);
+        routeCacheMock.Setup(x => x.ViewModelRouteTemplates).Returns(new Dictionary<Type, RouteTemplateCollection>());
         configMock.Setup(x => x.Value).Returns(new LibraryConfiguration());
 
-        var mvvmNavigationManager = new MvvmNavigationManager(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object);
+        var selectorLogger = new NullLogger<RouteTemplateSelector>();
+        var routeTemplateSelector = new RouteTemplateSelector(selectorLogger);
+        var mvvmNavigationManager = new MvvmNavigationManager(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object, routeTemplateSelector);
 
         // Act
         mvvmNavigationManager.NavigateTo<TestViewModel>("");
@@ -311,15 +324,19 @@ public class ErrorScenarioTests
 
         var routes = new Dictionary<Type, string> { [typeof(TestViewModel)] = "/test" };
         routeCacheMock.Setup(x => x.ViewModelRoutes).Returns(routes);
+        routeCacheMock.Setup(x => x.ViewModelRouteTemplates).Returns(new Dictionary<Type, RouteTemplateCollection>());
         configMock.Setup(x => x.Value).Returns(new LibraryConfiguration());
 
-        var mvvmNavigationManager = new MvvmNavigationManager(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object);
+        var selectorLogger = new NullLogger<RouteTemplateSelector>();
+        var routeTemplateSelector = new RouteTemplateSelector(selectorLogger);
+        var mvvmNavigationManager = new MvvmNavigationManager(navigationManager, loggerMock.Object, routeCacheMock.Object, configMock.Object, routeTemplateSelector);
 
         // Act
         mvvmNavigationManager.NavigateTo<TestViewModel>("details?param1=value1?param2=value2");
 
-        // Assert - Should handle malformed query gracefully
-        navigationManager.LastNavigatedUri.Should().Contain("test/details");
+        // Assert - Should handle query string (even malformed) and append to base route
+        navigationManager.LastNavigatedUri.Should().Contain("test");
+        navigationManager.LastNavigatedUri.Should().Contain("param1=value1");
     }
 
     // Test classes

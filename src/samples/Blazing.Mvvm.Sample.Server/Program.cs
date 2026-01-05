@@ -1,5 +1,6 @@
 using Blazing.Mvvm;
 using Blazing.Mvvm.Sample.Server.Data;
+using Blazing.Mvvm.Sample.Server.Services;
 using CommunityToolkit.Mvvm.Messaging;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,10 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<IWeatherService, WeatherService>();
 builder.Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
+
+// Add application services
+builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IPostsService, PostsService>();
 
 // Add Blazing.Mvvm
 builder.Services.AddMvvm(options =>

@@ -52,6 +52,10 @@ public static class ServicesExtension
         services.TryAddSingleton(Options.Create(configuration));
 
         services.TryAddSingleton<IParameterResolver>(_ => new ParameterResolver(configuration.ParameterResolutionMode));
+        
+        // Register RouteTemplateSelector for multi-route template support
+        services.TryAddSingleton<RouteTemplateSelector>();
+        
         // Register ViewModelRouteCache as a singleton, ensuring assemblies are captured here.
         services.TryAddSingleton<IViewModelRouteCache>(sp => 
             new ViewModelRouteCache(
