@@ -32,10 +32,18 @@
       - [Navigate by abstraction](#navigate-by-abstraction)
     - [MVVM Validation](#mvvm-validation)
     - [Subpath Hosting](#subpath-hosting)
+    - [Supported Navigation Route Patterns](#supported-navigation-route-patterns)
+      - [Simple Routes](#simple-routes)
+      - [Single Parameter Routes](#single-parameter-routes)
+      - [Multiple Parameter Routes](#multiple-parameter-routes)
+      - [Query String Support](#query-string-support)
+      - [Combined Parameters and Query Strings](#combined-parameters-and-query-strings)
+      - [Complex Multi-Level Routes](#complex-multi-level-routes)
     - [Complex Multi-Project ViewModel Registration](#complex-multi-project-viewmodel-registration)
     - [Sample Projects](#sample-projects)
       - [Running Samples with Different .NET Target Frameworks](#running-samples-with-different-net-target-frameworks)
   - [History](#history)
+    - [V3.2.0](#v320)
     - [V3.1.0](#v310)
     - [V3.0.0](#v300)
     - [V2.0.0](#v200)
@@ -833,6 +841,123 @@ For more information about ASP.NET Core subpath hosting and YARP configuration, 
 - **[YARP Path Transforms](https://microsoft.github.io/reverse-proxy/articles/transforms.html)** - Path manipulation and header forwarding in YARP
 - **[ASP.NET Core Forwarded Headers](https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer)** - Configuring forwarded headers middleware for reverse proxy scenarios
 
+### Supported Navigation Route Patterns
+
+Blazing.Mvvm supports a comprehensive set of route patterns for flexible navigation in your Blazor applications. All patterns work seamlessly with both type-based navigation (`NavigateTo<TViewModel>`) and keyed navigation (`NavigateTo(key)`).
+
+#### Simple Routes
+
+Navigate to pages with simple, static routes:
+
+```csharp
+// Page with @page "/"
+mvvmNavigationManager.NavigateTo<HomeViewModel>();
+
+// Page with @page "/counter"
+mvvmNavigationManager.NavigateTo<CounterViewModel>();
+
+// Page with @page "/fetchdata"
+mvvmNavigationManager.NavigateTo<FetchDataViewModel>();
+```
+
+#### Single Parameter Routes
+
+Navigate to pages with a single route parameter:
+
+```csharp
+// Page with @page "/users/{userId}"
+mvvmNavigationManager.NavigateTo<UserViewModel>("123");
+// Results in: /users/123
+
+// Page with @page "/products/{productId}"
+mvvmNavigationManager.NavigateTo<ProductViewModel>("abc-456");
+// Results in: /products/abc-456
+```
+
+#### Multiple Parameter Routes
+
+Navigate to pages with two or more route parameters:
+
+```csharp
+// Page with @page "/users/{userId}/posts/{postId}"
+mvvmNavigationManager.NavigateTo<UserPostViewModel>("1/101");
+// Results in: /users/1/posts/101
+
+// Page with @page "/api/{version}/users/{userId}/posts/{postId}"
+mvvmNavigationManager.NavigateTo<ApiUserPostViewModel>("v2/1/101");
+// Results in: /api/v2/users/1/posts/101
+```
+
+**Pattern Rules:**
+- Parameters are separated by forward slashes (`/`)
+- The order of parameters must match the route template
+- Supports any number of route parameters
+
+#### Query String Support
+
+Add query strings to any navigation:
+
+```csharp
+// Simple query string
+mvvmNavigationManager.NavigateTo<ProductsViewModel>("?category=electronics");
+// Results in: /products?category=electronics
+
+// Multiple query parameters
+mvvmNavigationManager.NavigateTo<SearchViewModel>("?query=blazor&sort=relevance&page=1");
+// Results in: /search?query=blazor&sort=relevance&page=1
+```
+
+#### Combined Parameters and Query Strings
+
+Combine route parameters with query strings:
+
+```csharp
+// Single parameter + query string
+// Page with @page "/users/{userId}"
+mvvmNavigationManager.NavigateTo<UserViewModel>("123?tab=profile&edit=true");
+// Results in: /users/123?tab=profile&edit=true
+
+// Multiple parameters + query string
+// Page with @page "/users/{userId}/posts/{postId}"
+mvvmNavigationManager.NavigateTo<UserPostViewModel>("1/101?filter=recent&sort=desc");
+// Results in: /users/1/posts/101?filter=recent&sort=desc
+
+// Complex multi-level route + query string
+// Page with @page "/api/{version}/users/{userId}/posts/{postId}"
+mvvmNavigationManager.NavigateTo<ApiUserPostViewModel>("v2/1/101?include=comments&expand=author");
+// Results in: /api/v2/users/1/posts/101?include=comments&expand=author
+```
+
+#### Complex Multi-Level Routes
+
+Navigate to deeply nested routes with multiple segments:
+
+```csharp
+// Page with @page "/admin/settings/users/{userId}/permissions"
+mvvmNavigationManager.NavigateTo<UserPermissionsViewModel>("123");
+// Results in: /admin/settings/users/123/permissions
+
+// Page with @page "/app/tenant/{tenantId}/workspace/{workspaceId}/project/{projectId}"
+mvvmNavigationManager.NavigateTo<ProjectViewModel>("abc/ws-123/proj-456");
+// Results in: /app/tenant/abc/workspace/ws-123/project/proj-456
+```
+
+**Pattern Rules:**
+- ✅ Route parameters are defined with curly braces: `{paramName}`
+- ✅ Parameters are substituted in order from the `relativeUri` string
+- ✅ Query strings start with `?` and use `&` to separate multiple parameters
+- ✅ URL encoding is handled automatically by the navigation manager
+- ✅ Works with subpath hosting and YARP reverse proxy scenarios
+- ✅ Supports dynamic base path detection (no manual configuration needed)
+
+**Working Examples:**
+
+For complete working examples demonstrating these route patterns, see:
+- **[Blazing.Mvvm.Sample.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.Server)** - User and post management with `/users/{userId}/posts/{postId}` routes
+- **[Blazing.Mvvm.Sample.WebApp](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.WebApp)** - Enhanced with multi-parameter navigation examples
+- **[Blazing.Mvvm.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.Wasm)** - Added complex route pattern demonstrations
+- **[Blazing.Mvvm.Sample.HybridMaui](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.HybridMaui)** - Updated with route parameter examples
+
 ### Complex Multi-Project ViewModel Registration
 
 When working with complex multi-project solutions where ViewModels are distributed across multiple assemblies, you can register all ViewModels from different assemblies using the `RegisterViewModelsFromAssemblyContaining` method in the `AddMvvm` configuration.
@@ -897,10 +1022,10 @@ The repository includes several sample projects demonstrating different Blazor h
 
 #### Blazor Hosting Model Samples
 
-- **[Blazing.Mvvm.Sample.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.Server)** - Blazor Server App sample
-- **[Blazing.Mvvm.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.Wasm)** - Blazor WebAssembly (WASM) App sample
-- **[Blazing.Mvvm.Sample.WebApp](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.WebApp)** - Blazor Web App (.NET 8+) sample
-- **[Blazing.Mvvm.Sample.HybridMaui](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.HybridMaui)** - Blazor Hybrid MAUI sample
+- **[Blazing.Mvvm.Sample.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.Server)** - Blazor Server App sample with user and post management demonstrating complex route patterns
+- **[Blazing.Mvvm.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.Wasm)** - Blazor WebAssembly (WASM) App sample with navigation patterns
+- **[Blazing.Mvvm.Sample.WebApp](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.WebApp)** - Blazor Web App (.NET 8+) sample with query string and parameter navigation
+- **[Blazing.Mvvm.Sample.HybridMaui](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.HybridMaui)** - Blazor Hybrid MAUI sample demonstrating route patterns in mobile applications
 
 #### Blazor Hybrid Samples
 
@@ -931,6 +1056,30 @@ All sample projects in this repository support multi-targeting across .NET 8, .N
 For detailed instructions on switching between .NET target frameworks and troubleshooting multi-targeting scenarios, see the [Running Samples with Different .NET Versions](docs/Running_Different_NET_Versions.md) guide.
 
 ## History
+
+### V3.2.0 - 6 January 2025
+
+This release adds comprehensive support for complex route patterns with multiple parameters and query strings. [@gragra33](https://github.com/gragra33)
+
+**New Features:**
+- **Multi-Parameter Route Support:** Full support for routes with multiple parameters (e.g., `/users/{userId}/posts/{postId}`). 
+- **Enhanced Route Parameter Substitution:** Smart substitution of route parameters with proper URL encoding and query string handling. 
+- **Combined Parameters + Query Strings:** Navigate with both route parameters and query strings in a single call (e.g., `1/101?filter=recent&sort=desc`). 
+- **Complex Multi-Level Routes:** Support for deeply nested routes with multiple segments and parameters. 
+
+**Improvements:**
+- Added 9 new unit tests for complex route patterns with multiple parameters and query strings (total 879 tests across all frameworks).
+- Enhanced `SubstituteRouteParameters` method to handle multiple parameters and query string separation.
+- Updated sample projects to demonstrate complex route patterns:
+  - `Blazing.Mvvm.Sample.Server`, `Blazing.Mvvm.Sample.WebApp`, `Blazing.Mvvm.Sample.Wasm`, `Blazing.Mvvm.Sample.HybridMaui`
+- Improved documentation with comprehensive route pattern examples and usage guide.
+
+**Route Pattern Examples:**
+- Simple routes: `/counter`, `/fetchdata`
+- Single parameter: `/users/{userId}` with `NavigateTo<UserViewModel>("123")`
+- Multiple parameters: `/users/{userId}/posts/{postId}` with `NavigateTo<UserPostViewModel>("1/101")`
+- With query strings: `/users/{userId}/posts/{postId}` with `NavigateTo<UserPostViewModel>("1/101?filter=recent&sort=desc")`
+- Complex routes: `/api/{version}/users/{userId}/posts/{postId}` with `NavigateTo<ApiUserPostViewModel>("v2/1/101?include=comments")`
 
 ### V3.1.0 - 3 December 2025
 
