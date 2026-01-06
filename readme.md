@@ -1201,7 +1201,7 @@ This release adds support for:
 - **Complex Multi-Level Routes:** Support for deeply nested routes with multiple segments and parameters. 
 
 **New Sample:** 
-- [ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute, and automatic two-way binding with `@bind-` syntax
+- **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute, and automatic two-way binding with `@bind-` syntax
 
 **Updated Samples:**
 - Updated sample projects to demonstrate complex route patterns:
