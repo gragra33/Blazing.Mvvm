@@ -1,6 +1,6 @@
 ﻿# Version History
 
-### V3.2.0 - 12 December 2024
+### V3.2.1 - 12 December 2024
 
 This release introduces the new **Blazing.Mvvm.Analyzers** package for compile-time code quality validation. We also added automatic two-way binding support, eliminating the need for manual PropertyChanged event handling in components.
 
