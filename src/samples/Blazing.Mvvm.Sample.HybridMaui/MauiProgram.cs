@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using Blazing.Mvvm.Sample.HybridMaui.Services;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 
 namespace Blazing.Mvvm.Sample.HybridMaui;
@@ -19,6 +20,11 @@ public static class MauiProgram
         builder.Services.AddMauiBlazorWebView();
 
         builder.Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
+    
+        // Add application services
+        builder.Services.AddScoped<IUsersService, UsersService>();
+        builder.Services.AddScoped<IPostsService, PostsService>();
+
         builder.Services.AddMvvm(options =>
         { 
             options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
