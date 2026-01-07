@@ -13,6 +13,7 @@ namespace ParameterResolution.Sample.Wasm.ViewModels;
 /// <see cref="ObservablePropertyAttribute"/> and <see cref="RelayCommandAttribute"/> from CommunityToolkit.Mvvm.
 /// Parameters are resolved from query string values defined in the associated View component.
 /// </remarks>
+[ViewModelDefinition]
 public sealed partial class ParameterDemoViewModel : ViewModelBase
 {
     /// <summary>

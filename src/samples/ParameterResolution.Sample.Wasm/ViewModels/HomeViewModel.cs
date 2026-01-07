@@ -11,19 +11,9 @@ namespace ParameterResolution.Sample.Wasm.ViewModels;
 /// This ViewModel showcases how to use <see cref="IMvvmNavigationManager"/> with <see cref="RelayCommand"/>
 /// to perform type-safe navigation while passing query string parameters from the View to the ViewModel.
 /// </remarks>
-public sealed partial class HomeViewModel : ViewModelBase
+[ViewModelDefinition]
+public sealed partial class HomeViewModel(IMvvmNavigationManager navigationManager) : ViewModelBase
 {
-    private readonly IMvvmNavigationManager _navigationManager;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="HomeViewModel"/> class.
-    /// </summary>
-    /// <param name="navigationManager">The MVVM navigation manager for type-safe navigation.</param>
-    public HomeViewModel(IMvvmNavigationManager navigationManager)
-    {
-        _navigationManager = navigationManager;
-    }
-
     /// <summary>
     /// Navigates to the <see cref="ParameterDemoViewModel"/> with the specified query string parameters.
     /// </summary>
@@ -36,7 +26,7 @@ public sealed partial class HomeViewModel : ViewModelBase
     /// </example>
     [RelayCommand]
     private void NavigateWithParams(string queryString)
-{
-        _navigationManager.NavigateTo<ParameterDemoViewModel>(queryString);
+    {
+        navigationManager.NavigateTo<ParameterDemoViewModel>(queryString);
     }
 }
