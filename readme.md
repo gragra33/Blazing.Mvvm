@@ -66,6 +66,7 @@
       - [Specialized Samples](#specialized-samples)
       - [Running Samples with Different .NET Target Frameworks](#running-samples-with-different.net-target-frameworks)
   - [History](#history)
+    - [V3.3.0 - 10 January 2025](#v3.3.0-10-january-2025)
     - [V3.2.0 - 7 January 2026](#v3.2.0-7-january-2026)
     - [V3.1.0 - 3 December 2025](#v3.1.0-3-december-2025)
     - [V3.0.0 - 18 November 2025](#v3.0.0-18-november-2025)
