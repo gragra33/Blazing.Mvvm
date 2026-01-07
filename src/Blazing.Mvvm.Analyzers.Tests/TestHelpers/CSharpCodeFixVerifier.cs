@@ -14,12 +14,17 @@ public static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     where TAnalyzer : DiagnosticAnalyzer, new()
     where TCodeFix : CodeFixProvider, new()
 {
+    private static string NormalizeLineEndings(string code)
+    {
+        return code.Replace("\r\n", "\n").Replace("\r", "\n");
+    }
+
     /// <summary>
     /// Creates a new code fix test instance
     /// </summary>
-    public static CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier> CreateTest()
+    public static CSharpCodeFixTest<TAnalyzer, TCodeFix, LineEndingNormalizingVerifier> CreateTest()
     {
-        return new CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>
+        return new CSharpCodeFixTest<TAnalyzer, TCodeFix, LineEndingNormalizingVerifier>
         {
             ReferenceAssemblies = ReferenceAssemblies.Net.Net80
                 .AddPackages(ImmutableArray.Create(
@@ -48,8 +53,8 @@ public static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     public static Task VerifyCodeFixAsync(string source, string fixedSource, params DiagnosticResult[] expected)
     {
         var test = CreateTest();
-        test.TestCode = source;
-        test.FixedCode = fixedSource;
+        test.TestCode = NormalizeLineEndings(source);
+        test.FixedCode = NormalizeLineEndings(fixedSource);
         test.ExpectedDiagnostics.AddRange(expected);
         return test.RunAsync();
     }
@@ -60,7 +65,7 @@ public static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     public static Task VerifyAnalyzerAsync(string source, params DiagnosticResult[] expected)
     {
         var test = CreateTest();
-        test.TestCode = source;
+        test.TestCode = NormalizeLineEndings(source);
         test.ExpectedDiagnostics.AddRange(expected);
         return test.RunAsync();
     }

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Collections.Concurrent;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -22,7 +23,8 @@ public class MvvmNavLinkTypeSafetyAnalyzer : DiagnosticAnalyzer
         
         context.RegisterCompilationStartAction(compilationContext =>
         {
-            var validViewModels = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+            // Use thread-safe collection for concurrent execution
+            var validViewModels = new ConcurrentBag<INamedTypeSymbol>();
 
             // Collect all valid ViewModels
             compilationContext.RegisterSymbolAction(symbolContext =>
@@ -61,7 +63,7 @@ public class MvvmNavLinkTypeSafetyAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeMvvmNavLinkUsage(
         SyntaxNodeAnalysisContext context,
-        HashSet<INamedTypeSymbol> validViewModels)
+        ConcurrentBag<INamedTypeSymbol> validViewModels)
     {
         var genericName = (GenericNameSyntax)context.Node;
 
@@ -92,8 +94,8 @@ public class MvvmNavLinkTypeSafetyAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        // Check if the ViewModel is valid
-        if (!validViewModels.Contains(namedViewModelType, SymbolEqualityComparer.Default))
+        // Check if the ViewModel is valid (thread-safe check)
+        if (!validViewModels.Any(vm => SymbolEqualityComparer.Default.Equals(vm, namedViewModelType)))
         {
             var diagnostic = Diagnostic.Create(
                 DiagnosticDescriptors.MvvmNavLinkInvalidViewModel,

@@ -17,7 +17,7 @@ namespace Blazing.Mvvm.ComponentModel
     using Microsoft.Extensions.DependencyInjection;
     using CommunityToolkit.Mvvm.Messaging;
 
-    public abstract class ViewModelBase : System.ComponentModel.INotifyPropertyChanged
+    public abstract class ViewModelBase : System.ComponentModel.INotifyPropertyChanged, IViewModelBase
     {
         public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
         
@@ -35,20 +35,53 @@ namespace Blazing.Mvvm.ComponentModel
             return true;
         }
 
-        // Lifecycle methods - protected to match Blazor ComponentBase pattern
-        protected virtual void OnInitialized() { }
-        protected virtual Task OnInitializedAsync() => Task.CompletedTask;
-        protected virtual void OnParametersSet() { }
-        protected virtual Task OnParametersSetAsync() => Task.CompletedTask;
-        protected virtual void OnAfterRender(bool firstRender) { }
-        protected virtual Task OnAfterRenderAsync(bool firstRender) => Task.CompletedTask;
-        protected virtual bool ShouldRender() => true;
+        // Lifecycle methods
+        public virtual void OnInitialized() { }
+        public virtual Task OnInitializedAsync() => Task.CompletedTask;
+        public virtual void OnParametersSet() { }
+        public virtual Task OnParametersSetAsync() => Task.CompletedTask;
+        public virtual void OnAfterRender(bool firstRender) { }
+        public virtual Task OnAfterRenderAsync(bool firstRender) => Task.CompletedTask;
+        public virtual bool ShouldRender() => true;
+        public virtual void NotifyStateChanged() => OnPropertyChanged();
     }
 
-    public abstract class RecipientViewModelBase : ViewModelBase
+    public interface IViewModelBase : System.ComponentModel.INotifyPropertyChanged
+    {
+        void OnAfterRender(bool firstRender);
+        Task OnAfterRenderAsync(bool firstRender);
+        void OnInitialized();
+        Task OnInitializedAsync();
+        void OnParametersSet();
+        Task OnParametersSetAsync();
+        bool ShouldRender();
+        void NotifyStateChanged();
+    }
+
+    public abstract class RecipientViewModelBase : ViewModelBase, IDisposable
     {
         protected IMessenger Messenger { get; } = WeakReferenceMessenger.Default;
         protected virtual void OnActivated() { }
+        
+        private bool IsDisposed;
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if (IsDisposed)
+                return;
+            
+            if (disposing)
+            {
+                // Cleanup logic
+            }
+            IsDisposed = true;
+        }
+        
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 
     public abstract class ValidatorViewModelBase : ViewModelBase { }

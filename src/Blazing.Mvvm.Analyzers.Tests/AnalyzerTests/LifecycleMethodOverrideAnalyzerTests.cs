@@ -58,7 +58,7 @@ namespace TestNamespace
 {
     public class TestViewModel : ViewModelBase
     {
-        protected override async Task OnInitializedAsync()
+        public override async Task OnInitializedAsync()
         {
             await LoadDataAsync();
             await base.OnInitializedAsync();

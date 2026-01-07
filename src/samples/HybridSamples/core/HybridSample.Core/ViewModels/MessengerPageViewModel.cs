@@ -27,29 +27,30 @@ public class MessengerPageViewModel : SamplePageViewModel
     }
 
     /// <summary>
-    /// Gets the command to request the current username.
+    /// Gets the command to request the current _username.
     /// </summary>
     public ICommand RequestCurrentUsernameCommand { get; }
 
     /// <summary>
-    /// Gets the command to reset the current username.
+    /// Gets the command to reset the current _username.
     /// </summary>
     public ICommand ResetCurrentUsernameCommand { get; }
 
     /// <summary>
-    /// Gets the sender view model for username messages.
+    /// Gets the sender view model for _username messages.
     /// </summary>
     public UserSenderViewModel SenderViewModel { get; } = new();
 
     /// <summary>
-    /// Gets the receiver view model for username messages.
+    /// Gets the receiver view model for _username messages.
     /// </summary>
     public UserReceiverViewModel ReceiverViewModel { get; } = new();
 
     /// <summary>
-    /// Simple viewmodel for a module sending a username message.
+    /// Simple viewmodel for a module sending a _username message.
     /// </summary>
-    public class UserSenderViewModel : ObservableRecipient
+    [ViewModelDefinition]
+    public class UserSenderViewModel : RecipientViewModelBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="UserSenderViewModel"/> class.
@@ -60,19 +61,19 @@ public class MessengerPageViewModel : SamplePageViewModel
         }
 
         /// <summary>
-        /// Gets the command to send a username message.
+        /// Gets the command to send a _username message.
         /// </summary>
         public ICommand SendUserMessageCommand { get; }
 
-        private string username = "Bob";
+        private string _username = "Bob";
 
         /// <summary>
-        /// Gets the current username.
+        /// Gets the current _username.
         /// </summary>
         public string Username
         {
-            get => username;
-            private set => SetProperty(ref username, value);
+            get => _username;
+            private set => SetProperty(ref _username, value);
         }
 
         /// <inheritdoc/>
@@ -82,7 +83,7 @@ public class MessengerPageViewModel : SamplePageViewModel
         }
 
         /// <summary>
-        /// Sends a username changed message and toggles the username value.
+        /// Sends a _username changed message and toggles the _username value.
         /// </summary>
         public void SendUserMessage()
         {
@@ -93,19 +94,19 @@ public class MessengerPageViewModel : SamplePageViewModel
     }
 
     /// <summary>
-    /// Simple viewmodel for a module receiving a username message.
+    /// Simple viewmodel for a module receiving a _username message.
     /// </summary>
-    public class UserReceiverViewModel : ObservableRecipient
+    public class UserReceiverViewModel : RecipientViewModelBase
     {
-        private string username = "";
+        private string _username = "";
 
         /// <summary>
-        /// Gets the received username.
+        /// Gets the received _username.
         /// </summary>
         public string Username
         {
-            get => username;
-            private set => SetProperty(ref username, value);
+            get => _username;
+            private set => SetProperty(ref _username, value);
         }
 
         /// <inheritdoc/>
@@ -115,19 +116,19 @@ public class MessengerPageViewModel : SamplePageViewModel
         }
     }
 
-    private string? username;
+    private string? _username;
 
     /// <summary>
-    /// Gets the current username value.
+    /// Gets the current _username value.
     /// </summary>
     public string? Username
     {
-        get => username;
-        private set => SetProperty(ref username, value);
+        get => _username;
+        private set => SetProperty(ref _username, value);
     }
 
     /// <summary>
-    /// Requests the current username using the messenger.
+    /// Requests the current _username using the messenger.
     /// </summary>
     public void RequestCurrentUsername()
     {
@@ -135,7 +136,7 @@ public class MessengerPageViewModel : SamplePageViewModel
     }
 
     /// <summary>
-    /// Resets the current username value.
+    /// Resets the current _username value.
     /// </summary>
     public void ResetCurrentUsername()
     {
@@ -143,13 +144,13 @@ public class MessengerPageViewModel : SamplePageViewModel
     }
 
     /// <summary>
-    /// A sample message with a username value.
+    /// A sample message with a _username value.
     /// </summary>
-    /// <param name="value">The username value.</param>
+    /// <param name="value">The _username value.</param>
     public sealed class UsernameChangedMessage(string value) : ValueChangedMessage<string>(value);
 
     /// <summary>
-    /// A sample request message to get the current username.
+    /// A sample request message to get the current _username.
     /// </summary>
     public sealed class CurrentUsernameRequestMessage : RequestMessage<string>
     {

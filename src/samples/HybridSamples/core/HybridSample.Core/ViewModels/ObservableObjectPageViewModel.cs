@@ -16,7 +16,7 @@ public class ObservableObjectPageViewModel : SamplePageViewModel
     /// <summary>
     /// Initializes a new instance of the <see cref="ObservableObjectPageViewModel"/> class.
     /// </summary>
-    /// <param name="filesService">The service for file operations.</param>
+    /// <param _name="filesService">The service for file operations.</param>
     public ObservableObjectPageViewModel(IFilesService filesService) 
         : base(filesService)
     {
@@ -28,26 +28,26 @@ public class ObservableObjectPageViewModel : SamplePageViewModel
     /// </summary>
     public ICommand ReloadTaskCommand { get; }
 
-    private string? name;
+    private string? _name;
 
     /// <summary>
-    /// Gets or sets the name to display.
+    /// Gets or sets the _name to display.
     /// </summary>
     public string? Name
     {
-        get => name;
-        set => SetProperty(ref name, value);
+        get => _name;
+        set => SetProperty(ref _name, value);
     }
 
-    private TaskNotifier? myTask;
+    private TaskNotifier? _myTask;
 
     /// <summary>
     /// Gets or sets the asynchronous task notifier.
     /// </summary>
     public Task? MyTask
     {
-        get => myTask;
-        private set => SetPropertyAndNotifyOnCompletion(ref myTask, value);
+        get => _myTask;
+        private set => SetPropertyAndNotifyOnCompletion(ref _myTask, value);
     }
 
     /// <summary>

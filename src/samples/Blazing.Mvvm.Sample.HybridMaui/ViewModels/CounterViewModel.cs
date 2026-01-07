@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Blazing.Mvvm.Sample.HybridMaui.ViewModels;
 
+[ViewModelDefinition]
 public sealed partial class CounterViewModel : ViewModelBase
 {
     private readonly ILogger<CounterViewModel> _logger;

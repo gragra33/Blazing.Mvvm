@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Blazing.Mvvm.Sample.HybridMaui.ViewModels;
 
+[ViewModelDefinition]
 public sealed partial class EditContactViewModel : ViewModelBase, IDisposable
 {
     private readonly ILogger<EditContactViewModel> _logger;

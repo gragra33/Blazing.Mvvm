@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Messaging;
 
 namespace Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
 
+[ViewModelDefinition]
 public sealed partial class HexEntryViewModel : RecipientViewModelBase<ConvertAsciiToHexMessage>, IRecipient<ResetHexAsciiInputsMessage>
 {
     [ObservableProperty]

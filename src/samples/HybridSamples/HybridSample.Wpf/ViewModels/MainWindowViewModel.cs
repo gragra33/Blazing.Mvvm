@@ -8,6 +8,7 @@ namespace HybridSample.Wpf.ViewModels;
 /// <summary>
 /// ViewModel for the main window, providing navigation logic and actions.
 /// </summary>
+[ViewModelDefinition ]
 internal class MainWindowViewModel : ViewModelBase
 {
     /// <summary>

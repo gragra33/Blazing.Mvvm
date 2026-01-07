@@ -15,9 +15,9 @@ public static class CSharpAnalyzerVerifier<TAnalyzer>
     /// <summary>
     /// Creates a new analyzer test instance
     /// </summary>
-    public static CSharpAnalyzerTest<TAnalyzer, DefaultVerifier> CreateTest()
+    public static CSharpAnalyzerTest<TAnalyzer, LineEndingNormalizingVerifier> CreateTest()
     {
-        return new CSharpAnalyzerTest<TAnalyzer, DefaultVerifier>
+        return new CSharpAnalyzerTest<TAnalyzer, LineEndingNormalizingVerifier>
         {
             ReferenceAssemblies = ReferenceAssemblies.Net.Net80
                 .AddPackages(ImmutableArray.Create(

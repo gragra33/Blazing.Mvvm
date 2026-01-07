@@ -24,6 +24,13 @@ public class CascadingParameterVsInjectAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeProperty(SymbolAnalysisContext context)
     {
         var propertySymbol = (IPropertySymbol)context.Symbol;
+        var containingType = propertySymbol.ContainingType;
+
+        // Only analyze properties in Blazor components (types inheriting from ComponentBase)
+        if (!InheritsFromComponentBase(containingType, context.Compilation))
+        {
+            return;
+        }
 
         // Check if property has CascadingParameter attribute
         var cascadingAttribute = propertySymbol.GetAttributes().FirstOrDefault(attr =>
@@ -59,5 +66,26 @@ public class CascadingParameterVsInjectAnalyzer : DiagnosticAnalyzer
 
             context.ReportDiagnostic(diagnostic);
         }
+    }
+
+    private static bool InheritsFromComponentBase(INamedTypeSymbol typeSymbol, Compilation compilation)
+    {
+        var componentBaseType = compilation.GetTypeByMetadataName("Microsoft.AspNetCore.Components.ComponentBase");
+        if (componentBaseType == null)
+        {
+            return false;
+        }
+
+        var currentType = typeSymbol.BaseType;
+        while (currentType != null)
+        {
+            if (SymbolEqualityComparer.Default.Equals(currentType, componentBaseType))
+            {
+                return true;
+            }
+            currentType = currentType.BaseType;
+        }
+
+        return false;
     }
 }

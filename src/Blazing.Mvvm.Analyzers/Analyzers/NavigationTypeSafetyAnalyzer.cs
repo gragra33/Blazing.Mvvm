@@ -1,13 +1,16 @@
 using System.Collections.Immutable;
+using System.Collections.Concurrent;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Blazing.Mvvm.Analyzers.Helpers;
 
 namespace Blazing.Mvvm.Analyzers.Analyzers;
 
 /// <summary>
 /// Analyzer that ensures NavigateTo&lt;TViewModel&gt;() calls reference ViewModels with valid route mappings.
+/// Now supports multi-project architectures where ViewModels may be in referenced assemblies.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class NavigationTypeSafetyAnalyzer : DiagnosticAnalyzer
@@ -21,10 +24,11 @@ public class NavigationTypeSafetyAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterCompilationStartAction(compilationContext =>
         {
-            var viewModelRoutes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-            var invocationsToCheck = new List<(InvocationExpressionSyntax Invocation, SemanticModel Model)>();
+            // Use thread-safe collection for concurrent execution
+            var viewModelRoutes = new ConcurrentBag<INamedTypeSymbol>();
+            var invocationsToCheck = new ConcurrentBag<(InvocationExpressionSyntax Invocation, SemanticModel Model)>();
 
-            // First pass: collect all ViewModels
+            // First pass: collect all ViewModels from current compilation
             compilationContext.RegisterSymbolAction(symbolContext =>
             {
                 CollectViewModelRoutes(symbolContext, viewModelRoutes);
@@ -45,6 +49,20 @@ public class NavigationTypeSafetyAnalyzer : DiagnosticAnalyzer
             // Third pass: analyze all collected invocations after all symbols are collected
             compilationContext.RegisterCompilationEndAction(endContext =>
             {
+                // Also collect ViewModels from referenced assemblies for cross-project support
+                foreach (var reference in endContext.Compilation.References)
+                {
+                    if (endContext.Compilation.GetAssemblyOrModuleSymbol(reference) is IAssemblySymbol assemblySymbol)
+                    {
+                        var referencedViewModels = CrossProjectAnalyzerHelper.GetViewModelsFromAssembly(assemblySymbol);
+                        foreach (var vm in referencedViewModels)
+                        {
+                            viewModelRoutes.Add(vm);
+                        }
+                    }
+                }
+
+                // Now analyze all invocations with complete ViewModel list (current + referenced)
                 foreach (var (invocation, semanticModel) in invocationsToCheck)
                 {
                     AnalyzeNavigateToInvocation(endContext, invocation, semanticModel, viewModelRoutes);
@@ -53,7 +71,7 @@ public class NavigationTypeSafetyAnalyzer : DiagnosticAnalyzer
         });
     }
 
-    private static void CollectViewModelRoutes(SymbolAnalysisContext context, HashSet<INamedTypeSymbol> viewModelRoutes)
+    private static void CollectViewModelRoutes(SymbolAnalysisContext context, ConcurrentBag<INamedTypeSymbol> viewModelRoutes)
     {
         var namedTypeSymbol = (INamedTypeSymbol)context.Symbol;
 
@@ -80,7 +98,7 @@ public class NavigationTypeSafetyAnalyzer : DiagnosticAnalyzer
         CompilationAnalysisContext context,
         InvocationExpressionSyntax invocationExpression,
         SemanticModel semanticModel,
-        HashSet<INamedTypeSymbol> viewModelRoutes)
+        ConcurrentBag<INamedTypeSymbol> viewModelRoutes)
     {
         // Get semantic model to resolve generic type
         var symbolInfo = semanticModel.GetSymbolInfo(invocationExpression, context.CancellationToken);
@@ -109,8 +127,8 @@ public class NavigationTypeSafetyAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        // Check if the ViewModel is valid
-        var isValidViewModel = viewModelRoutes.Contains(namedViewModelType, SymbolEqualityComparer.Default) ||
+        // Check if the ViewModel is valid (thread-safe check)
+        var isValidViewModel = viewModelRoutes.Any(vm => SymbolEqualityComparer.Default.Equals(vm, namedViewModelType)) ||
                                HasViewModelDefinitionAttribute(namedViewModelType) ||
                                InheritsFromViewModelBase(namedViewModelType, context.Compilation);
 

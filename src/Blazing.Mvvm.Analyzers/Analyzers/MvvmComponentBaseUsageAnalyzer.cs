@@ -36,11 +36,11 @@ public class MvvmComponentBaseUsageAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        // Check if the component has a ViewModel property
+        // Check if the component has ANY property that inherits from ViewModelBase
         var hasViewModelProperty = namedTypeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
-            .Any(p => p.Name == AnalyzerConstants.PropertyNames.ViewModel &&
-                     InheritsFromViewModelBase(p.Type as INamedTypeSymbol, context.Compilation));
+            .Any(p => p.Type is INamedTypeSymbol namedType && 
+                     InheritsFromViewModelBase(namedType, context.Compilation));
 
         if (!hasViewModelProperty)
         {

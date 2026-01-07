@@ -240,4 +240,51 @@ namespace TestNamespace
         // RecipientViewModelBase handles cleanup automatically
         await VerifyCS.VerifyAnalyzerAsync(test);
     }
+
+    [Fact]
+    public async Task ViewModelWithDisposableNestedRecipientViewModels_NoDiagnostic()
+    {
+        const string test = @"
+using Blazing.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+
+namespace TestNamespace
+{
+    public class TestViewModel : ViewModelBase
+    {
+        public UserSenderViewModel SenderViewModel { get; } = new();
+        public UserReceiverViewModel ReceiverViewModel { get; } = new();
+
+        public class UserSenderViewModel : RecipientViewModelBase
+        {
+            protected override void OnActivated()
+            {
+                Messenger.Register<MyMessage>(this, HandleMessage);
+            }
+
+            private void HandleMessage(object recipient, MyMessage message)
+            {
+            }
+        }
+
+        public class UserReceiverViewModel : RecipientViewModelBase
+        {
+            protected override void OnActivated()
+            {
+                Messenger.Register<MyMessage>(this, HandleMessage);
+            }
+
+            private void HandleMessage(object recipient, MyMessage message)
+            {
+            }
+        }
+    }
+
+    public class MyMessage { }
+}";
+
+        // Nested ViewModels inherit from RecipientViewModelBase which implements IDisposable
+        // Since RecipientViewModelBase handles its own disposal, the parent doesn't need to implement IDisposable
+        await VerifyCS.VerifyAnalyzerAsync(test);
+    }
 }

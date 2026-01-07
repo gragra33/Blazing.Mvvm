@@ -8,6 +8,7 @@ namespace HybridSample.Avalonia.ViewModels;
 /// <summary>
 /// ViewModel for the main window, providing navigation logic and actions for Avalonia.
 /// </summary>
+[ViewModelDefinition]
 internal class MainWindowViewModel : ViewModelBase
 {
     /// <summary>

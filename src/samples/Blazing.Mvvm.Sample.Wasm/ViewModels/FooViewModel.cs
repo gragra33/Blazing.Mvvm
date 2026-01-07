@@ -2,6 +2,7 @@
 
 namespace Blazing.Mvvm.Sample.Wasm.ViewModels;
 
+// sample ViewModel showing Blazor Analyzers in action!
 public class FooViewModel : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;

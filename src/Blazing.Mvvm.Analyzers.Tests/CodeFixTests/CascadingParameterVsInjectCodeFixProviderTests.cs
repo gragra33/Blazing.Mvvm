@@ -24,7 +24,7 @@ namespace TestNamespace
     public class MyComponent : ComponentBase
     {
         [CascadingParameter]
-        public {|#0:IMyService|} MyService { get; set; }
+        public IMyService {|#0:MyService|} { get; set; }
     }
 
     public interface IMyService { }

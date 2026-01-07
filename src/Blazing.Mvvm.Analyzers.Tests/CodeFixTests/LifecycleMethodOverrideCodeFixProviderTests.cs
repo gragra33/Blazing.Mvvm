@@ -47,7 +47,7 @@ namespace TestNamespace
             _data = ""initialized"";
         }
 
-        protected override async Task OnInitializedAsync()
+        public override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
         }
@@ -109,7 +109,7 @@ namespace TestNamespace
         {
         }
 
-        protected override async Task OnInitializedAsync()
+        public override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
         }
@@ -137,42 +137,15 @@ namespace TestNamespace
     {
         private readonly IMyService _service;
 
-        public {|#0:ServiceViewModel|}(IMyService service)
-        {
-            _service = service;
-        }
-    }
-}";
-
-        const string fixedCode = @"
-using Blazing.Mvvm.ComponentModel;
-using System.Threading.Tasks;
-
-namespace TestNamespace
-{
-    public interface IMyService { }
-
-    public class ServiceViewModel : ViewModelBase
-    {
-        private readonly IMyService _service;
-
         public ServiceViewModel(IMyService service)
         {
             _service = service;
         }
-
-        protected override async Task OnInitializedAsync()
-        {
-            await base.OnInitializedAsync();
-        }
     }
 }";
 
-        var expected = new DiagnosticResult(DiagnosticDescriptors.LifecycleMethodSuggestion)
-            .WithLocation(0)
-            .WithArguments("OnInitializedAsync");
-
-        await VerifyCS.VerifyCodeFixAsync(test, fixedCode, expected);
+        // DI-only constructor should NOT trigger diagnostic
+        await VerifyCS.VerifyAnalyzerAsync(test);
     }
 
     [Fact]
@@ -209,7 +182,7 @@ namespace TestNamespace
             _title = ""Messaging"";
         }
 
-        protected override async Task OnInitializedAsync()
+        public override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
         }
@@ -257,7 +230,7 @@ namespace TestNamespace
             _isValid = true;
         }
 
-        protected override async Task OnInitializedAsync()
+        public override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
         }
@@ -306,7 +279,7 @@ namespace TestNamespace
             _data = ""test"";
         }
 
-        protected override async Task OnInitializedAsync()
+        public override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
         }

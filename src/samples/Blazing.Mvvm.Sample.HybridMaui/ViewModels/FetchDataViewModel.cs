@@ -6,18 +6,13 @@ using System.Collections.ObjectModel;
 
 namespace Blazing.Mvvm.Sample.HybridMaui.ViewModels;
 
-public sealed partial class FetchDataViewModel : ViewModelBase, IDisposable
+[ViewModelDefinition]
+public sealed partial class FetchDataViewModel(ILogger<FetchDataViewModel> logger) : ViewModelBase, IDisposable
 {
-    private readonly ILogger<FetchDataViewModel> _logger;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     [ObservableProperty]
     private IEnumerable<WeatherForecast>? _weatherForecasts;
-
-    public FetchDataViewModel(ILogger<FetchDataViewModel> logger)
-    {
-        _logger = logger;
-    }
 
     public override async Task OnInitializedAsync()
     {
@@ -41,7 +36,7 @@ public sealed partial class FetchDataViewModel : ViewModelBase, IDisposable
 
     public void Dispose()
     {
-        _logger.LogInformation("Disposing {VMName}.", nameof(FetchDataViewModel));
+        logger.LogInformation("Disposing {VMName}.", nameof(FetchDataViewModel));
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
     }

@@ -3,11 +3,13 @@ using System.Collections.Concurrent;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Diagnostics;
+using Blazing.Mvvm.Analyzers.Helpers;
 
 namespace Blazing.Mvvm.Analyzers.Analyzers;
 
 /// <summary>
 /// Analyzer that ensures properties marked with [ViewParameter] in ViewModels have corresponding [Parameter] properties in Views.
+/// Now supports multi-project architectures where Views and ViewModels are in separate assemblies.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class ViewParameterAttributeAnalyzer : DiagnosticAnalyzer
@@ -26,7 +28,7 @@ public class ViewParameterAttributeAnalyzer : DiagnosticAnalyzer
             var viewModelParameters = new ConcurrentDictionary<INamedTypeSymbol, ConcurrentBag<IPropertySymbol>>(SymbolEqualityComparer.Default);
             var allViews = new ConcurrentBag<INamedTypeSymbol>();
 
-            // Collect ViewModels and Views
+            // Collect ViewModels and Views from current compilation
             compilationContext.RegisterSymbolAction(symbolContext =>
             {
                 var namedType = (INamedTypeSymbol)symbolContext.Symbol;
@@ -55,51 +57,104 @@ public class ViewParameterAttributeAnalyzer : DiagnosticAnalyzer
             {
                 Debug.WriteLine($"[ViewParameterAnalyzer] CompilationEnd: Found {viewModelParameters.Count} ViewModels and {allViews.Count} Views");
                 
-                foreach (var kvp in viewModelParameters)
+                // Also get ViewModels from referenced assemblies
+                var referencedViewModels = new List<(INamedTypeSymbol ViewModel, List<IPropertySymbol> Properties)>();
+                foreach (var reference in compilationEndContext.Compilation.References)
                 {
-                    var viewModelType = kvp.Key;
-                    var viewParamProperties = kvp.Value;
-                    
-                    Debug.WriteLine($"[ViewParameterAnalyzer] Analyzing ViewModel: {viewModelType.Name}");
-                    
-                    // Find corresponding View component
-                    var viewType = FindCorrespondingView(viewModelType, allViews);
-                    if (viewType == null)
+                    var assemblySymbol = compilationEndContext.Compilation.GetAssemblyOrModuleSymbol(reference) as IAssemblySymbol;
+                    if (assemblySymbol != null)
                     {
-                        Debug.WriteLine($"[ViewParameterAnalyzer] No View found for ViewModel: {viewModelType.Name}");
-                        continue;
+                        var viewModels = CrossProjectAnalyzerHelper.GetViewModelsFromAssembly(assemblySymbol);
+                        foreach (var vm in viewModels)
+                        {
+                            var viewParamProps = GetViewParameterProperties(vm);
+                            if (viewParamProps.Count > 0)
+                            {
+                                referencedViewModels.Add((vm, viewParamProps));
+                                Debug.WriteLine($"[ViewParameterAnalyzer] Found referenced ViewModel: {vm.Name} with {viewParamProps.Count} ViewParameter properties");
+                            }
+                        }
                     }
+                }
 
-                    Debug.WriteLine($"[ViewParameterAnalyzer] Found View: {viewType.Name} for ViewModel: {viewModelType.Name}");
-
-                    // Get View's [Parameter] properties (from the view we found)
-                    var viewParams = GetParameterPropertyNames(viewType);
-                    Debug.WriteLine($"[ViewParameterAnalyzer] View {viewType.Name} has {viewParams.Count} Parameter properties");
-
-                    // Check each [ViewParameter] property
-                    foreach (var viewParamProperty in viewParamProperties)
+                // Validate ViewModels from current compilation
+                ValidateViewModelParameters(viewModelParameters, allViews, compilationEndContext);
+                
+                // Validate ViewModels from referenced assemblies (cross-project validation)
+                foreach (var (viewModel, properties) in referencedViewModels)
+                {
+                    var viewType = FindCorrespondingView(viewModel, allViews);
+                    if (viewType != null)
                     {
-                        Debug.WriteLine($"[ViewParameterAnalyzer] Checking ViewParameter: {viewParamProperty.Name}");
-                        if (!viewParams.Contains(viewParamProperty.Name))
-                        {
-                            Debug.WriteLine($"[ViewParameterAnalyzer] DIAGNOSTIC: Property {viewParamProperty.Name} not found in View");
-                            
-                            // Report diagnostic on the ViewModel property
-                            var diagnostic = Diagnostic.Create(
-                                DiagnosticDescriptors.ViewParameterMismatch,
-                                viewParamProperty.Locations[0],
-                                viewParamProperty.Name);
-
-                            compilationEndContext.ReportDiagnostic(diagnostic);
-                        }
-                        else
-                        {
-                            Debug.WriteLine($"[ViewParameterAnalyzer] OK: Property {viewParamProperty.Name} found in View");
-                        }
+                        Debug.WriteLine($"[ViewParameterAnalyzer] Cross-project: Found View {viewType.Name} for referenced ViewModel {viewModel.Name}");
+                        ValidateViewParametersForViewModel(viewModel, properties, viewType, compilationEndContext);
                     }
                 }
             });
         });
+    }
+
+    private static void ValidateViewModelParameters(
+        ConcurrentDictionary<INamedTypeSymbol, ConcurrentBag<IPropertySymbol>> viewModelParameters,
+        IEnumerable<INamedTypeSymbol> allViews,
+        CompilationAnalysisContext context)
+    {
+        foreach (var kvp in viewModelParameters)
+        {
+            var viewModelType = kvp.Key;
+            var viewParamProperties = kvp.Value;
+            
+            Debug.WriteLine($"[ViewParameterAnalyzer] Analyzing ViewModel: {viewModelType.Name}");
+            
+            // Find corresponding View component
+            var viewType = FindCorrespondingView(viewModelType, allViews);
+            if (viewType == null)
+            {
+                Debug.WriteLine($"[ViewParameterAnalyzer] No View found for ViewModel: {viewModelType.Name}");
+                continue;
+            }
+
+            ValidateViewParametersForViewModel(viewModelType, viewParamProperties.ToList(), viewType, context);
+        }
+    }
+
+    private static void ValidateViewParametersForViewModel(
+        INamedTypeSymbol viewModelType,
+        List<IPropertySymbol> viewParameterProperties,
+        INamedTypeSymbol viewType,
+        CompilationAnalysisContext context)
+    {
+        Debug.WriteLine($"[ViewParameterAnalyzer] Found View: {viewType.Name} for ViewModel: {viewModelType.Name}");
+
+        // Get View's [Parameter] properties
+        var viewParams = GetParameterPropertyNames(viewType);
+        Debug.WriteLine($"[ViewParameterAnalyzer] View {viewType.Name} has {viewParams.Count} Parameter properties");
+
+        // Check each [ViewParameter] property
+        foreach (var viewParamProperty in viewParameterProperties)
+        {
+            Debug.WriteLine($"[ViewParameterAnalyzer] Checking ViewParameter: {viewParamProperty.Name}");
+            if (!viewParams.Contains(viewParamProperty.Name))
+            {
+                Debug.WriteLine($"[ViewParameterAnalyzer] DIAGNOSTIC: Property {viewParamProperty.Name} not found in View");
+                
+                // Only report diagnostic if the property location is in the current compilation
+                // (don't report for properties in referenced assemblies as we can't fix them)
+                if (viewParamProperty.Locations.Any(loc => loc.IsInSource))
+                {
+                    var diagnostic = Diagnostic.Create(
+                        DiagnosticDescriptors.ViewParameterMismatch,
+                        viewParamProperty.Locations[0],
+                        viewParamProperty.Name);
+
+                    context.ReportDiagnostic(diagnostic);
+                }
+            }
+            else
+            {
+                Debug.WriteLine($"[ViewParameterAnalyzer] OK: Property {viewParamProperty.Name} found in View");
+            }
+        }
     }
 
     private static bool IsViewModel(INamedTypeSymbol typeSymbol)

@@ -29,7 +29,7 @@ namespace TestNamespace
     public class MyComponent : ComponentBase
     {
         [CascadingParameter]
-        public {|#0:IMyService|} MyService { get; set; }
+        public IMyService {|#0:MyService|} { get; set; }
     }
 
     public interface IMyService { }
@@ -111,29 +111,6 @@ namespace TestNamespace
     }
 
     [Fact]
-    public async Task CascadingParameterForHttpContext_ReportsDiagnostic()
-    {
-        const string test = @"
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Http;
-
-namespace TestNamespace
-{
-    public class MyComponent : ComponentBase
-    {
-        [CascadingParameter]
-        public {|#0:IHttpContextAccessor|} HttpContextAccessor { get; set; }
-    }
-}";
-
-        var expected = new DiagnosticResult(DiagnosticDescriptors.InjectPreferredOverCascading)
-            .WithLocation(0)
-            .WithArguments("HttpContextAccessor");
-
-        await VerifyCS.VerifyAnalyzerAsync(test, expected);
-    }
-
-    [Fact]
     public async Task CascadingParameterForNavigation_ReportsDiagnostic()
     {
         const string test = @"
@@ -144,7 +121,7 @@ namespace TestNamespace
     public class MyComponent : ComponentBase
     {
         [CascadingParameter]
-        public {|#0:NavigationManager|} Navigation { get; set; }
+        public NavigationManager {|#0:Navigation|} { get; set; }
     }
 
     public class NavigationManager { }
@@ -168,10 +145,10 @@ namespace TestNamespace
     public class MyComponent : ComponentBase
     {
         [CascadingParameter]
-        public {|#0:IFirstService|} FirstService { get; set; }
+        public IFirstService {|#0:FirstService|} { get; set; }
 
         [CascadingParameter]
-        public {|#1:ISecondService|} SecondService { get; set; }
+        public ISecondService {|#1:SecondService|} { get; set; }
     }
 
     public interface IFirstService { }

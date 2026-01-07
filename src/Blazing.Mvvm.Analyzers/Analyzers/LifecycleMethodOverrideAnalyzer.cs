@@ -97,23 +97,32 @@ public class LifecycleMethodOverrideAnalyzer : DiagnosticAnalyzer
         // Analyze each statement to determine if it's business logic
         foreach (var statement in statements)
         {
-            // Simple assignment statements (DI pattern) are OK
+            // Simple assignment statements need deeper analysis
             if (statement is ExpressionStatementSyntax expressionStatement)
             {
                 var expression = expressionStatement.Expression;
                 
-                // Check if it's a simple assignment from parameter to field/property
+                // Check if it's an assignment
                 if (expression is AssignmentExpressionSyntax assignment)
                 {
-                    // This is likely DI: _field = parameter or Property = parameter
-                    if (assignment.Left is IdentifierNameSyntax || 
-                        assignment.Left is MemberAccessExpressionSyntax)
+                    // If right side is just a parameter identifier, it's DI
+                    if (assignment.Right is IdentifierNameSyntax identifier)
                     {
-                        // If right side is just an identifier (parameter), it's DI
-                        if (assignment.Right is IdentifierNameSyntax)
+                        // Check if the identifier name matches a constructor parameter pattern
+                        // DI parameters are typically lowercase versions of field names
+                        var rightName = identifier.Identifier.Text;
+                        
+                        // If it looks like a parameter (lowercase, no prefix), it's likely DI
+                        if (char.IsLower(rightName[0]) && !rightName.StartsWith("_"))
                         {
-                            continue; // This is OK - simple DI assignment
+                            continue; // This is DI assignment
                         }
+                    }
+                    
+                    // Literal values (strings, numbers, bools) are initialization logic
+                    if (assignment.Right is LiteralExpressionSyntax)
+                    {
+                        return true; // Literal initialization is business logic
                     }
                 }
                 
