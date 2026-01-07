@@ -278,4 +278,36 @@
   <data name="BLAZMVVM0020_Description" xml:space="preserve">
     <value>Route parameters defined in @page directive should have corresponding [ViewParameter] properties in the ViewModel to ensure proper parameter binding and maintain MVVM data flow.</value>
   </data>
+
+
+  <!-- BLAZMVVM0021: EventCallback Two-Way Binding Analyzer -->
+  <data name="BLAZMVVM0021_Title" xml:space="preserve">
+    <value>Manual two-way binding is obsolete</value>
+  </data>
+  <data name="BLAZMVVM0021_MessageFormat" xml:space="preserve">
+    <value>Manual PropertyChanged subscription for '{0}' is obsolete. Since v3.2.0, automatic two-way binding is available when component has [Parameter] EventCallback&lt;T&gt; {0}Changed and ViewModel property has [ViewParameter]</value>
+  </data>
+  <data name="BLAZMVVM0021_Description" xml:space="preserve">
+    <value>Manual PropertyChanged event subscriptions for two-way binding are no longer needed. Blazing.Mvvm v3.2.0+ automatically handles two-way binding when the component has matching EventCallback&lt;T&gt; parameters and the ViewModel property is marked with [ViewParameter].</value>
+  </data>
+
+  <data name="BLAZMVVM0021_EventCallbackMissing_Title" xml:space="preserve">
+    <value>EventCallback missing for automatic two-way binding</value>
+  </data>
+  <data name="BLAZMVVM0021_EventCallbackMissing_MessageFormat" xml:space="preserve">
+    <value>Property '{0}' could support automatic two-way binding. Add '[Parameter] public EventCallback&lt;{1}&gt; {0}Changed {{ get; set; }}' to enable it</value>
+  </data>
+  <data name="BLAZMVVM0021_EventCallbackMissing_Description" xml:space="preserve">
+    <value>Components with parameters that have corresponding [ViewParameter] properties in ViewModels can enable automatic two-way binding by adding an EventCallback&lt;T&gt; property following the {PropertyName}Changed naming convention.</value>
+  </data>
+
+  <data name="BLAZMVVM0021_TypeMismatch_Title" xml:space="preserve">
+    <value>EventCallback type mismatch prevents automatic two-way binding</value>
+  </data>
+  <data name="BLAZMVVM0021_TypeMismatch_MessageFormat" xml:space="preserve">
+    <value>EventCallback type '{0}' does not match parameter type '{1}' for '{2}Changed'. Both should use type '{1}' for automatic two-way binding</value>
+  </data>
+  <data name="BLAZMVVM0021_TypeMismatch_Description" xml:space="preserve">
+    <value>For automatic two-way binding to work correctly, the EventCallback&lt;T&gt; parameter must use the same type as the corresponding [Parameter] property. Type mismatches will prevent automatic binding from functioning.</value>
+  </data>
 </root>

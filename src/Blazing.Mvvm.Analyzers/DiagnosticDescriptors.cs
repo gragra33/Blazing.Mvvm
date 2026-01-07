@@ -232,4 +232,38 @@ public static class DiagnosticDescriptors
         description: new LocalizableResourceString(nameof(Resources.BLAZMVVM0020_Description), Resources.ResourceManager, typeof(Resources)),
         helpLinkUri: "https://github.com/gragra33/Blazing.Mvvm/docs/analyzers/BLAZMVVM0020.md",
         customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+    // BLAZMVVM0021: EventCallback Two-Way Binding Analyzer
+    public static readonly DiagnosticDescriptor ManualTwoWayBindingObsolete = new(
+        id: "BLAZMVVM0021",
+        title: new LocalizableResourceString(nameof(Resources.BLAZMVVM0021_Title), Resources.ResourceManager, typeof(Resources)),
+        messageFormat: new LocalizableResourceString(nameof(Resources.BLAZMVVM0021_MessageFormat), Resources.ResourceManager, typeof(Resources)),
+        category: _category,
+        defaultSeverity: DiagnosticSeverity.Info,
+        isEnabledByDefault: true,
+        description: new LocalizableResourceString(nameof(Resources.BLAZMVVM0021_Description), Resources.ResourceManager, typeof(Resources)),
+        helpLinkUri: "https://github.com/gragra33/Blazing.Mvvm/blob/master/docs/analyzers/BLAZMVVM0021.md",
+        customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+    public static readonly DiagnosticDescriptor EventCallbackMissing = new(
+        id: "BLAZMVVM0021",
+        title: new LocalizableResourceString(nameof(Resources.BLAZMVVM0021_EventCallbackMissing_Title), Resources.ResourceManager, typeof(Resources)),
+        messageFormat: new LocalizableResourceString(nameof(Resources.BLAZMVVM0021_EventCallbackMissing_MessageFormat), Resources.ResourceManager, typeof(Resources)),
+        category: _category,
+        defaultSeverity: DiagnosticSeverity.Info,
+        isEnabledByDefault: true,
+        description: new LocalizableResourceString(nameof(Resources.BLAZMVVM0021_EventCallbackMissing_Description), Resources.ResourceManager, typeof(Resources)),
+        helpLinkUri: "https://github.com/gragra33/Blazing.Mvvm/blob/master/docs/analyzers/BLAZMVVM0021.md",
+        customTags: new[] { WellKnownDiagnosticTags.CompilationEnd, WellKnownDiagnosticTags.Telemetry });
+
+    public static readonly DiagnosticDescriptor EventCallbackTypeMismatch = new(
+        id: "BLAZMVVM0021",
+        title: new LocalizableResourceString(nameof(Resources.BLAZMVVM0021_TypeMismatch_Title), Resources.ResourceManager, typeof(Resources)),
+        messageFormat: new LocalizableResourceString(nameof(Resources.BLAZMVVM0021_TypeMismatch_MessageFormat), Resources.ResourceManager, typeof(Resources)),
+        category: _category,
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: new LocalizableResourceString(nameof(Resources.BLAZMVVM0021_TypeMismatch_Description), Resources.ResourceManager, typeof(Resources)),
+        helpLinkUri: "https://github.com/gragra33/Blazing.Mvvm/blob/master/docs/analyzers/BLAZMVVM0021.md",
+        customTags: new[] { WellKnownDiagnosticTags.CompilationEnd, WellKnownDiagnosticTags.Telemetry });
 }

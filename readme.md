@@ -108,7 +108,7 @@ dotnet add package Blazing.Mvvm.Analyzers
 Install-Package Blazing.Mvvm.Analyzers
 ```
 
-This analyzer package provides 20 Roslyn analyzers and 13 code fix providers to help you follow MVVM best practices. See the [Code Quality with Blazing.Mvvm.Analyzers](#code-quality-with-blazingmvvmanalyzers) section for details.
+This analyzer package provides 21 Roslyn analyzers and 14 code fix providers to help you follow MVVM best practices. See the [Code Quality with Blazing.Mvvm.Analyzers](#code-quality-with-blazingmvvmanalyzers) section for details.
 
 ### Configuration
 
@@ -265,8 +265,18 @@ Roslyn Analyzers are code analysis tools that integrate with the .NET compiler t
 
 The **Blazing.Mvvm.Analyzers** package includes:
 
-- **20 Roslyn Analyzers** that provide live feedback in your IDE as you code.
-- **13 Code Fix Providers** that suggest automatic fixes for common issues.
+- **21 Roslyn Analyzers** that provide live feedback in your IDE as you code.
+- **14 Code Fix Providers** that suggest automatic fixes for common issues.
+
+**Key Analyzers:**
+- **BLAZMVVM0001**: ViewModelBase Inheritance - Ensures ViewModels inherit from the correct base class
+- **BLAZMVVM0003**: MvvmComponentBase Usage - Ensures proper View-ViewModel binding
+- **BLAZMVVM0005**: Navigation Type Safety - Validates navigation calls
+- **BLAZMVVM0017**: RelayCommand Async Pattern - Prevents async void methods
+- **BLAZMVVM0021**: EventCallback Two-Way Binding - Detects manual two-way binding patterns and suggests automatic binding (v3.2.0+)
+- And 16 more analyzers covering validation, lifecycle methods, messaging patterns, and more!
+
+For a complete list and detailed documentation, see the [Blazing.Mvvm.Analyzers README](src/Blazing.Mvvm.Analyzers/README.md).
 
 #### Installation
 
@@ -1266,20 +1276,20 @@ For detailed instructions on switching between .NET target frameworks and troubl
 This release introduces the new **Blazing.Mvvm.Analyzers** package for compile-time code quality validation.
 
 **New Features:**
-- **Blazing.Mvvm.Analyzers Package:** New optional NuGet package with 20 Roslyn analyzers to help write better Blazing.Mvvm code. [@gragra33](https://github.com/gragra33)
-- **13 Code Fix Providers:** Automatic code fixes for common MVVM patterns and best practices. [@gragra33](https://github.com/gragra33)
+- **Blazing.Mvvm.Analyzers Package:** New optional NuGet package with 21 Roslyn analyzers to help write better Blazing.Mvvm code. [@gragra33](https://github.com/gragra33)
+- **14 Code Fix Providers:** Automatic code fixes for common MVVM patterns and best practices. [@gragra33](https://github.com/gragra33)
 
 **Analyzer Categories:**
-- **Core MVVM Pattern (6 analyzers):** ViewModelBase inheritance, ViewModelDefinition attribute, MvvmComponentBase usage, navigation type safety, MvvmOwningComponentBase usage, and RelayCommand async patterns
-- **Best Practices (6 analyzers):** ViewParameter validation, observable properties, dispose patterns, messenger registration lifetime, property change notifications, and route parameter binding
-- **Code Quality (5 analyzers):** Lifecycle method overrides, route-ViewModel mapping, command patterns, StateHasChanged optimization, and CascadingParameter vs Inject suggestions
-- **Advanced (3 analyzers):** ViewModelKey consistency, service injection validation, and MvvmNavLink type safety
+- **Core MVVM Pattern (7 analyzers):** ViewModelBase inheritance (BLAZMVVM0001), ViewModelDefinition attribute (BLAZMVVM0002), MvvmComponentBase usage (BLAZMVVM0003), navigation type safety (BLAZMVVM0005), MvvmOwningComponentBase usage (BLAZMVVM0013), RelayCommand async patterns (BLAZMVVM0017), and EventCallback two-way binding (BLAZMVVM0021)
+- **Best Practices (6 analyzers):** ViewParameter validation (BLAZMVVM0004), observable properties (BLAZMVVM0008), dispose patterns (BLAZMVVM0015), messenger registration lifetime (BLAZMVVM0016), property change notifications (BLAZMVVM0018), and route parameter binding (BLAZMVVM0020)
+- **Code Quality (5 analyzers):** Lifecycle method overrides (BLAZMVVM0007), route-ViewModel mapping (BLAZMVVM0010), command patterns (BLAZMVVM0012), StateHasChanged optimization (BLAZMVVM0014), and CascadingParameter vs Inject suggestions (BLAZMVVM0019)
+- **Advanced (3 analyzers):** ViewModelKey consistency (BLAZMVVM0006), service injection validation (BLAZMVVM0009), and MvvmNavLink type safety (BLAZMVVM0011)
 
 **Code Fix Providers:**
-- Automatic corrections for ViewModelBase inheritance, ViewModelDefinition attributes, component base classes, async patterns, dispose implementations, messenger cleanup, property notifications, lifecycle methods, command patterns, and dependency injection
+- Automatic corrections for ViewModelBase inheritance, ViewModelDefinition attributes, component base classes, async patterns, dispose implementations, messenger cleanup, property notifications, lifecycle methods, command patterns, dependency injection, and **manual two-way binding migration**
 
 **Documentation:**
-- Complete analyzer documentation with examples and best practices
+- Complete analyzer documentation with examples and best practices at [docs/analyzers/](docs/analyzers/)
 - Comprehensive implementation guide in [Blazing.Mvvm.Analyzers README](src/Blazing.Mvvm.Analyzers/README.md)
 
 **Note:** The analyzers package is completely optional and can be installed separately from the main Blazing.Mvvm package.

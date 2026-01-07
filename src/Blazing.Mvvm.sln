@@ -9,10 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		..\.gitattributes = ..\.gitattributes
 		..\.gitignore = ..\.gitignore
+		..\cleanbuild.ps1 = ..\cleanbuild.ps1
 		..\clear-analyzer-cache.ps1 = ..\clear-analyzer-cache.ps1
 		..\CODE_OF_CONDUCT.md = ..\CODE_OF_CONDUCT.md
 		..\CONTRIBUTING.md = ..\CONTRIBUTING.md
-		..\.github\copilot-instructions.md = ..\.github\copilot-instructions.md
 		Directory.Build.props = Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props
 		..\HISTORY.md = ..\HISTORY.md
@@ -114,6 +114,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "Analyzers", "{
 		..\docs\analyzers\BLAZMVVM0018.md = ..\docs\analyzers\BLAZMVVM0018.md
 		..\docs\analyzers\BLAZMVVM0019.md = ..\docs\analyzers\BLAZMVVM0019.md
 		..\docs\analyzers\BLAZMVVM0020.md = ..\docs\analyzers\BLAZMVVM0020.md
+		..\docs\analyzers\BLAZMVVM0021.md = ..\docs\analyzers\BLAZMVVM0021.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{34B436F7-FD8E-4FD2-AD4C-27A47025A5E1}"

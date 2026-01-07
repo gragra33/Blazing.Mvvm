@@ -25,3 +25,4 @@ BLAZMVVM0017 | Blazing.Mvvm | Warning | RelayCommand Async Pattern Analyzer
 BLAZMVVM0018 | Blazing.Mvvm | Info | NotifyPropertyChangedFor Analyzer
 BLAZMVVM0019 | Blazing.Mvvm | Info | CascadingParameter vs Inject Analyzer
 BLAZMVVM0020 | Blazing.Mvvm | Warning | Route Parameter Binding Analyzer
+BLAZMVVM0021 | Blazing.Mvvm | Info, Warning | EventCallback Two-Way Binding Analyzer

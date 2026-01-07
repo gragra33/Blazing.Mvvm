@@ -22,7 +22,7 @@ Install-Package Blazing.Mvvm.Analyzers
 
 ## Analyzers
 
-This package includes **20 analyzers** to help you write better Blazing.Mvvm code:
+This package includes **21 analyzers** to help you write better Blazing.Mvvm code:
 
 ### Phase 1: Core MVVM Pattern (High Priority)
 
@@ -32,6 +32,7 @@ This package includes **20 analyzers** to help you write better Blazing.Mvvm cod
 - **[BLAZMVVM0005](../../docs/analyzers/BLAZMVVM0005.md)**: Navigation Type Safety - Validates NavigateTo<TViewModel> calls reference valid routes
 - **[BLAZMVVM0013](../../docs/analyzers/BLAZMVVM0013.md)**: MvvmOwningComponentBase Usage - Detects when scoped services require owned scope
 - **[BLAZMVVM0017](../../docs/analyzers/BLAZMVVM0017.md)**: RelayCommand Async Pattern - Prevents async void methods with [RelayCommand]
+- **[BLAZMVVM0021](../../docs/analyzers/BLAZMVVM0021.md)**: EventCallback Two-Way Binding - Detects manual two-way binding patterns and suggests automatic binding (v3.2.0+)
 
 ### Phase 2: Best Practices (Medium Priority)
 
@@ -58,7 +59,7 @@ This package includes **20 analyzers** to help you write better Blazing.Mvvm cod
 
 ## Code Fix Providers
 
-The package includes **13 code fix providers** for automatic corrections:
+The package includes **14 code fix providers** for automatic corrections:
 
 ### Core MVVM Pattern Fixes
 1. **ViewModelBaseInheritanceCodeFixProvider** - Adds ViewModelBase inheritance
@@ -66,24 +67,25 @@ The package includes **13 code fix providers** for automatic corrections:
 3. **MvvmComponentBaseUsageCodeFixProvider** - Replaces ComponentBase with MvvmComponentBase<TViewModel>
 4. **MvvmOwningComponentBaseUsageCodeFixProvider** - Replaces MvvmComponentBase with MvvmOwningComponentBase
 5. **RelayCommandAsyncPatternCodeFixProvider** - Converts async void to async Task
+6. **EventCallbackTwoWayBindingCodeFixProvider** - Removes manual two-way binding boilerplate and adds EventCallback properties (v3.2.0+)
 
 ### Best Practices Fixes
-6. **RouteParameterBindingCodeFixProvider** - Generates missing [Parameter] or [ViewParameter] properties
-7. **DisposePatternCodeFixProvider** - Adds IDisposable implementation with cleanup
-8. **MessengerRegistrationLifetimeCodeFixProvider** - Adds Dispose with Unregister or OnActivated pattern
-9. **NotifyPropertyChangedForCodeFixProvider** - Adds [NotifyPropertyChangedFor] attribute
+7. **RouteParameterBindingCodeFixProvider** - Generates missing [Parameter] or [ViewParameter] properties
+8. **DisposePatternCodeFixProvider** - Adds IDisposable implementation with cleanup
+9. **MessengerRegistrationLifetimeCodeFixProvider** - Adds Dispose with Unregister or OnActivated pattern
+10. **NotifyPropertyChangedForCodeFixProvider** - Adds [NotifyPropertyChangedFor] attribute
 
 ### Code Quality Fixes
-10. **LifecycleMethodOverrideCodeFixProvider** - Adds OnInitializedAsync override method
-11. **CommandPatternCodeFixProvider** - Adds [RelayCommand] attribute and makes method private
-12. **StateHasChangedOveruseCodeFixProvider** - Removes unnecessary StateHasChanged() calls
-13. **CascadingParameterVsInjectCodeFixProvider** - Replaces [CascadingParameter] with [Inject]
+11. **LifecycleMethodOverrideCodeFixProvider** - Adds OnInitializedAsync override method
+12. **CommandPatternCodeFixProvider** - Adds [RelayCommand] attribute and makes method private
+13. **StateHasChangedOveruseCodeFixProvider** - Removes unnecessary StateHasChanged() calls
+14. **CascadingParameterVsInjectCodeFixProvider** - Replaces [CascadingParameter] with [Inject]
 
 ## Severity Levels
 
 - **Error**: Must be fixed (BLAZMVVM0003, 0005, 0011)
-- **Warning**: Should be addressed (BLAZMVVM0001, 0002, 0004, 0013, 0015, 0016, 0017, 0020)
-- **Info**: Consider improvements (BLAZMVVM0006, 0007, 0008, 0009, 0010, 0012, 0014, 0018, 0019)
+- **Warning**: Should be addressed (BLAZMVVM0001, 0002, 0004, 0013, 0015, 0016, 0017, 0020, 0021 type mismatch)
+- **Info**: Consider improvements (BLAZMVVM0006, 0007, 0008, 0009, 0010, 0012, 0014, 0018, 0019, 0021 suggestions)
 
 ## Quick Start
 
@@ -132,6 +134,9 @@ If you want to disable specific analyzers, add them to your `.editorconfig`:
 ```ini
 # Disable Command Pattern analyzer
 dotnet_diagnostic.BLAZMVVM0012.severity = none
+
+# Disable all BLAZMVVM0021 diagnostics (manual binding, missing EventCallback, type mismatch)
+dotnet_diagnostic.BLAZMVVM0021.severity = none
 ```
 
 ## Documentation
