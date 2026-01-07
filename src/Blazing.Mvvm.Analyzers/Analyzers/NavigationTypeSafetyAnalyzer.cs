@@ -13,7 +13,7 @@ namespace Blazing.Mvvm.Analyzers.Analyzers;
 public class NavigationTypeSafetyAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(DiagnosticDescriptors.InvalidNavigationTarget);
+        [DiagnosticDescriptors.InvalidNavigationTarget];
 
     public override void Initialize(AnalysisContext context)
     {
@@ -21,18 +21,35 @@ public class NavigationTypeSafetyAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterCompilationStartAction(compilationContext =>
         {
-            var navigateToMethods = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
             var viewModelRoutes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+            var invocationsToCheck = new List<(InvocationExpressionSyntax Invocation, SemanticModel Model)>();
 
+            // First pass: collect all ViewModels
             compilationContext.RegisterSymbolAction(symbolContext =>
             {
                 CollectViewModelRoutes(symbolContext, viewModelRoutes);
             }, SymbolKind.NamedType);
 
+            // Second pass: collect all NavigateTo invocations
             compilationContext.RegisterSyntaxNodeAction(nodeContext =>
             {
-                AnalyzeNavigateToInvocation(nodeContext, viewModelRoutes);
+                var invocationExpression = (InvocationExpressionSyntax)nodeContext.Node;
+                var methodName = invocationExpression.Expression.ToString();
+                
+                if (methodName.Contains("NavigateTo"))
+                {
+                    invocationsToCheck.Add((invocationExpression, nodeContext.SemanticModel));
+                }
             }, SyntaxKind.InvocationExpression);
+
+            // Third pass: analyze all collected invocations after all symbols are collected
+            compilationContext.RegisterCompilationEndAction(endContext =>
+            {
+                foreach (var (invocation, semanticModel) in invocationsToCheck)
+                {
+                    AnalyzeNavigateToInvocation(endContext, invocation, semanticModel, viewModelRoutes);
+                }
+            });
         });
     }
 
@@ -60,20 +77,12 @@ public class NavigationTypeSafetyAnalyzer : DiagnosticAnalyzer
     }
 
     private static void AnalyzeNavigateToInvocation(
-        SyntaxNodeAnalysisContext context,
+        CompilationAnalysisContext context,
+        InvocationExpressionSyntax invocationExpression,
+        SemanticModel semanticModel,
         HashSet<INamedTypeSymbol> viewModelRoutes)
     {
-        var invocationExpression = (InvocationExpressionSyntax)context.Node;
-
-        // Check if this is a NavigateTo call
-        var methodName = invocationExpression.Expression.ToString();
-        if (!methodName.Contains("NavigateTo"))
-        {
-            return;
-        }
-
         // Get semantic model to resolve generic type
-        var semanticModel = context.SemanticModel;
         var symbolInfo = semanticModel.GetSymbolInfo(invocationExpression, context.CancellationToken);
 
         if (symbolInfo.Symbol is not IMethodSymbol methodSymbol)
@@ -94,8 +103,18 @@ public class NavigationTypeSafetyAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        // Check if the ViewModel has a valid route mapping
-        if (!viewModelRoutes.Contains(namedViewModelType, SymbolEqualityComparer.Default))
+        // Skip if it doesn't end with "ViewModel" suffix
+        if (!namedViewModelType.Name.EndsWith(AnalyzerConstants.Naming.ViewModelSuffix))
+        {
+            return;
+        }
+
+        // Check if the ViewModel is valid
+        var isValidViewModel = viewModelRoutes.Contains(namedViewModelType, SymbolEqualityComparer.Default) ||
+                               HasViewModelDefinitionAttribute(namedViewModelType) ||
+                               InheritsFromViewModelBase(namedViewModelType, context.Compilation);
+
+        if (!isValidViewModel)
         {
             var diagnostic = Diagnostic.Create(
                 DiagnosticDescriptors.InvalidNavigationTarget,
@@ -109,7 +128,8 @@ public class NavigationTypeSafetyAnalyzer : DiagnosticAnalyzer
     private static bool HasViewModelDefinitionAttribute(INamedTypeSymbol typeSymbol)
     {
         return typeSymbol.GetAttributes().Any(attr =>
-            attr.AttributeClass?.Name == AnalyzerConstants.AttributeNames.ViewModelDefinition);
+            attr.AttributeClass?.Name == AnalyzerConstants.AttributeNames.ViewModelDefinition ||
+            attr.AttributeClass?.Name == $"{AnalyzerConstants.AttributeNames.ViewModelDefinition}Attribute");
     }
 
     private static bool InheritsFromViewModelBase(INamedTypeSymbol typeSymbol, Compilation compilation)

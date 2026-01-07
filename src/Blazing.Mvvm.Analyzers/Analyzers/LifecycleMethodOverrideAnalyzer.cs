@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Blazing.Mvvm.Analyzers.Analyzers;
@@ -12,7 +13,7 @@ namespace Blazing.Mvvm.Analyzers.Analyzers;
 public class LifecycleMethodOverrideAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(DiagnosticDescriptors.LifecycleMethodSuggestion);
+        [DiagnosticDescriptors.LifecycleMethodSuggestion];
 
     public override void Initialize(AnalysisContext context)
     {
@@ -49,7 +50,7 @@ public class LifecycleMethodOverrideAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        // Check if constructor has meaningful code (more than just assignments)
+        // Check if constructor has meaningful business logic (not just DI assignments)
         foreach (var constructor in constructors)
         {
             if (constructor.DeclaringSyntaxReferences.Length == 0)
@@ -60,11 +61,13 @@ public class LifecycleMethodOverrideAnalyzer : DiagnosticAnalyzer
             var syntaxReference = constructor.DeclaringSyntaxReferences[0];
             var syntax = syntaxReference.GetSyntax(context.CancellationToken);
 
-            // Simple heuristic: if constructor has body with statements, suggest lifecycle methods
-            var hasBody = syntax.DescendantNodes().Any(n => 
-                n.IsKind(SyntaxKind.Block));
+            if (syntax is not ConstructorDeclarationSyntax constructorSyntax)
+            {
+                continue;
+            }
 
-            if (hasBody)
+            // Check if constructor has business logic beyond simple field/property assignments
+            if (HasBusinessLogic(constructorSyntax))
             {
                 var diagnostic = Diagnostic.Create(
                     DiagnosticDescriptors.LifecycleMethodSuggestion,
@@ -75,6 +78,89 @@ public class LifecycleMethodOverrideAnalyzer : DiagnosticAnalyzer
                 break;
             }
         }
+    }
+
+    private static bool HasBusinessLogic(ConstructorDeclarationSyntax constructor)
+    {
+        if (constructor.Body == null)
+        {
+            return false;
+        }
+
+        var statements = constructor.Body.Statements;
+        
+        if (statements.Count == 0)
+        {
+            return false;
+        }
+
+        // Analyze each statement to determine if it's business logic
+        foreach (var statement in statements)
+        {
+            // Simple assignment statements (DI pattern) are OK
+            if (statement is ExpressionStatementSyntax expressionStatement)
+            {
+                var expression = expressionStatement.Expression;
+                
+                // Check if it's a simple assignment from parameter to field/property
+                if (expression is AssignmentExpressionSyntax assignment)
+                {
+                    // This is likely DI: _field = parameter or Property = parameter
+                    if (assignment.Left is IdentifierNameSyntax || 
+                        assignment.Left is MemberAccessExpressionSyntax)
+                    {
+                        // If right side is just an identifier (parameter), it's DI
+                        if (assignment.Right is IdentifierNameSyntax)
+                        {
+                            continue; // This is OK - simple DI assignment
+                        }
+                    }
+                }
+                
+                // Any method invocation is business logic
+                if (expression.DescendantNodesAndSelf().OfType<InvocationExpressionSyntax>().Any())
+                {
+                    return true;
+                }
+                
+                // Complex expressions (not simple assignments) are business logic
+                if (expression is not AssignmentExpressionSyntax)
+                {
+                    return true;
+                }
+                
+                // Assignment with method call on right side is business logic
+                if (expression is AssignmentExpressionSyntax complexAssignment &&
+                    complexAssignment.Right.DescendantNodesAndSelf().OfType<InvocationExpressionSyntax>().Any())
+                {
+                    return true;
+                }
+            }
+            
+            // Control flow statements indicate business logic
+            if (statement is IfStatementSyntax || 
+                statement is ForStatementSyntax || 
+                statement is ForEachStatementSyntax ||
+                statement is WhileStatementSyntax ||
+                statement is DoStatementSyntax ||
+                statement is SwitchStatementSyntax ||
+                statement is TryStatementSyntax)
+            {
+                return true;
+            }
+            
+            // Local variable declarations with method calls are business logic
+            if (statement is LocalDeclarationStatementSyntax localDecl)
+            {
+                if (localDecl.DescendantNodes().OfType<InvocationExpressionSyntax>().Any())
+                {
+                    return true;
+                }
+            }
+        }
+
+        // If we only found simple DI assignments, don't trigger
+        return false;
     }
 
     private static bool InheritsFromViewModelBase(INamedTypeSymbol typeSymbol, Compilation compilation)
