@@ -21,7 +21,7 @@ builder.Services.AddMvvm(options =>
 {
     options.HostingModelType = BlazorHostingModelType.WebApp;
     options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
-    options.RegisterViewModelsFromAssemblyContaining<Blazing.Mvvm.Sample.WebApp.Client._Imports>();
+    options.RegisterViewModelsFromAssemblyContaining<Blazing.Mvvm.Sample.WebApp.Client.ViewModels.CounterViewModel>();
 });
 
 var app = builder.Build();
@@ -46,7 +46,7 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(Blazing.Mvvm.Sample.WebApp.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(Blazing.Mvvm.Sample.WebApp.Client.ViewModels.CounterViewModel).Assembly);
 
 app.MapGet("/api/weatherforecast", (IWeatherService weatherService, CancellationToken cancellationToken)
     => weatherService.GetForecastAsync(cancellationToken));
