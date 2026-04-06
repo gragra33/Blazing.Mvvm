@@ -7,7 +7,7 @@ public interface ITestNavigationViewModel : IViewModelBase, IDisposable
 {
     string QueryString { get; set; }
 
-    string Test { get; set; }
+    string? Test { get; set; }
 
     string? Echo { get; set; }
 
