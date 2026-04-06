@@ -1385,7 +1385,7 @@ This maintenance release focuses on improvements to the sample project and bug f
 > Updates to `ViewModelBase` and `ValidatorViewModelBase` now implement `IDisposable` for `PropertyChanged` event tracking. This may cause build errors when `IDisposable` is implemented manually. Use `protected override void Dispose(bool disposing)` to handle manual disposal in derived classes.
 
 **Sample Project Refactoring:**
-- **Major Consolidation:** Refactored `Blazing.Mvvm.Sample.Server`, `Blazing.Mvvm.Sample.Wasm`, `Blazing.Mvvm.Sample.WebApp`, `Blazing.Mvvm.Sample.HybridMaui`, and `Blazing.SubpathHosting.Server` to use a centralized **` Blazing.Mvvm.Sample.Shared`** library. [@gragra33](https://github.com/gragra33)
+- **Major Consolidation:** Refactored `Blazing.Mvvm.Sample.Server`, `Blazing.Mvvm.Sample.Wasm`, `Blazing.Mvvm.Sample.WebApp`, `Blazing.Mvvm.Sample.HybridMaui`, and `Blazing.SubpathHosting.Server` to use a centralized **`Blazing.Mvvm.Sample.Shared`** library. [@gragra33](https://github.com/gragra33)
 - **Integrated Standalone Samples:** Moved content from `ParameterResolution.Sample.Wasm` and `Blazing.Mvvm.ParentChildSample` into the shared library, making these patterns available across all sample applications. [@gragra33](https://github.com/gragra33)
 - **New RelayCommand Sample Page:** Added comprehensive `RelayCommands` page demonstrating synchronous and asynchronous command patterns, `AllowConcurrentExecutions` behavior, command parameters, and `CanExecute` validation. [@gragra33](https://github.com/gragra33)
 
