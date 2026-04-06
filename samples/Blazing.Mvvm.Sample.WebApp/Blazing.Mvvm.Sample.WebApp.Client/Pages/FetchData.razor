@@ -58,7 +58,7 @@ else
 
         if (disposing)
         {
-            _persistingSubscription.Dispose();
+            _persistingSubscription?.Dispose();
         }
 
         base.Dispose(disposing);
