@@ -720,7 +720,7 @@ The same principle works with the `MvvmKeyNavLink` component:
 
 #### Navigation Fallback
 
-`MvvmNavigationManager` still supports normal `NavigationManager` magic string navigation,  as it is still used internally by `MvvmNavigationManager`.
+`MvvmNavigationManager` still supports normal `NavigationManager` magic string navigation, as it is still used internally by `MvvmNavigationManager`.
 
 ### MVVM Validation
 
