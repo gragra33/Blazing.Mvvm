@@ -63,4 +63,4 @@ app.MapGet("/api/users/{userId}/posts", (string userId, IPostsService postsServi
 app.MapGet("/api/users/{userId}/posts/{postId}", (string userId, string postId, IPostsService postsService) 
     => postsService.GetPostByIdAsync(userId, postId));
 
-await app.RunAsync();await app.RunAsync();
+await app.RunAsync();

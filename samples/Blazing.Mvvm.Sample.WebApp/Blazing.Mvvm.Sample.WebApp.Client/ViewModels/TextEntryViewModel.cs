@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using Blazing.Mvvm.ComponentModel;
 using Blazing.Mvvm.Sample.WebApp.Client.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -18,12 +19,21 @@ public sealed partial class TextEntryViewModel : RecipientViewModelBase<ConvertH
     {
         StringBuilder asciiBuilder = new();
 
+        if (message.HexToConvert.Length % 2 != 0)
+        {
+            AsciiText = string.Empty;
+            return;
+        }
+
         for (int i = 0; i < message.HexToConvert.Length; i += 2)
         {
-            string hs = message.HexToConvert.Substring(i, 2);
-            uint decimalVal = Convert.ToUInt32(hs, 16);
-            char character = Convert.ToChar(decimalVal);
-            asciiBuilder.Append(character);
+            if (!byte.TryParse(message.HexToConvert.AsSpan(i, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out byte value))
+            {
+                AsciiText = string.Empty;
+                return;
+            }
+
+            asciiBuilder.Append((char)value);
         }
 
         AsciiText = asciiBuilder.ToString();
