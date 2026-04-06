@@ -2,7 +2,8 @@
 <!-- TOC -->
 #### Table of Contents
 
-- [V3.3.0 - 10 January 2025](#v3.3.0-10-january-2025)
+- [V3.3.0 - 10 January 2026](#v3.3.0-10-january-2026)
+- [V3.2.1 - 2 February 2026](#v3.2.1-2-february-2026)
 - [V3.2.0 - 7 January 2026](#v3.2.0-7-january-2026)
 - [V3.1.0 - 3 December 2025](#v3.1.0-3-december-2025)
 - [V3.0.0 - 18 November 2025](#v3.0.0-18-november-2025)
@@ -45,6 +46,36 @@ This release introduces the new **Blazing.Mvvm.Analyzers** package for compile-t
 
 **Note:** The analyzers package is completely optional and can be installed separately from the main Blazing.Mvvm package.
 
+### V3.2.1 - 2 February 2026
+
+This maintenance release focuses on improvements to the sample project and bug fixes.
+
+**Improvements:**
+- **IAsyncRelayCommand Edge Case Fix:** ([Issue #65](https://github.com/gragra33/Blazing.Mvvm/issues/65)) Improved support for edge cases where `PropertyChanged` events were blocked when `ExecutionTask` is awaited, particularly when `AllowConcurrentExecutions` is set to `false`. This ensures UI updates propagate correctly even when awaiting long-running async commands. [@gragra33](https://github.com/gragra33) & [@teunlielu](https://github.com/teunlielu)
+
+> [!WARNING]
+> Updates to `ViewModelBase` and `ValidatorViewModelBase` now implement `IDisposable` for `PropertyChanged` event tracking. This may cause build errors when `IDisposable` is implemented manually. Use `protected override void Dispose(bool disposing)` to handle manual disposal in derived classes.
+
+**Sample Project Refactoring:**
+- **Major Consolidation:** Refactored `Blazing.Mvvm.Sample.Server`, `Blazing.Mvvm.Sample.Wasm`, `Blazing.Mvvm.Sample.WebApp`, `Blazing.Mvvm.Sample.HybridMaui`, and `Blazing.SubpathHosting.Server` to use a centralized **`Blazing.Mvvm.Sample.Shared`** library. [@gragra33](https://github.com/gragra33)
+- **Integrated Standalone Samples:** Moved content from `ParameterResolution.Sample.Wasm` and `Blazing.Mvvm.ParentChildSample` into the shared library, making these patterns available across all sample applications. [@gragra33](https://github.com/gragra33)
+- **New RelayCommand Sample Page:** Added comprehensive `RelayCommands` page demonstrating synchronous and asynchronous command patterns, `AllowConcurrentExecutions` behavior, command parameters, and `CanExecute` validation. [@gragra33](https://github.com/gragra33)
+
+**Component Libraries:**
+- **MvvmButton Component:** New MVVM-aware button component (`Blazing.Buttons`) with integrated command binding and automatic state management. [@gragra33](https://github.com/gragra33)
+- **Bootstrap Components:** Added production-ready Bootstrap 5 wrapper components, including `BootstrapAccordion`, `BootstrapBreadcrumbs`, `BootstrapCard`, `BootstrapNavMenu`, and `BootstrapRowGroup` to `Blazing.Mvvm.Sample.Shared`. [@gragra33](https://github.com/gragra33)
+- **ConditionalSwitch Component:** Added declarative conditional rendering components (`ConditionalSwitch`, `When`, `Otherwise`) to `Blazing.Common` library. [@gragra33](https://github.com/gragra33)
+
+**Documentation:**
+- Updated `Blazing.SubpathHosting.Server` readme with comprehensive information about sample architecture, component libraries, and recent updates. [@gragra33](https://github.com/gragra33)
+- Added reference to the [Blazing.SubpathHosting.Server sample readme](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/Blazing.SubpathHosting.Server/readme.md) for detailed subpath hosting best practices. [@gragra33](https://github.com/gragra33)
+
+**Benefits of Refactoring:**
+- Demonstrates best practices for code sharing across Blazor hosting models (Server, WebAssembly, Web App, Hybrid MAUI)
+- Reduces code duplication and maintenance overhead
+- Provides consistent examples across all hosting models
+- Easier to add new features that work everywhere
+
 ### V3.2.0 - 7 January 2026
 
 This release adds support for:
@@ -64,34 +95,6 @@ This release adds support for:
 **Updated Samples:**
 - Updated sample projects to demonstrate complex route patterns:
   - `Blazing.Mvvm.Sample.Server`, `Blazing.Mvvm.Sample.WebApp`, `Blazing.Mvvm.Sample.Wasm`, `Blazing.Mvvm.Sample.HybridMaui`
-
-### V3.2.1 - 12 December 2024
-
-This release introduces the new **Blazing.Mvvm.Analyzers** package for compile-time code quality validation. We also added automatic two-way binding support, eliminating the need for manual PropertyChanged event handling in components.
-
-**New Features:**
-- **Blazing.Mvvm.Analyzers Package:** New optional NuGet package with 20 Roslyn analyzers to help write better Blazing.Mvvm code. [@gragra33](https://github.com/gragra33)
-- **13 Code Fix Providers:** Automatic code fixes for common MVVM patterns and best practices. [@gragra33](https://github.com/gragra33)
-- **Automatic Two-Way Binding:** Components with `EventCallback<T>` parameters following the `{PropertyName}Changed` convention and corresponding `[ViewParameter]` properties in ViewModels now automatically wire up two-way binding. [@gragra33](https://github.com/gragra33)
-
-**New Sample:** 
-- **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute, and automatic two-way binding with `@bind-` syntax
-
-**Analyzer Categories:**
-- **Core MVVM Pattern (6 analyzers):** ViewModelBase inheritance, ViewModelDefinition attribute, MvvmComponentBase usage, navigation type safety, MvvmOwningComponentBase usage, and RelayCommand async patterns
-- **Best Practices (6 analyzers):** ViewParameter validation, observable properties, dispose patterns, messenger registration lifetime, property change notifications, and route parameter binding
-- **Code Quality (5 analyzers):** Lifecycle method overrides, route-ViewModel mapping, command patterns, StateHasChanged optimization, and CascadingParameter vs Inject suggestions
-- **Advanced (3 analyzers):** ViewModelKey consistency, service injection validation, and MvvmNavLink type safety
-
-**Code Fix Providers:**
-- Automatic corrections for ViewModelBase inheritance, ViewModelDefinition attributes, component base classes, async patterns, dispose implementations, messenger cleanup, property notifications, lifecycle methods, command patterns, and dependency injection
-
-**Documentation:**
-- Complete analyzer documentation with examples and best practices
-- All 7 sample projects updated to demonstrate analyzer usage
-- Comprehensive implementation guide in [Blazing.Mvvm.Analyzers README](src/Blazing.Mvvm.Analyzers/README.md)
-
-**Note:** The analyzers package is completely optional and can be installed separately from the main Blazing.Mvvm package.
 
 ### V3.1.0 - 3 December 2025
 
@@ -114,7 +117,7 @@ This release adds automatic base path detection for YARP reverse proxy scenarios
 - For YARP scenarios, simply use `app.UseForwardedHeaders()` and optionally handle `X-Forwarded-Prefix` header
 - Existing code using `BasePath` is now marked `obsolete`, but continues to work without changes. Will be removed in a future release.
 
-See the [Subpath Hosting](../readme.md#subpath-hosting) section in the readme for updated configuration examples.
+See the [Subpath Hosting](readme.md#subpath-hosting) section in the readme for updated configuration examples.
 
 ### V3.0.0 - 18 November 2025
 

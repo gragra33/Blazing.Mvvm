@@ -21,7 +21,7 @@ builder.Services.AddMvvm(options =>
 {
     options.HostingModelType = BlazorHostingModelType.WebApp;
     options.ParameterResolutionMode = ParameterResolutionMode.ViewAndViewModel;
-    options.RegisterViewModelsFromAssemblyContaining<Blazing.Mvvm.Sample.WebApp.Client._Imports>();
+    options.RegisterViewModelsFromAssemblyContaining<Blazing.Mvvm.Sample.WebApp.Client.ViewModels.CounterViewModel>();
 });
 
 var app = builder.Build();
@@ -63,4 +63,4 @@ app.MapGet("/api/users/{userId}/posts", (string userId, IPostsService postsServi
 app.MapGet("/api/users/{userId}/posts/{postId}", (string userId, string postId, IPostsService postsService) 
     => postsService.GetPostByIdAsync(userId, postId));
 
-await app.RunAsync();await app.RunAsync();
+await app.RunAsync();

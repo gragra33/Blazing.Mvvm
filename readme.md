@@ -34,6 +34,7 @@
       - [Learn More](#learn-more)
     - [View Model](#view-model)
       - [Lifecycle Methods](#lifecycle-methods)
+      - [IDisposable Implementation](#idisposable-implementation)
       - [Service Registration](#service-registration)
         - [Registering ViewModels with Interfaces or Abstract Classes](#registering-viewmodels-with-interfaces-or-abstract-classes)
         - [Registering Keyed ViewModels](#registering-keyed-viewmodels)
@@ -41,6 +42,7 @@
       - [Automatic Two-Way Binding](#automatic-two-way-binding)
     - [MVVM Navigation](#mvvm-navigation)
       - [Navigate by abstraction](#navigate-by-abstraction)
+      - [Navigation Fallback](#navigation-fallback)
     - [MVVM Validation](#mvvm-validation)
     - [Subpath Hosting](#subpath-hosting)
       - [Automatic Base Path Detection (Recommended)](#automatic-base-path-detection-recommended)
@@ -64,9 +66,11 @@
       - [Blazor Hosting Model Samples](#blazor-hosting-model-samples)
       - [Blazor Hybrid Samples](#blazor-hybrid-samples)
       - [Specialized Samples](#specialized-samples)
+      - [Component Libraries](#component-libraries)
       - [Running Samples with Different .NET Target Frameworks](#running-samples-with-different.net-target-frameworks)
   - [History](#history)
-    - [V3.3.0 - 10 January 2025](#v3.3.0-10-january-2025)
+    - [V3.3.0 - 10 January 2026](#v3.3.0-10-january-2026)
+    - [V3.2.1 - 2 February 2026](#v321-2-february-2026)
     - [V3.2.0 - 7 January 2026](#v3.2.0-7-january-2026)
     - [V3.1.0 - 3 December 2025](#v3.1.0-3-december-2025)
     - [V3.0.0 - 18 November 2025](#v3.0.0-18-november-2025)
@@ -332,6 +336,47 @@ The `ViewModelBase`, `RecipientViewModelBase`, and `ValidatorViewModelBase` clas
 - `OnParametersSetAsync`
 - `ShouldRender`
 
+#### IDisposable Implementation
+
+> [!NOTE]
+> **Added v3.2.1**, all ViewModel base classes (`ViewModelBase`, `RecipientViewModelBase`, and `ValidatorViewModelBase`) now implement `IDisposable` to provide automatic cleanup of `PropertyChanged` event subscriptions for `IAsyncRelayCommand` instances.
+
+**Automatic Cleanup:**
+When a ViewModel is disposed, it automatically unsubscribes from all `IAsyncRelayCommand` `PropertyChanged` events, preventing memory leaks and ensuring proper resource cleanup. This is particularly important for commands with `AllowConcurrentExecutions` set to `false`, where the framework monitors the command's `IsRunning` property to trigger UI updates.
+
+**Manual Disposal in Derived Classes:**
+If you need to dispose of additional resources in your ViewModel, override the `Dispose(bool disposing)` method:
+
+```csharp
+[ViewModelDefinition(Lifetime = ServiceLifetime.Scoped)]
+public sealed partial class MyViewModel : ViewModelBase
+{
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            // Dispose of your managed resources here
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+        }
+        
+        // Always call base to ensure command subscriptions are cleaned up
+        base.Dispose(disposing);
+    }
+}
+```
+
+> [!WARNING]
+> If your ViewModel previously implemented `IDisposable` manually, you must change `public void Dispose()` to `protected override void Dispose(bool disposing)` to avoid build errors. The base classes now handle the `IDisposable` pattern implementation.
+
+**Benefits:**
+- ✅ **Automatic Memory Leak Prevention** - Command event subscriptions are automatically cleaned up
+- ✅ **Simplified Code** - No need to manually track and unsubscribe from command events
+- ✅ **Consistent Pattern** - All ViewModels follow the standard .NET dispose pattern
+- ✅ **Better Performance** - Proper cleanup ensures commands and ViewModels are garbage collected efficiently
+
 #### Service Registration
 
 ViewModels are registered as `Transient` services by default. If you need to register a ViewModel with a different service lifetime (Scoped, Singleton, Transient), use the `ViewModelDefinition` attribute:
@@ -569,6 +614,7 @@ When navigation is required, a quick lookup is performed, and the Blazor `Naviga
 </div>
 ```
 
+> [!NOTE]
 > The `MvvmNavLink` component is based on the Blazor `NavLink` component and includes additional `TViewModel` and `RelativeUri` properties. Internally, it uses the `MvvmNavigationManager` for navigation.
 
 **Navigate by ViewModel using the `MvvmNavigationManager` from code:**
@@ -671,6 +717,10 @@ The same principle works with the `MvvmKeyNavLink` component:
     </MvvmKeyNavLink>
 </div>
 ```
+
+#### Navigation Fallback
+
+`MvvmNavigationManager` still supports normal `NavigationManager` magic string navigation,  as it is still used internally by `MvvmNavigationManager`.
 
 ### MVVM Validation
 
@@ -1258,6 +1308,35 @@ Modernises the Microsoft's [Xamarin Sample](https://github.com/CommunityToolkit/
 - **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute, and automatic two-way binding with `@bind-` syntax
 - **[Blazing.Mvvm.ParentChildSample](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/ParentChildSample)** - Demonstrates dynamic parent-child component communication using Messenger. [Original](https://github.com/gragra33/Blazing.Mvvm.ParentChildSample) repo is now archived.
 
+#### Component Libraries
+
+The sample projects include several reusable component libraries that demonstrate MVVM patterns and best practices:
+
+##### MvvmButton (`Blazing.Buttons`)
+- MVVM-aware button component with integrated command binding
+- Automatic disabled state management when commands cannot execute
+- Seamless integration with `IRelayCommand` and `IAsyncRelayCommand`
+- Example usage in all sample applications
+
+##### Bootstrap Components (`Blazing.Mvvm.Sample.Shared/Components/Bootstrap`)
+Production-ready Bootstrap 5 wrapper components demonstrating component composition patterns:
+- **BootstrapAccordion** & **BootstrapAccordionItem** - Collapsible content panels with Bootstrap styling
+- **BootstrapBreadcrumbs** - Navigation breadcrumb trails with MVVM-friendly API
+- **BootstrapCard** - Content containers with headers, footers, and customizable styling
+- **BootstrapNavMenu** & **BootstrapNavMenuGroup** - Hierarchical navigation menus with collapsible groups and JavaScript interop
+- **BootstrapRowGroup** & **BootstrapRowGroupItem** - Grouped row layouts for structured content display
+
+##### Blazor Common Utilities (`Blazing.Common`)
+Shared utility components and helpers used across sample projects:
+- **ConditionalSwitch**, **When**, **Otherwise** - Declarative conditional rendering components (alternative to if/else in markup)
+- **ComponentControlBase**, **ComponentInputControlBase** - Base classes for reusable components
+
+These component libraries are included in the sample projects to demonstrate:
+- How to build reusable, MVVM-aware components
+- Component composition and communication patterns
+- Integration with popular CSS frameworks (Bootstrap 5)
+- Code organization and architectural patterns
+
 #### Running Samples with Different .NET Target Frameworks
 
 All sample projects in this repository support multi-targeting across .NET 8, .NET 9, and .NET 10. To run a sample with a specific .NET version:
@@ -1294,6 +1373,36 @@ This release introduces the new **Blazing.Mvvm.Analyzers** package for compile-t
 - Comprehensive implementation guide in [Blazing.Mvvm.Analyzers README](src/Blazing.Mvvm.Analyzers/README.md)
 
 **Note:** The analyzers package is completely optional and can be installed separately from the main Blazing.Mvvm package.
+
+### V3.2.1 - 2 February 2026
+
+This maintenance release focuses on improvements to the sample project and bug fixes.
+
+**Improvements:**
+- **IAsyncRelayCommand Edge Case Fix:** ([Issue #65](https://github.com/gragra33/Blazing.Mvvm/issues/65)) Improved support for edge cases where `PropertyChanged` events were blocked when `ExecutionTask` is awaited, particularly when `AllowConcurrentExecutions` is set to `false`. This ensures UI updates propagate correctly even when awaiting long-running async commands. [@gragra33](https://github.com/gragra33) & [@teunlielu](https://github.com/teunlielu)
+
+> [!WARNING]
+> Updates to `ViewModelBase` and `ValidatorViewModelBase` now implement `IDisposable` for `PropertyChanged` event tracking. This may cause build errors when `IDisposable` is implemented manually. Use `protected override void Dispose(bool disposing)` to handle manual disposal in derived classes.
+
+**Sample Project Refactoring:**
+- **Major Consolidation:** Refactored `Blazing.Mvvm.Sample.Server`, `Blazing.Mvvm.Sample.Wasm`, `Blazing.Mvvm.Sample.WebApp`, `Blazing.Mvvm.Sample.HybridMaui`, and `Blazing.SubpathHosting.Server` to use a centralized **` Blazing.Mvvm.Sample.Shared`** library. [@gragra33](https://github.com/gragra33)
+- **Integrated Standalone Samples:** Moved content from `ParameterResolution.Sample.Wasm` and `Blazing.Mvvm.ParentChildSample` into the shared library, making these patterns available across all sample applications. [@gragra33](https://github.com/gragra33)
+- **New RelayCommand Sample Page:** Added comprehensive `RelayCommands` page demonstrating synchronous and asynchronous command patterns, `AllowConcurrentExecutions` behavior, command parameters, and `CanExecute` validation. [@gragra33](https://github.com/gragra33)
+
+**Component Libraries:**
+- **MvvmButton Component:** New MVVM-aware button component (`Blazing.Buttons`) with integrated command binding and automatic state management. [@gragra33](https://github.com/gragra33)
+- **Bootstrap Components:** Added production-ready Bootstrap 5 wrapper components, including `BootstrapAccordion`, `BootstrapBreadcrumbs`, `BootstrapCard`, `BootstrapNavMenu`, and `BootstrapRowGroup` to `Blazing.Mvvm.Sample.Shared`. [@gragra33](https://github.com/gragra33)
+- **ConditionalSwitch Component:** Added declarative conditional rendering components (`ConditionalSwitch`, `When`, `Otherwise`) to `Blazing.Common` library. [@gragra33](https://github.com/gragra33)
+
+**Documentation:**
+- Updated `Blazing.SubpathHosting.Server` readme with comprehensive information about sample architecture, component libraries, and recent updates. [@gragra33](https://github.com/gragra33)
+- Added reference to the [Blazing.SubpathHosting.Server sample readme](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/Blazing.SubpathHosting.Server/readme.md) for detailed subpath hosting best practices. [@gragra33](https://github.com/gragra33)
+
+**Benefits of Refactoring:**
+- Demonstrates best practices for code sharing across Blazor hosting models (Server, WebAssembly, Web App, Hybrid MAUI)
+- Reduces code duplication and maintenance overhead
+- Provides consistent examples across all hosting models
+- Easier to add new features that work everywhere
 
 ### V3.2.0 - 7 January 2026
 

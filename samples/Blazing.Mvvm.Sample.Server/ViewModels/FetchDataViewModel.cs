@@ -23,7 +23,7 @@ public sealed partial class FetchDataViewModel : ViewModelBase, IDisposable
 
     public override async Task OnInitializedAsync()
     {
-        WeatherForecasts = await _weatherService.GetForecastAsync() ?? [];
+        WeatherForecasts = await _weatherService.GetForecastAsync(_cancellationTokenSource.Token) ?? [];
     }
 
     public void Dispose()

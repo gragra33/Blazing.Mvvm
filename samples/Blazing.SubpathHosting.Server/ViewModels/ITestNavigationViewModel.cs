@@ -5,9 +5,9 @@ namespace Blazing.SubpathHosting.Server.ViewModels;
 
 public interface ITestNavigationViewModel : IViewModelBase, IDisposable
 {
-    string QueryString { get; set; }
+    string? QueryString { get; set; }
 
-    string Test { get; set; }
+    string? Test { get; set; }
 
     string? Echo { get; set; }
 
