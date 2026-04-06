@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,8 +23,8 @@ public class ViewModelKeyConsistencyAnalyzer : DiagnosticAnalyzer
         
         context.RegisterCompilationStartAction(compilationContext =>
         {
-            var viewModelKeys = new Dictionary<string, INamedTypeSymbol>();
-            var usedKeys = new HashSet<string>();
+            var viewModelKeys = new ConcurrentDictionary<string, Location>();
+            var usedKeys = new ConcurrentDictionary<string, byte>();
 
             // Collect all ViewModelKey attributes
             compilationContext.RegisterSymbolAction(symbolContext =>
@@ -34,15 +35,14 @@ public class ViewModelKeyConsistencyAnalyzer : DiagnosticAnalyzer
                     return;
                 }
 
-                var viewModelKeyAttr = namedType.GetAttributes().FirstOrDefault(attr =>
-                    attr.AttributeClass?.Name == AnalyzerConstants.AttributeNames.ViewModelKey);
+                var viewModelKeyAttr = namedType.GetAttributes().FirstOrDefault(IsViewModelKeyAttribute);
 
                 if (viewModelKeyAttr != null && viewModelKeyAttr.ConstructorArguments.Length > 0)
                 {
                     var key = viewModelKeyAttr.ConstructorArguments[0].Value?.ToString();
                     if (!string.IsNullOrEmpty(key))
                     {
-                        viewModelKeys[key!] = namedType;
+                        viewModelKeys[key!] = GetDiagnosticLocation(namedType, viewModelKeyAttr);
                     }
                 }
             }, SymbolKind.NamedType);
@@ -58,11 +58,11 @@ public class ViewModelKeyConsistencyAnalyzer : DiagnosticAnalyzer
             {
                 foreach (var kvp in viewModelKeys)
                 {
-                    if (!usedKeys.Contains(kvp.Key))
+                    if (!usedKeys.ContainsKey(kvp.Key))
                     {
                         var diagnostic = Diagnostic.Create(
                             DiagnosticDescriptors.ViewModelKeyInconsistent,
-                            kvp.Value.Locations[0],
+                            kvp.Value,
                             kvp.Key);
 
                         endContext.ReportDiagnostic(diagnostic);
@@ -74,7 +74,7 @@ public class ViewModelKeyConsistencyAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeNavigationCall(
         SyntaxNodeAnalysisContext context,
-        HashSet<string> usedKeys)
+        ConcurrentDictionary<string, byte> usedKeys)
     {
         var invocation = (InvocationExpressionSyntax)context.Node;
 
@@ -95,8 +95,34 @@ public class ViewModelKeyConsistencyAnalyzer : DiagnosticAnalyzer
                 literal.IsKind(SyntaxKind.StringLiteralExpression))
             {
                 var key = literal.Token.ValueText;
-                usedKeys.Add(key);
+                usedKeys.TryAdd(key, 0);
             }
         }
+    }
+
+    private static bool IsViewModelKeyAttribute(AttributeData attribute)
+    {
+        var attributeName = attribute.AttributeClass?.Name;
+        var fullName = attribute.AttributeClass?.ToDisplayString();
+
+        return attributeName == AnalyzerConstants.AttributeNames.ViewModelKey ||
+               attributeName == $"{AnalyzerConstants.AttributeNames.ViewModelKey}Attribute" ||
+               fullName == AnalyzerConstants.TypeNames.ViewModelKeyAttribute;
+    }
+
+    private static Location GetDiagnosticLocation(INamedTypeSymbol namedType, AttributeData attribute)
+    {
+        if (attribute.ApplicationSyntaxReference?.GetSyntax() is AttributeSyntax attributeSyntax)
+        {
+            var argumentLocation = attributeSyntax.ArgumentList?.Arguments.FirstOrDefault()?.GetLocation();
+            if (argumentLocation is not null)
+            {
+                return argumentLocation;
+            }
+
+            return attributeSyntax.GetLocation();
+        }
+
+        return namedType.Locations[0];
     }
 }

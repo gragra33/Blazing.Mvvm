@@ -1,0 +1,53 @@
+@using Blazing.Mvvm.Tests.Infrastructure.Fakes.ViewModels
+@using Blazing.Mvvm.Components
+@inherits MvvmComponentBase<AsyncCommandTestViewModel>
+
+<div class="async-command-test">
+    <h3>AsyncRelayCommand Test Component</h3>
+
+    <div class="status">
+        <p id="result">Result: @ViewModel.Result</p>
+        <p id="execution-count">Executions: @ViewModel.ExecutionCount</p>
+        <p id="is-processing">Processing: @ViewModel.IsProcessing</p>
+        <p id="is-running">Command Running: @ViewModel.LoadDataCommand.IsRunning</p>
+    </div>
+
+    <div class="commands">
+        <button id="load-data"
+                type="button"
+                class="btn btn-primary"
+                disabled="@(!ViewModel.LoadDataCommand.CanExecute(null))"
+                @onclick="@(async () => await ViewModel.LoadDataCommand.ExecuteAsync(null))">
+            Load Data
+        </button>
+
+        <button id="process-data"
+                type="button"
+                class="btn btn-secondary"
+                disabled="@(!ViewModel.ProcessCommand.CanExecute(null))"
+                @onclick="@(async () => await ViewModel.ProcessCommand.ExecuteAsync("TestInput"))">
+            Process Data
+        </button>
+
+        <button id="fast-command"
+                type="button"
+                class="btn btn-info"
+                disabled="@(!ViewModel.FastCommand.CanExecute(null))"
+                @onclick="@(async () => await ViewModel.FastCommand.ExecuteAsync(null))">
+            Fast Command
+        </button>
+
+        <button id="slow-command"
+                type="button"
+                class="btn btn-warning"
+                disabled="@(!ViewModel.SlowCommand.CanExecute(null))"
+                @onclick="@(async () => await ViewModel.SlowCommand.ExecuteAsync(null))">
+            Slow Command
+        </button>
+    </div>
+
+    <div class="button-states">
+        <p id="load-data-enabled">Load Data Enabled: @ViewModel.LoadDataCommand.CanExecute(null)</p>
+        <p id="process-data-enabled">Process Data Enabled: @ViewModel.ProcessCommand.CanExecute(null)</p>
+    </div>
+</div>

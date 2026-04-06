@@ -28,7 +28,7 @@ using Blazing.Mvvm.Services;
 namespace TestNamespace
 {
     [ViewModelDefinition]
-    [ViewModelKey(""{|#0:product-details|}"")]
+    [ViewModelKey({|#0:""product-details""|})]
     public class ProductViewModel : ViewModelBase
     {
     }

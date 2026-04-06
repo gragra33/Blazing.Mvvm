@@ -127,31 +127,7 @@ public class NotifyPropertyChangedForAnalyzer : DiagnosticAnalyzer
                 }
 
                 // Check if the field already has NotifyPropertyChangedFor for this computed property
-                var hasNotification = field.GetAttributes().Any(attr =>
-                {
-                    var attrName = attr.AttributeClass?.Name;
-                    var attrFullName = attr.AttributeClass?.ToDisplayString();
-                    
-                    // Check if this is NotifyPropertyChangedFor attribute
-                    bool isNotifyAttribute = attrName == "NotifyPropertyChangedForAttribute" || 
-                                           attrName == "NotifyPropertyChangedFor" ||
-                                           attrFullName == "CommunityToolkit.Mvvm.ComponentModel.NotifyPropertyChangedForAttribute";
-                    
-                    if (!isNotifyAttribute)
-                        return false;
-
-                    // Check constructor arguments
-                    foreach (var arg in attr.ConstructorArguments)
-                    {
-                        if (arg.Kind == TypedConstantKind.Primitive && arg.Value is string stringValue)
-                        {
-                            // Match the property name (nameof() is evaluated at compile time)
-                            if (stringValue == computedProperty.Name)
-                                return true;
-                        }
-                    }
-                    return false;
-                });
+                var hasNotification = HasNotifyPropertyChangedFor(field, computedProperty.Name, context.CancellationToken);
 
                 if (!hasNotification)
                 {
@@ -190,6 +166,21 @@ public class NotifyPropertyChangedForAnalyzer : DiagnosticAnalyzer
 
                 if (backingField != null)
                 {
+                    var isObservableBackingField = backingField.GetAttributes().Any(attr =>
+                        attr.AttributeClass?.Name == "ObservablePropertyAttribute" ||
+                        attr.AttributeClass?.Name == "ObservableProperty" ||
+                        attr.AttributeClass?.ToDisplayString() == AnalyzerConstants.TypeNames.ObservablePropertyAttribute);
+
+                    if (isObservableBackingField)
+                    {
+                        break;
+                    }
+
+                    if (HasNotifyPropertyChangedFor(backingField, computedProperty.Name, context.CancellationToken))
+                    {
+                        break;
+                    }
+
                     // Create unique key to prevent duplicate reporting
                     var key = $"{backingField.Name}:{computedProperty.Name}";
                     if (reportedPairs.Contains(key))
@@ -235,6 +226,119 @@ public class NotifyPropertyChangedForAnalyzer : DiagnosticAnalyzer
         {
             referencedIdentifiers.Add(identifier);
         }
+    }
+
+    private static bool HasPropertyNameArgument(AttributeData attribute, string propertyName)
+    {
+        foreach (var arg in attribute.ConstructorArguments)
+        {
+            if (arg.Kind == TypedConstantKind.Primitive && arg.Value is string stringValue && stringValue == propertyName)
+            {
+                return true;
+            }
+
+            if (arg.Kind == TypedConstantKind.Array)
+            {
+                foreach (var value in arg.Values)
+                {
+                    if (value.Kind == TypedConstantKind.Primitive && value.Value is string arrayValue && arrayValue == propertyName)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static bool HasNotifyPropertyChangedFor(IFieldSymbol field, string propertyName, CancellationToken cancellationToken)
+    {
+        foreach (var attribute in field.GetAttributes())
+        {
+            var attrName = attribute.AttributeClass?.Name;
+            var attrFullName = attribute.AttributeClass?.ToDisplayString();
+
+            var isNotifyAttribute = attrName == "NotifyPropertyChangedForAttribute" ||
+                                    attrName == "NotifyPropertyChangedFor" ||
+                                    attrFullName == "CommunityToolkit.Mvvm.ComponentModel.NotifyPropertyChangedForAttribute";
+
+            if (isNotifyAttribute && HasPropertyNameArgument(attribute, propertyName))
+            {
+                return true;
+            }
+        }
+
+        foreach (var syntaxReference in field.DeclaringSyntaxReferences)
+        {
+            var syntax = syntaxReference.GetSyntax(cancellationToken);
+            var fieldDeclaration = syntax.AncestorsAndSelf().OfType<FieldDeclarationSyntax>().FirstOrDefault();
+            if (fieldDeclaration is null)
+            {
+                continue;
+            }
+
+            foreach (var attributeList in fieldDeclaration.AttributeLists)
+            {
+                foreach (var attribute in attributeList.Attributes)
+                {
+                    var attributeName = attribute.Name.ToString();
+                    if (attributeName != "NotifyPropertyChangedFor" && attributeName != "NotifyPropertyChangedForAttribute")
+                    {
+                        continue;
+                    }
+
+                    if (attribute.ArgumentList is null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var argument in attribute.ArgumentList.Arguments)
+                    {
+                        if (argument.Expression is LiteralExpressionSyntax literal &&
+                            literal.IsKind(SyntaxKind.StringLiteralExpression) &&
+                            literal.Token.ValueText == propertyName)
+                        {
+                            return true;
+                        }
+
+                        if (argument.Expression is InvocationExpressionSyntax invocation &&
+                            invocation.Expression is IdentifierNameSyntax identifierName &&
+                            identifierName.Identifier.ValueText == "nameof" &&
+                            invocation.ArgumentList.Arguments.FirstOrDefault()?.Expression is IdentifierNameSyntax propertyIdentifier &&
+                            propertyIdentifier.Identifier.ValueText == propertyName)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        var sourceTree = field.Locations.FirstOrDefault()?.SourceTree;
+        if (sourceTree is not null)
+        {
+            var root = sourceTree.GetRoot(cancellationToken);
+            var fieldDeclaration = root.DescendantNodes()
+                .OfType<FieldDeclarationSyntax>()
+                .FirstOrDefault(declaration => declaration.Span.Contains(field.Locations[0].SourceSpan.Start));
+
+            if (fieldDeclaration is not null)
+            {
+                var declarationText = fieldDeclaration.ToString();
+                if (declarationText.Contains("NotifyPropertyChangedFor") && declarationText.Contains($"\"{propertyName}\""))
+                {
+                    return true;
+                }
+
+                if (declarationText.Contains("NotifyPropertyChangedFor") && declarationText.Contains($"nameof({propertyName})"))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private static string GetGeneratedPropertyName(string fieldName)

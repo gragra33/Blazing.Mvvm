@@ -5,7 +5,7 @@ namespace Blazing.Mvvm.ComponentModel;
 /// <summary>
 /// Represents a base interface for ViewModel classes in Blazing.Mvvm, supporting property change notification and lifecycle methods for Blazor Views.
 /// </summary>
-public interface IViewModelBase : INotifyPropertyChanged
+public interface IViewModelBase : INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     /// Invoked when the <c>View</c> has been rendered.

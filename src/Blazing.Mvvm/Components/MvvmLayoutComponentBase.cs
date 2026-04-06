@@ -10,7 +10,7 @@ namespace Blazing.Mvvm.Components;
 ///  A base class for components that represent a layout and resolves a ViewModel of type <typeparamref name="TViewModel"/>.
 /// </summary>
 /// <typeparam name="TViewModel">The ViewModel.</typeparam>
-public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase, IView<TViewModel>
+public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase, IView<TViewModel>, IDisposable
     where TViewModel : IViewModelBase
 {
     private TViewModel? _viewModel;
@@ -39,8 +39,17 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
     /// </summary>
     protected virtual TViewModel ViewModel
     {
-        get => _viewModel ??= ViewModelResolver.Resolve(this, Services);
-        set => _viewModel = value;
+        get
+        {
+            _viewModel ??= ViewModelResolver.Resolve(this, Services);
+            EnsureCommandSubscriptions(_viewModel);
+            return _viewModel;
+        }
+        set
+        {
+            EnsureCommandSubscriptions(value);
+            _viewModel = value;
+        }
     }
 
     /// <inheritdoc/>
@@ -107,15 +116,17 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
 
         if (disposing)
         {
-            ViewModel.PropertyChanged -= OnPropertyChanged;
-            if (ViewModel is ObservableRecipient observableRecipient)
+            var viewModel = _viewModel;
+
+            if (viewModel is not null)
             {
-                observableRecipient.IsActive = false;
+                viewModel.PropertyChanged -= OnPropertyChanged;
             }
 
             // Dispose two-way binding helper if it was initialized
             _bindingHelper?.Dispose();
             _bindingHelper = null;
+            _viewModel = default;
         }
 
         IsDisposed = true;
@@ -123,4 +134,20 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
 
     private void OnPropertyChanged(object? o, PropertyChangedEventArgs propertyChangedEventArgs)
         => InvokeAsync(StateHasChanged);
+
+    private static void EnsureCommandSubscriptions(TViewModel viewModel)
+    {
+        switch (viewModel)
+        {
+            case ViewModelBase viewModelBase:
+                viewModelBase.EnsureCommandSubscriptions();
+                break;
+            case ValidatorViewModelBase validatorViewModelBase:
+                validatorViewModelBase.EnsureCommandSubscriptions();
+                break;
+            case RecipientViewModelBase recipientViewModelBase:
+                recipientViewModelBase.EnsureCommandSubscriptions();
+                break;
+        }
+    }
 }

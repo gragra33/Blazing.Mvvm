@@ -1,10 +1,13 @@
 using System.ComponentModel;
+using Blazing.Mvvm;
 using Blazing.Mvvm.ComponentModel;
 using Blazing.Mvvm.Components;
 using Bunit;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Blazing.Mvvm.Tests.ComponentTests;
 
@@ -171,6 +174,99 @@ public class TwoWayBindingTests : ComponentTestBase
         viewModel.Counter.Should().Be(42);
     }
 
+    [Fact]
+    public void MvvmComponentBase_WhenDisposed_ShouldNotDisposeDiManagedViewModel()
+    {
+        var viewModel = new DisposableTrackingViewModel();
+        Services.AddSingleton<IParameterResolver>(_ => new Blazing.Mvvm.Components.Parameter.ParameterResolver(ParameterResolutionMode.ViewModel));
+        Services.AddSingleton(_ => viewModel);
+
+        var component = RenderComponent<DisposableTrackingChildComponent>();
+
+        component.Instance.Dispose();
+
+        viewModel.DisposeCount.Should().Be(0);
+    }
+
+    [Fact]
+    public void MvvmLayoutComponentBase_WhenDisposed_ShouldNotDisposeDiManagedViewModel()
+    {
+        var viewModel = new DisposableTrackingViewModel();
+        Services.AddSingleton<IParameterResolver>(_ => new Blazing.Mvvm.Components.Parameter.ParameterResolver(ParameterResolutionMode.ViewModel));
+        Services.AddSingleton(_ => viewModel);
+
+        var component = RenderComponent<DisposableTrackingLayoutComponent>();
+
+        component.Instance.Dispose();
+
+        viewModel.DisposeCount.Should().Be(0);
+    }
+
+    [Fact]
+    public void MvvmComponentBase_WhenDisposed_ShouldNotDeactivateDiManagedRecipientViewModel()
+    {
+        var viewModel = new RecipientTrackingViewModel();
+        Services.AddSingleton<IParameterResolver>(_ => new Blazing.Mvvm.Components.Parameter.ParameterResolver(ParameterResolutionMode.ViewModel));
+        Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
+        Services.AddSingleton(_ => viewModel);
+
+        var component = RenderComponent<RecipientTrackingChildComponent>();
+
+        viewModel.IsActive.Should().BeTrue();
+
+        component.Instance.Dispose();
+
+        viewModel.IsActive.Should().BeTrue();
+    }
+
+    [Fact]
+    public void MvvmLayoutComponentBase_WhenDisposed_ShouldNotDeactivateDiManagedRecipientViewModel()
+    {
+        var viewModel = new RecipientTrackingViewModel();
+        Services.AddSingleton<IParameterResolver>(_ => new Blazing.Mvvm.Components.Parameter.ParameterResolver(ParameterResolutionMode.ViewModel));
+        Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
+        Services.AddSingleton(_ => viewModel);
+
+        var component = RenderComponent<RecipientTrackingLayoutComponent>();
+
+        viewModel.IsActive.Should().BeTrue();
+
+        component.Instance.Dispose();
+
+        viewModel.IsActive.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task MvvmOwningComponentBase_WhenDisposed_ShouldDisposeOwnedViewModelOnce()
+    {
+        Services.Replace(ServiceDescriptor.Scoped(_ => new DisposableTrackingViewModel()));
+        Services.AddSingleton<IParameterResolver>(_ => new Blazing.Mvvm.Components.Parameter.ParameterResolver(ParameterResolutionMode.ViewModel));
+
+        var component = RenderComponent<DisposableTrackingOwningComponent>();
+        var viewModel = component.Instance.GetViewModel();
+
+        await component.Instance.DisposeAsync();
+
+        viewModel.DisposeCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task MvvmOwningComponentBase_WhenDisposed_ShouldDeactivateOwnedRecipientViewModel()
+    {
+        Services.Replace(ServiceDescriptor.Scoped(_ => new RecipientTrackingViewModel()));
+        Services.AddSingleton<IParameterResolver>(_ => new Blazing.Mvvm.Components.Parameter.ParameterResolver(ParameterResolutionMode.ViewModel));
+        Services.AddSingleton<IMessenger>(_ => WeakReferenceMessenger.Default);
+
+        var component = RenderComponent<RecipientTrackingOwningComponent>();
+        var viewModel = component.Instance.GetViewModel();
+
+        viewModel.IsActive.Should().BeTrue();
+
+        await component.Instance.DisposeAsync();
+
+        viewModel.IsActive.Should().BeFalse();
+    }
+
     /// <summary>
     /// Helper method to check if there are PropertyChanged event handlers.
     /// </summary>
@@ -195,6 +291,25 @@ public partial class TwoWayBindingTestViewModel : ViewModelBase
     [ObservableProperty]
     [property: ViewParameter]
     private int _counter;
+}
+
+public sealed class DisposableTrackingViewModel : ViewModelBase
+{
+    public int DisposeCount { get; private set; }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            DisposeCount++;
+        }
+
+        base.Dispose(disposing);
+    }
+}
+
+public sealed class RecipientTrackingViewModel : RecipientViewModelBase
+{
 }
 
 /// <summary>
@@ -255,6 +370,22 @@ public class TwoWayBindingChildComponent : MvvmComponentBase<TwoWayBindingTestVi
     protected override void BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder)
     {
         builder.AddContent(0, $"Counter: {ViewModel.Counter}");
+    }
+}
+
+public class DisposableTrackingChildComponent : MvvmComponentBase<DisposableTrackingViewModel>
+{
+    protected override void BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder)
+    {
+        builder.AddContent(0, "Disposable tracking component");
+    }
+}
+
+public class RecipientTrackingChildComponent : MvvmComponentBase<RecipientTrackingViewModel>
+{
+    protected override void BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder)
+    {
+        builder.AddContent(0, "Recipient tracking component");
     }
 }
 
@@ -334,6 +465,42 @@ public class TwoWayBindingOwningChildComponent : MvvmOwningComponentBase<TwoWayB
     protected override void BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder)
     {
         builder.AddContent(0, $"Counter: {ViewModel.Counter}");
+    }
+}
+
+public class DisposableTrackingOwningComponent : MvvmOwningComponentBase<DisposableTrackingViewModel>
+{
+    public DisposableTrackingViewModel GetViewModel() => ViewModel;
+
+    protected override void BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder)
+    {
+        builder.AddContent(0, "Disposable tracking owning component");
+    }
+}
+
+public class RecipientTrackingOwningComponent : MvvmOwningComponentBase<RecipientTrackingViewModel>
+{
+    public RecipientTrackingViewModel GetViewModel() => ViewModel;
+
+    protected override void BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder)
+    {
+        builder.AddContent(0, "Recipient tracking owning component");
+    }
+}
+
+public class DisposableTrackingLayoutComponent : MvvmLayoutComponentBase<DisposableTrackingViewModel>
+{
+    protected override void BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder)
+    {
+        builder.AddContent(0, "Disposable tracking layout component");
+    }
+}
+
+public class RecipientTrackingLayoutComponent : MvvmLayoutComponentBase<RecipientTrackingViewModel>
+{
+    protected override void BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder)
+    {
+        builder.AddContent(0, "Recipient tracking layout component");
     }
 }
 

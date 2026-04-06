@@ -140,7 +140,7 @@ public class ServicesExtensionTests
     }
 
     /// <summary>
-    /// Tests that AddMvvm registers transient view models from a dependent assembly containing a type.
+    /// Tests that AddMvvm registers transient view models from the fixture assembly marker type.
     /// </summary>
     [Theory]
     [MemberData(nameof(ServicesExtensionTestData.ViewModelsInDependentAssembly), MemberType = typeof(ServicesExtensionTestData))]
@@ -150,7 +150,7 @@ public class ServicesExtensionTests
         var sut = new ServiceCollection();
 
         // Act
-        sut.AddMvvm(c => c.RegisterViewModelsFromAssemblyContaining<Sample.WebApp.Client._Imports>());
+        sut.AddMvvm(c => c.RegisterViewModelsFromAssemblyContaining<Blazing.Mvvm.Sample.WebApp.Client._Imports>());
 
         // Assert
         sut.Contains(vmServiceDescriptor, ServiceDescriptorComparer.Comparer).Should().BeTrue();
@@ -178,16 +178,17 @@ public class ServicesExtensionTests
 
         public static TheoryData<ServiceDescriptor> ViewModelsInDependentAssembly = new()
         {
-            { ServiceDescriptor.Transient<Sample.WebApp.Client.ViewModels.EditContactViewModel, Sample.WebApp.Client.ViewModels.EditContactViewModel>() },
-            { ServiceDescriptor.Transient<Sample.WebApp.Client.ViewModels.HexEntryViewModel, Sample.WebApp.Client.ViewModels.HexEntryViewModel>() },
-            { ServiceDescriptor.Transient<Sample.WebApp.Client.ViewModels.ITestNavigationViewModel, Sample.WebApp.Client.ViewModels.TestNavigationViewModel>() },
-            { ServiceDescriptor.Transient<Sample.WebApp.Client.ViewModels.MainLayoutViewModel, Sample.WebApp.Client.ViewModels.MainLayoutViewModel>() },
-            { ServiceDescriptor.Transient<Sample.WebApp.Client.ViewModels.TextEntryViewModel, Sample.WebApp.Client.ViewModels.TextEntryViewModel>() },
-            { ServiceDescriptor.KeyedTransient<Sample.WebApp.Client.ViewModels.HexTranslateViewModel, Sample.WebApp.Client.ViewModels.HexTranslateViewModel>(nameof(Sample.WebApp.Client.ViewModels.HexTranslateViewModel)) },
+            { ServiceDescriptor.Transient<Blazing.Mvvm.Sample.WebApp.Client.ViewModels.EditContactViewModel, Blazing.Mvvm.Sample.WebApp.Client.ViewModels.EditContactViewModel>() },
+            { ServiceDescriptor.Transient<Blazing.Mvvm.Sample.WebApp.Client.ViewModels.HexEntryViewModel, Blazing.Mvvm.Sample.WebApp.Client.ViewModels.HexEntryViewModel>() },
+            { ServiceDescriptor.Transient<Blazing.Mvvm.Sample.WebApp.Client.ViewModels.ITestNavigationViewModel, Blazing.Mvvm.Sample.WebApp.Client.ViewModels.TestNavigationViewModel>() },
+            { ServiceDescriptor.KeyedTransient<Blazing.Mvvm.Sample.WebApp.Client.ViewModels.ITestKeyedNavigationViewModel, Blazing.Mvvm.Sample.WebApp.Client.ViewModels.TestKeyedNavigationViewModel>(nameof(Blazing.Mvvm.Sample.WebApp.Client.ViewModels.TestKeyedNavigationViewModel)) },
+            { ServiceDescriptor.Transient<Blazing.Mvvm.Sample.WebApp.Client.ViewModels.MainLayoutViewModel, Blazing.Mvvm.Sample.WebApp.Client.ViewModels.MainLayoutViewModel>() },
+            { ServiceDescriptor.Transient<Blazing.Mvvm.Sample.WebApp.Client.ViewModels.TextEntryViewModel, Blazing.Mvvm.Sample.WebApp.Client.ViewModels.TextEntryViewModel>() },
+            { ServiceDescriptor.KeyedTransient<Blazing.Mvvm.Sample.WebApp.Client.ViewModels.HexTranslateViewModel, Blazing.Mvvm.Sample.WebApp.Client.ViewModels.HexTranslateViewModel>(nameof(Blazing.Mvvm.Sample.WebApp.Client.ViewModels.HexTranslateViewModel)) },
 
-            { ServiceDescriptor.Scoped<Sample.WebApp.Client.ViewModels.FetchDataViewModel, Sample.WebApp.Client.ViewModels.FetchDataViewModel>() },
+            { ServiceDescriptor.Scoped<Blazing.Mvvm.Sample.WebApp.Client.ViewModels.FetchDataViewModel, Blazing.Mvvm.Sample.WebApp.Client.ViewModels.FetchDataViewModel>() },
 
-            { ServiceDescriptor.Singleton<Sample.WebApp.Client.ViewModels.CounterViewModel, Sample.WebApp.Client.ViewModels.CounterViewModel>() }
+            { ServiceDescriptor.Singleton<Blazing.Mvvm.Sample.WebApp.Client.ViewModels.CounterViewModel, Blazing.Mvvm.Sample.WebApp.Client.ViewModels.CounterViewModel>() }
         };
     }
 }

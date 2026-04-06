@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ViewModels\Widgets\RecipientViewModelBase.cs" />
+    <Compile Remove="ViewModels\Widgets\ValidatorViewModelBase.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Nito.AsyncEx.Coordination" />
+    <PackageReference Include="Refit" />
+    <PackageReference Include="Blazing.Mvvm" Condition="'$(UseBlazingMvvmLocalSource)' != 'true'" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseBlazingMvvmLocalSource)' == 'true'">
+    <ProjectReference Include="$(BlazingMvvmSourceRoot)Blazing.Mvvm\Blazing.Mvvm.csproj" />
+  </ItemGroup>
+</Project>

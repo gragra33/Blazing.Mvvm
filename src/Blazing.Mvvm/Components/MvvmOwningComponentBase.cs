@@ -37,8 +37,17 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     /// </summary>
     protected virtual TViewModel ViewModel
     {
-        get => _viewModel ??= ViewModelResolver.Resolve(this, ScopedServices);
-        set => _viewModel = value;
+        get
+        {
+            _viewModel ??= ViewModelResolver.Resolve(this, ScopedServices);
+            EnsureCommandSubscriptions(_viewModel);
+            return _viewModel;
+        }
+        set
+        {
+            EnsureCommandSubscriptions(value);
+            _viewModel = value;
+        }
     }
 
     /// <summary>
@@ -138,15 +147,22 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
 
         if (disposing)
         {
-            ViewModel.PropertyChanged -= OnPropertyChanged;
-            if (ViewModel is ObservableRecipient observableRecipient)
+            var viewModel = _viewModel;
+
+            if (viewModel is not null)
             {
-                observableRecipient.IsActive = false;
+                viewModel.PropertyChanged -= OnPropertyChanged;
+                if (viewModel is ObservableRecipient observableRecipient)
+                {
+                    observableRecipient.IsActive = false;
+                }
             }
 
             // Dispose two-way binding helper if it was initialized
             _bindingHelper?.Dispose();
             _bindingHelper = null;
+            viewModel?.Dispose();
+            _viewModel = default;
         }
 
         base.Dispose(disposing);
@@ -175,4 +191,20 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     /// <param name="propertyChangedEventArgs">The event data.</param>
     private void OnPropertyChanged(object? o, PropertyChangedEventArgs propertyChangedEventArgs)
         => InvokeAsync(StateHasChanged);
+
+    private static void EnsureCommandSubscriptions(TViewModel viewModel)
+    {
+        switch (viewModel)
+        {
+            case ViewModelBase viewModelBase:
+                viewModelBase.EnsureCommandSubscriptions();
+                break;
+            case ValidatorViewModelBase validatorViewModelBase:
+                validatorViewModelBase.EnsureCommandSubscriptions();
+                break;
+            case RecipientViewModelBase recipientViewModelBase:
+                recipientViewModelBase.EnsureCommandSubscriptions();
+                break;
+        }
+    }
 }

@@ -537,7 +537,7 @@ Automatic two-way binding has **negligible** overhead:
 ## Additional Resources
 
 - [Blazing.Mvvm v3.2.0 Release Notes](https://github.com/gragra33/Blazing.Mvvm/releases/tag/v3.2.0)
-- [Parameter Resolution Sample](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)
+- [Parameter Resolution Sample](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/ParameterResolution.Sample.Wasm)
 - [Blazor Data Binding](https://docs.microsoft.com/en-us/aspnet/core/blazor/components/data-binding)
 - [EventCallback Documentation](https://docs.microsoft.com/en-us/aspnet/core/blazor/components/event-handling)
 

@@ -2,6 +2,8 @@ using Blazing.Mvvm.Analyzers.Analyzers;
 using Blazing.Mvvm.Analyzers.CodeFixProviders;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
+using VerifyAnalyzerCS = Blazing.Mvvm.Analyzers.Tests.CSharpAnalyzerVerifier<
+    Blazing.Mvvm.Analyzers.Analyzers.LifecycleMethodOverrideAnalyzer>;
 using VerifyCS = Blazing.Mvvm.Analyzers.Tests.CSharpCodeFixVerifier<
     Blazing.Mvvm.Analyzers.Analyzers.LifecycleMethodOverrideAnalyzer,
     Blazing.Mvvm.Analyzers.CodeFixProviders.LifecycleMethodOverrideCodeFixProvider>;
@@ -145,7 +147,7 @@ namespace TestNamespace
 }";
 
         // DI-only constructor should NOT trigger diagnostic
-        await VerifyCS.VerifyAnalyzerAsync(test);
+        await VerifyAnalyzerCS.VerifyAnalyzerAsync(test);
     }
 
     [Fact(Skip = "Code fix generates 'public override' instead of 'protected override' - needs fix")]

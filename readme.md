@@ -544,7 +544,7 @@ public partial class CounterComponentViewModel : ViewModelBase
 
 The feature automatically detects matching EventCallback parameters and wires them up during component initialization, with proper disposal when the component is removed.
 
-> **Working Example:** For a complete working demonstration of Parameter Resolution and Automatic Two-Way Binding, see the **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** sample project.
+> **Working Example:** For a complete working demonstration of Parameter Resolution and Automatic Two-Way Binding, see the **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/ParameterResolution.Sample.Wasm)** sample project.
 
 ### MVVM Navigation
 
@@ -1044,7 +1044,7 @@ This ensures backward compatibility while enabling zero-configuration for most s
 #### Working Examples
 
 For complete working examples, see:
-- **[Blazing.SubpathHosting.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.SubpathHosting.Server)** - Traditional subpath hosting sample with `launchSettings.json` configuration
+- **[Blazing.SubpathHosting.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/Blazing.SubpathHosting.Server)** - Traditional subpath hosting sample with `launchSettings.json` configuration
 
 #### Further Reading
 
@@ -1167,10 +1167,10 @@ mvvmNavigationManager.NavigateTo<ProjectViewModel>("abc/ws-123/proj-456");
 **Working Examples:**
 
 For complete working examples demonstrating these route patterns, see:
-- **[Blazing.Mvvm.Sample.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.Server)** - User and post management with `/users/{userId}/posts/{postId}` routes
-- **[Blazing.Mvvm.Sample.WebApp](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.WebApp)** - Enhanced with multi-parameter navigation examples
-- **[Blazing.Mvvm.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.Wasm)** - Added complex route pattern demonstrations
-- **[Blazing.Mvvm.Sample.HybridMaui](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.HybridMaui)** - Updated with route parameter examples
+- **[Blazing.Mvvm.Sample.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/Blazing.Mvvm.Sample.Server)** - User and post management with `/users/{userId}/posts/{postId}` routes
+- **[Blazing.Mvvm.Sample.WebApp](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/Blazing.Mvvm.Sample.WebApp)** - Enhanced with multi-parameter navigation examples
+- **[Blazing.Mvvm.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/Blazing.Mvvm.Sample.Wasm)** - Added complex route pattern demonstrations
+- **[Blazing.Mvvm.Sample.HybridMaui](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/Blazing.Mvvm.Sample.HybridMaui)** - Updated with route parameter examples
 
 ### Complex Multi-Project ViewModel Registration
 
@@ -1225,10 +1225,10 @@ builder.Services.AddMvvm(options =>
 This approach ensures that all ViewModels across your solution are properly discovered and registered with the dependency injection container, enabling seamless MVVM navigation and component resolution.
 
 For working examples, see the Hybrid sample projects:
-- [HybridSample.Wpf](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.Wpf)
-- [HybridSample.WinForms](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.WinForms)
-- [HybridSample.MAUI](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.MAUI)
-- [HybridSample.Avalonia](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.Avalonia)
+- [HybridSample.Wpf](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/HybridSamples/HybridSample.Wpf)
+- [HybridSample.WinForms](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/HybridSamples/HybridSample.WinForms)
+- [HybridSample.MAUI](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/HybridSamples/HybridSample.MAUI)
+- [HybridSample.Avalonia](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/HybridSamples/HybridSample.Avalonia)
 
 ### Sample Projects
 
@@ -1236,27 +1236,27 @@ The repository includes several sample projects demonstrating different Blazor h
 
 #### Blazor Hosting Model Samples
 
-- **[Blazing.Mvvm.Sample.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.Server)** - Blazor Server App sample with user and post management demonstrating complex route patterns
-- **[Blazing.Mvvm.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.Wasm)** - Blazor WebAssembly (WASM) App sample with navigation patterns
-- **[Blazing.Mvvm.Sample.WebApp](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.WebApp)** - Blazor Web App (.NET 8+) sample with query string and parameter navigation
-- **[Blazing.Mvvm.Sample.HybridMaui](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.Mvvm.Sample.HybridMaui)** - Blazor Hybrid MAUI sample demonstrating route patterns in mobile applications
+- **[Blazing.Mvvm.Sample.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/Blazing.Mvvm.Sample.Server)** - Blazor Server App sample with user and post management demonstrating complex route patterns
+- **[Blazing.Mvvm.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/Blazing.Mvvm.Sample.Wasm)** - Blazor WebAssembly (WASM) App sample with navigation patterns
+- **[Blazing.Mvvm.Sample.WebApp](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/Blazing.Mvvm.Sample.WebApp)** - Blazor Web App (.NET 8+) sample with query string and parameter navigation
+- **[Blazing.Mvvm.Sample.HybridMaui](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/Blazing.Mvvm.Sample.HybridMaui)** - Blazor Hybrid MAUI sample demonstrating route patterns in mobile applications
 
 #### Blazor Hybrid Samples
 
 Modernises the Microsoft's [Xamarin Sample](https://github.com/CommunityToolkit/MVVM-Samples) project, using Blazing.Mvvm, for the [CommunityToolkit.Mvvm](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/).  Minimal changes were made.
 
-- **[HybridSample.Wpf](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.Wpf)** - WPF Blazor Hybrid sample
-- **[HybridSample.WinForms](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.WinForms)** - WinForms Blazor Hybrid sample
-- **[HybridSample.MAUI](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.MAUI)** - MAUI Blazor Hybrid sample
-- **[HybridSample.Avalonia](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/HybridSamples/HybridSample.Avalonia)** - Avalonia Blazor Hybrid sample (Windows only)
+- **[HybridSample.Wpf](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/HybridSamples/HybridSample.Wpf)** - WPF Blazor Hybrid sample
+- **[HybridSample.WinForms](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/HybridSamples/HybridSample.WinForms)** - WinForms Blazor Hybrid sample
+- **[HybridSample.MAUI](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/HybridSamples/HybridSample.MAUI)** - MAUI Blazor Hybrid sample
+- **[HybridSample.Avalonia](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/HybridSamples/HybridSample.Avalonia)** - Avalonia Blazor Hybrid sample (Windows only)
 
 **NOTE:** The original Project was [Blazor MVVM Sample](https://github.com/gragra33/MvvmSampleBlazor) - now archived.
 
 #### Specialized Samples
 
-- **[Blazing.SubpathHosting.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/Blazing.SubpathHosting.Server)** - Demonstrates subpath hosting configuration
-- **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute, and automatic two-way binding with `@bind-` syntax
-- **[Blazing.Mvvm.ParentChildSample](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParentChildSample)** - Demonstrates dynamic parent-child component communication using Messenger. [Original](https://github.com/gragra33/Blazing.Mvvm.ParentChildSample) repo is now archived.
+- **[Blazing.SubpathHosting.Server](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/Blazing.SubpathHosting.Server)** - Demonstrates subpath hosting configuration
+- **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute, and automatic two-way binding with `@bind-` syntax
+- **[Blazing.Mvvm.ParentChildSample](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/ParentChildSample)** - Demonstrates dynamic parent-child component communication using Messenger. [Original](https://github.com/gragra33/Blazing.Mvvm.ParentChildSample) repo is now archived.
 
 #### Running Samples with Different .NET Target Frameworks
 
@@ -1309,7 +1309,7 @@ This release adds support for:
 - **Complex Multi-Level Routes:** Support for deeply nested routes with multiple segments and parameters. 
 
 **New Sample:** 
-- **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/src/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute, and automatic two-way binding with `@bind-` syntax
+- **[ParameterResolution.Sample.Wasm](https://github.com/gragra33/Blazing.Mvvm/tree/master/samples/ParameterResolution.Sample.Wasm)** - Demonstrates parameter resolution between Views and ViewModels using `ViewParameter` attribute, and automatic two-way binding with `@bind-` syntax
 
 **Updated Samples:**
 - Updated sample projects to demonstrate complex route patterns:

@@ -1,4 +1,5 @@
 using Blazing.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Blazing.Mvvm.Tests.UnitTests;
 
@@ -318,6 +319,32 @@ public class ViewModelBaseTests
         viewModel.OnAfterRenderAsyncCalled.Should().BeTrue();
     }
 
+    [Fact]
+    public async Task EnsureCommandSubscriptions_WhenCalledAfterDerivedConstruction_ShouldObserveCommandIsRunningChanges()
+    {
+        var viewModel = new AsyncCommandLifecycleTestViewModel();
+
+        viewModel.Notifications.Should().Be(0);
+
+        viewModel.EnsureCommandSubscriptions();
+
+        await viewModel.Command.ExecuteAsync(null);
+
+        viewModel.Notifications.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public async Task Dispose_AfterEnsureCommandSubscriptions_ShouldStopObservingCommandIsRunningChanges()
+    {
+        var viewModel = new AsyncCommandLifecycleTestViewModel();
+        viewModel.EnsureCommandSubscriptions();
+        viewModel.Dispose();
+
+        await viewModel.Command.ExecuteAsync(null);
+
+        viewModel.Notifications.Should().Be(0);
+    }
+
     // Test classes
     public class TestViewModelBase : ViewModelBase
     {
@@ -375,5 +402,23 @@ public class ViewModelBaseTests
     public class DefaultViewModelBase : ViewModelBase
     {
         // Uses default implementations to test base behavior
+    }
+
+    public sealed class AsyncCommandLifecycleTestViewModel : ViewModelBase
+    {
+        public AsyncCommandLifecycleTestViewModel()
+        {
+            Command = new AsyncRelayCommand(async () => await Task.Delay(10));
+        }
+
+        public int Notifications { get; private set; }
+
+        public IAsyncRelayCommand Command { get; }
+
+        public override void NotifyStateChanged()
+        {
+            Notifications++;
+            base.NotifyStateChanged();
+        }
     }
 }

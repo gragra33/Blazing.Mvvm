@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Blazing.Mvvm.Sample.HybridMaui.csproj">
+    <Deploy />
+  </Project>
+</Solution>

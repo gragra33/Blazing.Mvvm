@@ -541,12 +541,36 @@ dotnet workload restore
 
 ## Package Versioning
 
-The project uses Central Package Management with conditional versioning:
-- **For .NET 8.0**: Uses v8.x packages  
-- **For .NET 9.0**: Uses v9.x packages
-- **For .NET 10.0**: Uses v10.x packages
+The repository now uses split Central Package Management ownership:
+- `src/Directory.Packages.props` manages source, test, and analyzer dependencies
+- `samples/Directory.Packages.props` manages sample-only dependencies and the default published `Blazing.Mvvm` package references
 
-This is configured in the `Directory.Packages.props` file at the solution root.
+This means there is no longer a single solution-root `Directory.Packages.props` governing both source and samples.
+
+### Validating local src changes against samples
+
+Samples are package-based by default so they stay decoupled from `src`. If you intentionally want to validate unreleased local `src` changes against the in-repo samples, create a local opt-in file:
+
+```xml
+samples/Directory.Build.local.props
+```
+
+with:
+
+```xml
+<Project>
+  <PropertyGroup>
+    <UseBlazingMvvmLocalSource>true</UseBlazingMvvmLocalSource>
+  </PropertyGroup>
+</Project>
+```
+
+You can copy `samples/Directory.Build.local.props.example` as a starting point. This override is:
+- **off by default**
+- **local only** (`samples/Directory.Build.local.props` is gitignored)
+- **explicit** so committed sample state remains package-based
+
+When enabled, sample projects switch their `Blazing.Mvvm` / `Blazing.Mvvm.Base` references from NuGet packages to local source projects under `src/`.
 
 ### MAUI-Specific Packages:
 - **Microsoft.Maui.Controls**: Automatically versioned based on target framework

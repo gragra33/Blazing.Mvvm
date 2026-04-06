@@ -10,8 +10,8 @@
 		<Description>MVVM for Blazor using CommunityToolkit.Mvvm</Description>
 		<PackageProjectUrl>https://github.com/gragra33/Blazing.Mvvm</PackageProjectUrl>
 		<PackageTags>Blazor,Wasm,Web Assembly,Blazor Server,Blazor Web App,Blazor Hybid MAUI,Mvvm,CommunityToolkit</PackageTags>
-		<PackageReleaseNotes>Support for Blazor Web App, Blazor Server, Blazor WebAssembly, Blazor Hybrid, Blazor Hybid MAUI</PackageReleaseNotes>
-		<Version>3.2.0</Version>
+		<PackageReleaseNotes>V3.2.1: ViewModelBase, RecipientViewModelBase, and ValidatorViewModelBase now implement IDisposable for automatic PropertyChanged event cleanup. Fixed IAsyncRelayCommand edge cases for AllowConcurrentExecutions. Breaking change: Manual IDisposable implementations must use protected override void Dispose(bool disposing).</PackageReleaseNotes>
+		<Version>3.2.1</Version>
 	</PropertyGroup>
 
 	<ItemGroup>

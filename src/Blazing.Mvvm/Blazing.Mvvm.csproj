@@ -10,8 +10,8 @@
 		<PackageProjectUrl>https://github.com/gragra33/Blazing.Mvvm</PackageProjectUrl>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 		<PackageTags>Blazor,Wasm,Web Assembly,Blazor Server,Blazor Web App,Blazor Hybrid MAUI,Mvvm,CommunityToolkit,YARP,Reverse Proxy,Subpath Hosting,Route Parameters,Navigation</PackageTags>
-		<PackageReleaseNotes>V3.2.0: Added Automatic Two-Way Binding, and comprehensive support for complex route patterns with multiple parameters (e.g., /users/{userId}/posts/{postId}). Enhanced route parameter substitution with query string handling. Updated sample projects to demonstrate multi-parameter navigation patterns.</PackageReleaseNotes>
-		<Version>3.2.0</Version>
+		<PackageReleaseNotes>V3.2.1: Fixed IAsyncRelayCommand PropertyChanged event edge cases. ViewModelBase and ValidatorViewModelBase now implement IDisposable for automatic cleanup. Refactored samples to shared library. Added MvvmButton, Bootstrap components, and ConditionalSwitch. Enhanced RelayCommand examples.</PackageReleaseNotes>
+		<Version>3.2.1</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
