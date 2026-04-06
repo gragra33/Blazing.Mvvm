@@ -5,7 +5,7 @@ namespace Blazing.Mvvm.Sample.Wasm.ViewModels;
 
 public interface ITestNavigationViewModel : IViewModelBase, IDisposable
 {
-    string QueryString { get; set; }
+    string? QueryString { get; set; }
 
     string? Test { get; set; }
 

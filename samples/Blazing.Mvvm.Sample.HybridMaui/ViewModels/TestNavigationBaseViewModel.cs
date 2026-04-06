@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
-using System.Web;
 
 namespace Blazing.Mvvm.Sample.HybridMaui.ViewModels;
 
@@ -81,9 +80,33 @@ public abstract partial class TestNavigationBaseViewModel : ViewModelBase, ITest
 
     private void ProcessQueryString()
     {
-        QueryString = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query;
-        var queryParameters = HttpUtility.ParseQueryString(QueryString);
-        // Get the value of the "test" key
-        Test = queryParameters["test"];
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        QueryString = uri.Query;
+        Test = GetQueryParameterValue(uri.Query, "test");
+    }
+
+    private static string? GetQueryParameterValue(string? query, string key)
+    {
+        if (string.IsNullOrEmpty(query))
+        {
+            return null;
+        }
+
+        foreach (var pair in query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var segments = pair.Split('=', 2);
+            var parameterName = Uri.UnescapeDataString(segments[0]);
+
+            if (!string.Equals(parameterName, key, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            return segments.Length > 1
+                ? Uri.UnescapeDataString(segments[1].Replace("+", " "))
+                : string.Empty;
+        }
+
+        return null;
     }
 }

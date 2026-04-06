@@ -39,7 +39,7 @@ else
 }
 
 @code {
-    private PersistingComponentStateSubscription _persistingSubscription;
+    private PersistingComponentStateSubscription? _persistingSubscription;
 
     protected override async Task OnInitializedAsync()
     {
@@ -57,7 +57,7 @@ else
 
         if (disposing)
         {
-            _persistingSubscription.Dispose();
+            _persistingSubscription?.Dispose();
         }
 
         base.Dispose(disposing);
