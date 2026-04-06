@@ -1,5 +1,5 @@
-﻿using Blazing.Mvvm.Sample.Shared.Pages;
-using Blazing.Mvvm.Sample.Shared.ViewModels;
+﻿using Blazing.Mvvm.Sample.WebApp.Client.Pages;
+using Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

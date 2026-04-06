@@ -1,0 +1,17 @@
+# Analyzer configuration for Blazing.Mvvm.Analyzers
+root = true
+
+[*.cs]
+# RS1038: Workspaces is required for CodeFixProviders
+# Suppressable via this configuration since CodeFix providers must be in same assembly as analyzers
+dotnet_diagnostic.RS1038.severity = none
+
+# RS2001: Multiple diagnostic descriptors with the same ID but different severities
+# Intentionally using BLAZMVVM0021 for multiple related diagnostic variants (manual pattern, missing EventCallback, type mismatch)
+# This is a design choice to group related diagnostics under a single ID for easier configuration by users
+dotnet_diagnostic.RS2001.severity = none
+
+[*.md]
+# RS2005: Multiple entries for the same rule ID in analyzer release tracking
+# Allowing multiple severity variants of BLAZMVVM0021 in Unshipped tracking
+dotnet_diagnostic.RS2005.severity = none

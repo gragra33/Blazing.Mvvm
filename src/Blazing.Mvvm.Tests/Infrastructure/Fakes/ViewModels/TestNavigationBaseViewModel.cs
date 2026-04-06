@@ -24,6 +24,7 @@ public abstract partial class TestNavigationBaseViewModel : ViewModelBase, ITest
     internal readonly NavigationManager NavigationManager;
 
     private RelayCommand? _hexTranslateNavigateCommand;
+    private bool isDisposed;
 
     /// <summary>
     /// Backing field for the test navigation command with parameters.
@@ -79,16 +80,21 @@ public abstract partial class TestNavigationBaseViewModel : ViewModelBase, ITest
         => ProcessQueryString();
 
     /// <summary>
-    /// Disposes resources used by the view model.
+    /// Disposes the view model and detaches navigation event handlers.
     /// </summary>
-    /// <param name="disposing">True if called from <see cref="Dispose()"/>; otherwise, false.</param>
     protected override void Dispose(bool disposing)
     {
+        if (isDisposed)
+        {
+            return;
+        }
+
         if (disposing)
         {
             NavigationManager.LocationChanged -= OnLocationChanged;
         }
 
+        isDisposed = true;
         base.Dispose(disposing);
     }
 

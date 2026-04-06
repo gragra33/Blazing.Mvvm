@@ -1,5 +1,5 @@
-﻿using Blazing.Mvvm.Sample.Shared.Layout;
-using Blazing.Mvvm.Sample.Shared.ViewModels;
+﻿using Blazing.Mvvm.Sample.WebApp.Client.Layout;
+using Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
 using Bunit;
 using Bunit.TestDoubles;
 using Microsoft.Extensions.DependencyInjection;

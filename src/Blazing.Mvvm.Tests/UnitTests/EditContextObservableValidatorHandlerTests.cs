@@ -1,5 +1,5 @@
 ﻿using Blazing.Mvvm.Components.Validation;
-using Blazing.Mvvm.Sample.Shared.Models;
+using Blazing.Mvvm.Sample.WebApp.Client.Models;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace Blazing.Mvvm.Tests.UnitTests;

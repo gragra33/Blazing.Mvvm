@@ -1,0 +1,51 @@
+﻿@page "/test"
+@page "/test/{echo}"
+
+@inherits MvvmComponentBase<ITestNavigationViewModel>
+
+<h3>Test Navigation</h3>
+
+@if (!string.IsNullOrWhiteSpace(ViewModel.Echo))
+{
+    <p aria-label="relative path">Relative Path: @ViewModel.Echo</p>
+}
+
+@if (!string.IsNullOrWhiteSpace(ViewModel.QueryString))
+{
+    <p aria-label="query string">QueryString: @ViewModel.QueryString</p>
+
+    @if (!string.IsNullOrWhiteSpace(ViewModel.Test))
+    {
+        <p>Test = @ViewModel.Test</p>
+    }
+}
+
+<button id="hex-translate" type="button" class="btn btn-primary"
+        @onclick="ViewModel.HexTranslateNavigateCommand.Execute">
+    Hex Translator
+</button>
+
+<button id="test" type="button" class="btn btn-secondary"
+        @onclick="@(() => ViewModel.TestNavigateCommand.Execute(null))">
+    Test
+</button>
+
+<button id="test-relative-path" type="button" class="btn btn-secondary"
+        @onclick="@(() => ViewModel.TestNavigateCommand.Execute("this is a MvvmNavLink test"))">
+    Test with Relative Path
+</button>
+
+<button id="test-query-string" type="button" class="btn btn-secondary"
+        @onclick="@(() => ViewModel.TestNavigateCommand.Execute("?test=this%20is%20a%20MvvmNavLink%20querystring%20test"))">
+    Test with QueryString
+</button>
+
+<button id="test-relpath-qstring" type="button" class="btn btn-secondary"
+        @onclick="@(() => ViewModel.TestNavigateCommand.Execute("this is a MvvmNavLink test/?test=this%20is%20a%20MvvmNavLink%20querystring%20test"))">
+    Test with Relative Path + QueryString
+</button>
+
+@code {
+    [Parameter]
+    public string? Echo { get; set; }
+}

@@ -1,0 +1,53 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="../.gitattributes" />
+    <File Path="../.gitignore" />
+    <File Path="../cleanbuild.ps1" />
+    <File Path="../clear-analyzer-cache.ps1" />
+    <File Path="../CODE_OF_CONDUCT.md" />
+    <File Path="../CONTRIBUTING.md" />
+    <File Path="../HISTORY.md" />
+    <File Path="../LICENSE" />
+    <File Path="../readme.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/Solution Items/Analyzers/">
+    <File Path="../docs/analyzers/BLAZMVVM0001.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0002.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0003.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0004.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0005.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0006.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0007.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0008.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0009.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0010.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0011.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0012.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0013.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0014.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0015.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0016.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0017.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0018.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0019.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0020.md" />
+    <File Path="../docs/analyzers/BLAZMVVM0021.md" />
+  </Folder>
+  <Folder Name="/Solution Items/Framework Version/">
+    <File Path="../docs/Running_Different_NET_Versions.md" />
+  </Folder>
+  <Folder Name="/Solution Items/Migration Notes/">
+    <File Path="../docs/migration-notes/v1.4_to_v2.md" />
+  </Folder>
+  <Folder Name="/Src/">
+    <Project Path="Blazing.Mvvm.Analyzers/Blazing.Mvvm.Analyzers.csproj" />
+    <Project Path="Blazing.Mvvm.Base/Blazing.Mvvm.Base.csproj" />
+    <Project Path="Blazing.Mvvm/Blazing.Mvvm.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Blazing.Mvvm.Analyzers.Tests/Blazing.Mvvm.Analyzers.Tests.csproj" />
+    <Project Path="Blazing.Mvvm.Tests/Blazing.Mvvm.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,7 +1,7 @@
-﻿using Blazing.Mvvm.Sample.Shared.Data;
-using Blazing.Mvvm.Sample.Shared.Models;
-using Blazing.Mvvm.Sample.Shared.Pages;
-using Blazing.Mvvm.Sample.Shared.ViewModels;
+﻿using Blazing.Mvvm.Sample.WebApp.Client.Data;
+using Blazing.Mvvm.Sample.WebApp.Client.Models;
+using Blazing.Mvvm.Sample.WebApp.Client.Pages;
+using Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
 using Bunit;
 using Bunit.TestDoubles;
 using Microsoft.Extensions.DependencyInjection;

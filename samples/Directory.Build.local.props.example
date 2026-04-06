@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Opt in locally when you want samples to validate the current src projects instead of published packages. -->
+    <UseBlazingMvvmLocalSource>true</UseBlazingMvvmLocalSource>
+  </PropertyGroup>
+</Project>

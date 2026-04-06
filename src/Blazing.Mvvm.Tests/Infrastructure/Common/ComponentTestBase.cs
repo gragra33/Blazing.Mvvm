@@ -1,6 +1,5 @@
 ﻿using Blazing.Mvvm.ComponentModel;
 using Bunit;
-using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazing.Mvvm.Tests.Infrastructure.Common;
@@ -54,12 +53,6 @@ public abstract class ComponentTestBase : TestContext
     protected T CreateInstance<T>(bool cacheInstance = false)
         where T : class
     {
-        // Register PersistentComponentState from Services if available
-        if (Services.GetService(typeof(PersistentComponentState)) is PersistentComponentState persistentState)
-        {
-            _autoMocker.Use(persistentState);
-        }
-
         if (!cacheInstance)
         {
             return _autoMocker.CreateInstance<T>();

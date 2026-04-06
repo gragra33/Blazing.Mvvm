@@ -30,12 +30,6 @@ public class MockServiceProvider : IServiceProvider
             return null;
         }
 
-        // PersistentComponentState can't be mocked in .NET 8+ due to constructor parameters
-        if (serviceType.Name == "PersistentComponentState")
-        {
-            return null;
-        }
-
 #if NET10_0
         // Handle ComponentsMetrics service for .NET 10.0
         if (serviceType.Name == "ComponentsMetrics")

@@ -1,0 +1,53 @@
+@page "/users"
+@inherits MvvmComponentBase<UsersViewModel>
+
+<PageTitle>Users</PageTitle>
+
+<h1>Users</h1>
+
+@if (ViewModel.IsLoading)
+{
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else
+{
+    <p>Manage and view all users in the system.</p>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in ViewModel.Users)
+                {
+                    <tr>
+                        <td>@user.Id</td>
+                        <td>@user.Name</td>
+                        <td>@user.Email</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" 
+                                    @onclick="() => ViewModel.ViewUserDetailsCommand.Execute(user.Id)">
+                                View Details
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!ViewModel.Users.Any())
+    {
+        <div class="alert alert-info">
+            No users found.
+        </div>
+    }
+}

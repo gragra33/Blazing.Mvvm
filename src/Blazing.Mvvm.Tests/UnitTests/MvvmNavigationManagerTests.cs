@@ -1,6 +1,6 @@
 ﻿using Blazing.Mvvm.Components;
 using Blazing.Mvvm.Components.Routing;
-using Blazing.Mvvm.Sample.Shared.ViewModels;
+using Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
 using Blazing.Mvvm.Tests.Infrastructure.Fakes;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;

@@ -1,0 +1,55 @@
+@page "/"
+@inherits MvvmComponentBase<HomeViewModel>
+
+<PageTitle>Parameter Resolution Sample</PageTitle>
+
+<h1>Parameter Resolution Demo</h1>
+
+<p class="lead">
+    This sample demonstrates the <strong>Parameter Resolution</strong> feature in Blazing.Mvvm.
+</p>
+
+<div class="alert alert-info">
+    <h4 class="alert-heading">What is Parameter Resolution?</h4>
+    <p class="mb-0">
+        Parameter Resolution allows you to pass parameter values from a View (Blazor component) to its ViewModel automatically.
+        Properties in the ViewModel marked with the <code>[ViewParameter]</code> attribute will be resolved from parameters
+        defined in the View with the <code>[Parameter]</code> attribute.
+    </p>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="mb-0">How to Navigate with Parameters</h3>
+    </div>
+    <div class="card-body">
+        <p>Click the buttons below to navigate to the demo page with different parameter values:</p>
+        
+        <div class="d-grid gap-2">
+            <button class="btn btn-primary" @onclick="@(() => ViewModel.NavigateWithParamsCommand.Execute("?Title=Hello%20World&Count=42&Content=Sample%20Content"))">
+                <span class="oi oi-arrow-right" aria-hidden="true"></span> Navigate with Basic Parameters
+            </button>
+            <button class="btn btn-success" @onclick="@(() => ViewModel.NavigateWithParamsCommand.Execute("?Title=Different%20Title&Count=100&Content=New%20Content%20Here"))">
+                <span class="oi oi-arrow-right" aria-hidden="true"></span> Navigate with Different Parameters
+            </button>
+            <button class="btn btn-warning" @onclick="@(() => ViewModel.NavigateWithParamsCommand.Execute("?Title=No%20Content&Count=5"))">
+                <span class="oi oi-arrow-right" aria-hidden="true"></span> Navigate with Null Content
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="mb-0">Key Features</h3>
+    </div>
+    <div class="card-body">
+        <ul class="mb-0">
+            <li><strong>Property Name Mapping:</strong> Use <code>[ViewParameter]</code> to map by property name</li>
+            <li><strong>Custom Name Mapping:</strong> Use <code>[ViewParameter("ParamName")]</code> to map to a different parameter name</li>
+            <li><strong>ObservableProperty Support:</strong> Works with <code>[ObservableProperty]</code> from CommunityToolkit.Mvvm</li>
+            <li><strong>Nullable Support:</strong> Parameters can be nullable types</li>
+            <li><strong>MVVM Navigation:</strong> Uses <code>MvvmNavigationManager</code> with <code>RelayCommand</code> for type-safe navigation</li>
+        </ul>
+    </div>
+</div>

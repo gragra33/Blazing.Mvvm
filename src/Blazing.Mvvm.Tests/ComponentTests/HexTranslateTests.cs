@@ -1,6 +1,6 @@
 ﻿using AngleSharp.Dom;
-using Blazing.Mvvm.Sample.Shared.Pages;
-using Blazing.Mvvm.Sample.Shared.ViewModels;
+using Blazing.Mvvm.Sample.WebApp.Client.Pages;
+using Blazing.Mvvm.Sample.WebApp.Client.ViewModels;
 using Bunit;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.AspNetCore.Components;

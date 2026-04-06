@@ -9,46 +9,15 @@
     <!-- Common packages - use latest compatible versions -->
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
     
-    <!-- ASP.NET Core packages with conditions -->
-    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
+    <!-- Analyzer packages -->
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.11.0" />
     
-    <!-- MAUI packages with proper conditions for multi-platform support -->
-    <!-- .NET 8.0 MAUI packages -->
-    <PackageVersion Include="Microsoft.Maui.Controls" Version="8.0.90" Condition="'$(TargetFramework)' == 'net8.0' or $(TargetFramework.StartsWith('net8.0-'))" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.90" Condition="'$(TargetFramework)' == 'net8.0' or $(TargetFramework.StartsWith('net8.0-'))" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0' or $(TargetFramework.StartsWith('net8.0-'))" />
-    
-    <!-- .NET 9.0 MAUI packages -->
-    <PackageVersion Include="Microsoft.Maui.Controls" Version="9.0.10" Condition="$(TargetFramework.StartsWith('net9.0'))" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.10" Condition="$(TargetFramework.StartsWith('net9.0'))" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" Condition="$(TargetFramework.StartsWith('net9.0'))" />
-    
-    <!-- .NET 10.0 MAUI packages -->
-    <PackageVersion Include="Microsoft.Maui.Controls" Version="10.0.0" Condition="$(TargetFramework.StartsWith('net10.0'))" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="10.0.0" Condition="$(TargetFramework.StartsWith('net10.0'))" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" Condition="$(TargetFramework.StartsWith('net10.0'))" />
-    
-    <!-- WebAssembly packages with conditions -->
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
-    
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
-    
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.10" PrivateAssets="all" Condition="'$(TargetFramework)' == 'net8.0'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.0" PrivateAssets="all" Condition="'$(TargetFramework)' == 'net9.0'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.0" PrivateAssets="all" Condition="'$(TargetFramework)' == 'net10.0'" />
-    
-    <PackageVersion Include="Microsoft.AspNetCore.WebUtilities" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0'" />
-    <PackageVersion Include="Microsoft.AspNetCore.WebUtilities" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0'" />
-    <PackageVersion Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
+    <!-- ASP.NET Core packages - using version 8.0.10 as baseline for multi-targeting -->
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="8.0.10" />
     
     <!-- Tests -->
     <PackageVersion Include="bunit.web.query" Version="1.28.4-preview" />
@@ -66,35 +35,9 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
     
-    <!-- HybridSamples packages - use latest compatible versions -->
-    <PackageVersion Include="Nito.AsyncEx.Coordination" Version="1.0.2" />
-    <PackageVersion Include="Refit" Version="7.2.22" />
-    <PackageVersion Include="Markdig" Version="0.37.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.0" />
+    <!-- Analyzer Testing -->
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.XUnit" Version="1.1.2" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing.XUnit" Version="1.1.2" />
     
-    <!-- Avalonia packages -->
-    <PackageVersion Include="Avalonia" Version="11.2.0" />
-    <PackageVersion Include="Avalonia.Desktop" Version="11.2.0" />
-    <PackageVersion Include="Avalonia.Diagnostics" Version="11.2.0" />
-    <PackageVersion Include="Avalonia.Markup.Xaml.Loader" Version="11.2.0" />
-    <PackageVersion Include="Avalonia.ReactiveUI" Version="11.2.0" />
-    <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.2.0" />
-    <PackageVersion Include="Avalonia.Themes.Simple" Version="11.2.0" />
-    
-    <!-- WebView packages for different target frameworks -->
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0-windows'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0-windows'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0-windows'" />
-    
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0-windows'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0-windows'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0-windows'" />
-
-    <!-- WebView base package for RootComponentsCollection support -->
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0-windows'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0-windows'" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0-windows'" />
   </ItemGroup>
 </Project>
