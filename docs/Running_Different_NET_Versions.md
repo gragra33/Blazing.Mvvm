@@ -551,7 +551,7 @@ This means there is no longer a single solution-root `Directory.Packages.props` 
 
 Samples are package-based by default so they stay decoupled from `src`. If you intentionally want to validate unreleased local `src` changes against the in-repo samples, create a local opt-in file:
 
-```xml
+```text
 samples/Directory.Build.local.props
 ```
 
