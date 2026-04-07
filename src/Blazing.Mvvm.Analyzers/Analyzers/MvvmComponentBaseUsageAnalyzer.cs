@@ -15,7 +15,8 @@ public class MvvmComponentBaseUsageAnalyzer : DiagnosticAnalyzer
 
     public override void Initialize(AnalysisContext context)
     {
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        // Enable analysis of generated code (Razor components compile to generated C# code)
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
         context.EnableConcurrentExecution();
         context.RegisterSymbolAction(AnalyzeNamedType, SymbolKind.NamedType);
     }
@@ -31,16 +32,15 @@ public class MvvmComponentBaseUsageAnalyzer : DiagnosticAnalyzer
         }
 
         // Skip if already inherits from MvvmComponentBase or related classes
-        if (InheritsFromMvvmComponentBase(namedTypeSymbol, context.Compilation))
+        if (InheritsFromMvvmComponentBase(namedTypeSymbol))
         {
             return;
         }
 
-        // Check if the component has a ViewModel property
+        // Check if the component has a ViewModel-like property
         var hasViewModelProperty = namedTypeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
-            .Any(p => p.Name == AnalyzerConstants.PropertyNames.ViewModel &&
-                     InheritsFromViewModelBase(p.Type as INamedTypeSymbol, context.Compilation));
+            .Any(p => InheritsFromViewModelBase(p.Type as INamedTypeSymbol, context.Compilation));
 
         if (!hasViewModelProperty)
         {
@@ -77,7 +77,7 @@ public class MvvmComponentBaseUsageAnalyzer : DiagnosticAnalyzer
         return false;
     }
 
-    private static bool InheritsFromMvvmComponentBase(INamedTypeSymbol typeSymbol, Compilation compilation)
+    private static bool InheritsFromMvvmComponentBase(INamedTypeSymbol typeSymbol)
     {
         var mvvmComponentBaseTypes = new[]
         {

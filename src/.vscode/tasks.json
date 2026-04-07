@@ -1,0 +1,20 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build analyzer samples",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"samples/Blazing.Mvvm.AnalyzerTest/Blazing.Mvvm.AnalyzerTest.csproj",
+				"-nologo"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		}
+	]
+}

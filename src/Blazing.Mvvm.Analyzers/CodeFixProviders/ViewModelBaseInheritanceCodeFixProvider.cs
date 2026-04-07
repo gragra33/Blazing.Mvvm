@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Blazing.Mvvm.Analyzers.CodeFixProviders;
 
@@ -71,8 +71,14 @@ public sealed class ViewModelBaseInheritanceCodeFixProvider : CodeFixProvider
         ClassDeclarationSyntax classDeclaration,
         CancellationToken cancellationToken)
     {
+        var originalText = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
         if (root is not CompilationUnitSyntax compilationUnit)
+        {
+            return document;
+        }
+
+        if (classDeclaration.BaseList?.Types.Any(type => type.Type.ToString() == "ViewModelBase") == true)
         {
             return document;
         }
@@ -99,11 +105,31 @@ public sealed class ViewModelBaseInheritanceCodeFixProvider : CodeFixProvider
         {
             var newUsing = SyntaxFactory.UsingDirective(
                 SyntaxFactory.ParseName(usingDirective))
-                .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+                .WithTrailingTrivia(SyntaxFactory.EndOfLine("\n"));
 
             newRoot = newRoot.AddUsings(newUsing);
         }
 
-        return document.WithSyntaxRoot(newRoot);
+        return document.WithText(CreateNormalizedText(newRoot, originalText));
+    }
+
+    private static SourceText CreateNormalizedText(SyntaxNode root, SourceText originalText)
+    {
+        var original = originalText.ToString();
+        var hasLeadingBlankLine = original.StartsWith("\r\n", StringComparison.Ordinal) || original.StartsWith("\n", StringComparison.Ordinal);
+        var lineEnding = original.IndexOf("\r\n", StringComparison.Ordinal) >= 0 ? "\r\n" : "\n";
+
+        var normalized = root.NormalizeWhitespace("    ", "\n").ToFullString().TrimStart('\r', '\n');
+        if (hasLeadingBlankLine)
+        {
+            normalized = "\n" + normalized;
+        }
+
+        if (lineEnding == "\r\n")
+        {
+            normalized = normalized.Replace("\n", "\r\n");
+        }
+
+        return SourceText.From(normalized, originalText.Encoding);
     }
 }

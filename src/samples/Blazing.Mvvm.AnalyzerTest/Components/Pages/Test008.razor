@@ -1,0 +1,22 @@
+@page "/test008"
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+@using Blazing.Mvvm.Components
+
+@inherits MvvmComponentBase<Test008ViewModel>
+
+<PageTitle>Test008 - Observable Property</PageTitle>
+
+<h1>BLAZMVVM0008: Observable Property Usage</h1>
+<p>Name: @ViewModel.Name</p>
+<button @onclick="UpdateName">Update Name</button>
+
+@code {
+    // BLAZMVVM0008: ViewModel uses regular property without notification
+    // Binding to Name property should trigger analyzer to recommend ObservableProperty
+    
+    private void UpdateName()
+    {
+        // This won't trigger UI update because Name property doesn't notify changes
+        ViewModel.Name = "Updated Name";
+    }
+}

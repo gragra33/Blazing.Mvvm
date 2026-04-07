@@ -1,0 +1,14 @@
+@page "/test021"
+
+<PageTitle>Test021 - EventCallback Two-Way Binding</PageTitle>
+
+<h1>BLAZMVVM0021: EventCallback Two-Way Binding</h1>
+<p>Using manual PropertyChanged subscription (obsolete pattern since v3.2.0)</p>
+
+<Test021Component @bind-Counter="@_counter" />
+
+<p>Parent counter value: @_counter</p>
+
+@code {
+    private int _counter = 0;
+}

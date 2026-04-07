@@ -1,0 +1,46 @@
+@page "/"
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+
+<PageTitle>Analyzer Test Index</PageTitle>
+
+<h1>Blazing.Mvvm Analyzer Test Suite</h1>
+
+<p>This application is designed to trigger all 21 Blazing.Mvvm analyzers for testing purposes.</p>
+
+<h2>Analyzer Coverage</h2>
+<ul>
+    <li>BLAZMVVM0001: ViewModelBase Inheritance - Test001ViewModel.cs</li>
+    <li>BLAZMVVM0002: ViewModelDefinition Attribute - Test002ViewModel.cs</li>
+    <li>BLAZMVVM0003: MvvmComponentBase Usage - Test003.razor</li>
+    <li>BLAZMVVM0004: ViewParameter Attribute - Test004And020ViewModel.cs</li>
+    <li>BLAZMVVM0005: Navigation Type Safety - Test005ViewModel.cs</li>
+    <li>BLAZMVVM0006: ViewModelKey Consistency - Test006.razor + Test006ViewModel.cs</li>
+    <li>BLAZMVVM0007: Lifecycle Method Override - Test007ViewModel.cs</li>
+    <li>BLAZMVVM0008: Observable Property - Test008ViewModel.cs</li>
+    <li>BLAZMVVM0009: Service Injection - Test009ViewModel.cs</li>
+    <li>BLAZMVVM0010: Route-ViewModel Mapping - Test010.razor</li>
+    <li>BLAZMVVM0011: MvvmNavLink Type Safety - Test011.razor</li>
+    <li>BLAZMVVM0012: Command Pattern - Test012ViewModel.cs</li>
+    <li>BLAZMVVM0013: MvvmOwningComponentBase Usage - Test013.razor</li>
+    <li>BLAZMVVM0014: StateHasChanged Overuse - Test014ViewModel.cs</li>
+    <li>BLAZMVVM0015: Dispose Pattern - Test015And016ViewModel.cs</li>
+    <li>BLAZMVVM0016: Messenger Registration Lifetime - Test015And016ViewModel.cs</li>
+    <li>BLAZMVVM0017: RelayCommand Async Pattern - Test017ViewModel.cs</li>
+    <li>BLAZMVVM0018: NotifyPropertyChangedFor - Test018ViewModel.cs</li>
+    <li>BLAZMVVM0019: CascadingParameter vs Inject - Test019.razor</li>
+    <li>BLAZMVVM0020: Route Parameter Binding - Test004.razor</li>
+    <li>BLAZMVVM0021: EventCallback Two-Way Binding - Test021.razor</li>
+</ul>
+
+<h3>Navigation Links</h3>
+<ul>
+    <li><a href="/test003">Test003 - MvvmComponentBase Usage</a></li>
+    <li><a href="/test004/123">Test004 - ViewParameter & Route Binding</a></li>
+    <li><a href="/test005">Test005 - Navigation Type Safety</a></li>
+    <li><a href="/test006">Test006 - ViewModelKey Consistency</a></li>
+    <li><a href="/test010">Test010 - Route-ViewModel Mapping</a></li>
+    <li><a href="/test011">Test011 - MvvmNavLink Type Safety</a></li>
+    <li><a href="/test013">Test013 - MvvmOwningComponentBase Usage</a></li>
+    <li><a href="/test019">Test019 - CascadingParameter vs Inject</a></li>
+    <li><a href="/test021">Test021 - EventCallback Two-Way Binding</a></li>
+</ul>

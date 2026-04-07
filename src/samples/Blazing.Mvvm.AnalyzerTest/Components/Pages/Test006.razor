@@ -1,0 +1,13 @@
+@page "/test006"
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+@using Blazing.Mvvm.Components
+
+<!-- BLAZMVVM0006: ViewModelKey mismatch -->
+@inherits MvvmComponentBase<Test006ViewModel>
+@attribute [ViewModelKey("DifferentKey")]
+
+<PageTitle>Test006 - ViewModelKey Consistency</PageTitle>
+
+<h1>BLAZMVVM0006: ViewModelKey Consistency</h1>
+<p>ViewModel has Key="WrongKey" but component has ViewModelKey="DifferentKey"</p>
+<p>Title: @ViewModel.Title</p>

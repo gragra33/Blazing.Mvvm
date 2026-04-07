@@ -8,7 +8,8 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
+using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Blazing.Mvvm.Analyzers.CodeFixProviders;
 
@@ -71,8 +72,19 @@ public sealed class DisposePatternCodeFixProvider : CodeFixProvider
         ClassDeclarationSyntax classDeclaration,
         CancellationToken cancellationToken)
     {
+        var originalText = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
         if (root is not CompilationUnitSyntax compilationUnit)
+        {
+            return document;
+        }
+
+        var hasDisposeMethod = classDeclaration.Members
+            .OfType<MethodDeclarationSyntax>()
+            .Any(method => method.Identifier.ValueText == "Dispose" && method.ParameterList.Parameters.Count == 0);
+
+        var alreadyImplementsDisposable = classDeclaration.BaseList?.Types.Any(type => type.Type.ToString() == "IDisposable") == true;
+        if (hasDisposeMethod || alreadyImplementsDisposable)
         {
             return document;
         }
@@ -85,19 +97,38 @@ public sealed class DisposePatternCodeFixProvider : CodeFixProvider
             ? SyntaxFactory.BaseList(SyntaxFactory.SingletonSeparatedList<BaseTypeSyntax>(disposableType))
             : classDeclaration.BaseList.AddTypes(disposableType);
 
-        // Create Dispose method
-        var disposeMethod = SyntaxFactory.MethodDeclaration(
-                SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
-                SyntaxFactory.Identifier("Dispose"))
-            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-            .WithBody(
-                SyntaxFactory.Block(
-                    SyntaxFactory.ParseStatement("// TODO: Unregister event handlers and dispose resources\n            GC.SuppressFinalize(this);")))
-            .WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed, SyntaxFactory.Whitespace("    "));
+        newBaseList = newBaseList.NormalizeWhitespace();
+
+        var disposeBody = UsesMessengerRegistration(classDeclaration)
+            ? "WeakReferenceMessenger.Default.UnregisterAll(this);\n            GC.SuppressFinalize(this);"
+            : "// TODO: Unregister event handlers and dispose resources\n            GC.SuppressFinalize(this);";
+
+        var disposeMethodText = $@"
+        public void Dispose()
+        {{
+            {disposeBody}
+        }}";
+
+        var disposeMethod = SyntaxFactory.ParseMemberDeclaration(disposeMethodText) as MethodDeclarationSyntax;
+        if (disposeMethod == null)
+        {
+            return document;
+        }
 
         var newClassDeclaration = classDeclaration
             .WithBaseList(newBaseList)
-            .AddMembers(disposeMethod);
+            .WithOpenBraceToken(
+                classDeclaration.OpenBraceToken.WithLeadingTrivia(
+                    SyntaxFactory.TriviaList(
+                        SyntaxFactory.EndOfLine("\n"),
+                        SyntaxFactory.Whitespace("    "))))
+            .WithCloseBraceToken(
+                classDeclaration.CloseBraceToken.WithLeadingTrivia(
+                    SyntaxFactory.TriviaList(
+                        SyntaxFactory.EndOfLine("\n"),
+                        SyntaxFactory.Whitespace("    "))))
+            .AddMembers(disposeMethod)
+            .WithLeadingTrivia(classDeclaration.GetLeadingTrivia());
 
         // Replace the class declaration in the tree
         var newRoot = compilationUnit.ReplaceNode(classDeclaration, newClassDeclaration);
@@ -109,13 +140,40 @@ public sealed class DisposePatternCodeFixProvider : CodeFixProvider
 
         if (!hasUsing)
         {
-            var newUsing = SyntaxFactory.UsingDirective(
-                SyntaxFactory.ParseName(usingDirective))
-                .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+            var newUsing = SyntaxFactory.ParseCompilationUnit($"using {usingDirective};\n").Usings[0];
 
             newRoot = newRoot.AddUsings(newUsing);
         }
 
-        return document.WithSyntaxRoot(newRoot);
+        var formattedRoot = Formatter.Format(newRoot, document.Project.Solution.Workspace);
+
+        return document.WithText(NormalizeLineEndings(formattedRoot.ToFullString(), originalText));
+    }
+
+    private static SourceText NormalizeLineEndings(string text, SourceText originalText)
+    {
+        var original = originalText.ToString();
+        var hasLeadingBlankLine = original.StartsWith("\r\n", StringComparison.Ordinal) || original.StartsWith("\n", StringComparison.Ordinal);
+        var normalized = text.Replace("\r\n", "\n").TrimStart('\r', '\n');
+
+        if (hasLeadingBlankLine)
+        {
+            normalized = "\n" + normalized;
+        }
+
+        return SourceText.From(normalized, originalText.Encoding);
+    }
+
+    private static bool UsesMessengerRegistration(ClassDeclarationSyntax classDeclaration)
+    {
+        return classDeclaration.DescendantNodes()
+            .OfType<InvocationExpressionSyntax>()
+            .Any(invocation =>
+            {
+                var identifierText = invocation.Expression.ToString();
+                return identifierText.IndexOf("Messenger.Register", StringComparison.Ordinal) >= 0 ||
+                       (identifierText.IndexOf("WeakReferenceMessenger", StringComparison.Ordinal) >= 0 &&
+                        identifierText.IndexOf("Register", StringComparison.Ordinal) >= 0);
+            });
     }
 }

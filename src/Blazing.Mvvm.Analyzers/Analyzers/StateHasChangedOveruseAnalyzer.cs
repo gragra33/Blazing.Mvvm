@@ -17,76 +17,88 @@ public class StateHasChangedOveruseAnalyzer : DiagnosticAnalyzer
 
     public override void Initialize(AnalysisContext context)
     {
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
         context.EnableConcurrentExecution();
         
-        context.RegisterSyntaxNodeAction(AnalyzeInvocation, SyntaxKind.InvocationExpression);
+        context.RegisterSymbolAction(AnalyzeNamedType, SymbolKind.NamedType);
     }
 
-    private static void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
+    private static void AnalyzeNamedType(SymbolAnalysisContext context)
     {
-        var invocationExpression = (InvocationExpressionSyntax)context.Node;
-        
-        // Check if this is a StateHasChanged call
-        var methodName = invocationExpression.Expression.ToString();
-        if (!methodName.EndsWith("StateHasChanged", StringComparison.Ordinal))
-        {
-            return;
-        }
-
-        // Get the containing method
-        var containingMethod = invocationExpression.Ancestors()
-            .OfType<MethodDeclarationSyntax>()
-            .FirstOrDefault();
-
-        if (containingMethod == null)
-        {
-            return;
-        }
-
-        var semanticModel = context.SemanticModel;
-        var methodSymbol = semanticModel.GetDeclaredSymbol(containingMethod);
-
-        if (methodSymbol == null)
-        {
-            return;
-        }
-
-        var containingType = methodSymbol.ContainingType;
+        var namedTypeSymbol = (INamedTypeSymbol)context.Symbol;
 
         // Only analyze ViewModels or Blazor components
-        var isViewModel = containingType.Name.EndsWith(AnalyzerConstants.Naming.ViewModelSuffix);
-        var isComponent = InheritsFromComponentBase(containingType);
+        var isViewModel = InheritsFromViewModelBase(namedTypeSymbol, context.Compilation);
+        var isComponent = InheritsFromComponentBase(namedTypeSymbol);
 
         if (!isViewModel && !isComponent)
         {
             return;
         }
 
-        // Check if the containing type uses property notification mechanisms
-        var hasPropertyNotification = HasObservableProperties(containingType);
+        // Skip abstract classes
+        if (namedTypeSymbol.IsAbstract || namedTypeSymbol.TypeKind != TypeKind.Class)
+        {
+            return;
+        }
+
+        // Check if the type has any property notification mechanisms
+        var hasPropertyNotification = HasPropertyNotificationMechanism(namedTypeSymbol);
 
         if (!hasPropertyNotification)
         {
-            // No observable properties - StateHasChanged might be necessary
+            // No property notification - StateHasChanged might be necessary
             return;
         }
 
-        // Get the method body to analyze
-        var methodBody = containingMethod.Body;
-        if (methodBody == null)
+        // Analyze each method for StateHasChanged calls
+        foreach (var syntaxReference in namedTypeSymbol.DeclaringSyntaxReferences)
+        {
+            var syntax = syntaxReference.GetSyntax(context.CancellationToken);
+            if (syntax is ClassDeclarationSyntax classDeclaration)
+            {
+                // Check all methods
+                foreach (var method in classDeclaration.Members.OfType<MethodDeclarationSyntax>())
+                {
+                    AnalyzeMethodForStateHasChanged(context, method);
+                }
+
+                // Check constructors
+                foreach (var constructor in classDeclaration.Members.OfType<ConstructorDeclarationSyntax>())
+                {
+                    AnalyzeMethodForStateHasChanged(context, constructor);
+                }
+            }
+        }
+    }
+
+    private static void AnalyzeMethodForStateHasChanged(SymbolAnalysisContext context, SyntaxNode methodNode)
+    {
+        // Find all StateHasChanged invocations in this method
+        var stateHasChangedCalls = methodNode.DescendantNodes()
+            .OfType<InvocationExpressionSyntax>()
+            .Where(invocation =>
+            {
+                var methodName = invocation.Expression.ToString();
+                return methodName.EndsWith("StateHasChanged", StringComparison.Ordinal);
+            })
+            .ToList();
+
+        if (!stateHasChangedCalls.Any())
         {
             return;
         }
 
-        // Check if method contains property assignments or uses SetProperty/OnPropertyChanged
-        var bodyText = methodBody.ToString();
-        var hasSetPropertyCalls = bodyText.Contains("SetProperty") || 
-                                   bodyText.Contains("OnPropertyChanged") ||
-                                   bodyText.Contains("PropertyChanged");
+        // Get the method body text for analysis
+        var methodBody = methodNode.ToString();
+
+        // Check if method contains property notification patterns
+        var hasSetPropertyCalls = methodBody.Contains("SetProperty") || 
+                                   methodBody.Contains("OnPropertyChanged") ||
+                                   methodBody.Contains("PropertyChanged");
 
         // Check for property assignments (properties typically start with uppercase)
-        var hasPropertyAssignments = methodBody.DescendantNodes()
+        var hasPropertyAssignments = methodNode.DescendantNodes()
             .OfType<AssignmentExpressionSyntax>()
             .Any(assignment =>
             {
@@ -95,36 +107,55 @@ public class StateHasChangedOveruseAnalyzer : DiagnosticAnalyzer
                 return left.Length > 0 && char.IsUpper(left[0]) && !left.StartsWith("_");
             });
 
-        // Report diagnostic if method uses property notifications or has property assignments
+        // Report diagnostic for each StateHasChanged call if method uses property notifications
         if (hasSetPropertyCalls || hasPropertyAssignments)
         {
-            var diagnostic = Diagnostic.Create(
-                DiagnosticDescriptors.StateHasChangedUnnecessary,
-                invocationExpression.GetLocation());
+            foreach (var call in stateHasChangedCalls)
+            {
+                var diagnostic = Diagnostic.Create(
+                    DiagnosticDescriptors.StateHasChangedUnnecessary,
+                    call.GetLocation());
 
-            context.ReportDiagnostic(diagnostic);
+                context.ReportDiagnostic(diagnostic);
+            }
         }
     }
 
-    private static bool HasObservableProperties(INamedTypeSymbol typeSymbol)
+    private static bool HasPropertyNotificationMechanism(INamedTypeSymbol typeSymbol)
     {
-        // Check if any member (field or property) has [ObservableProperty] attribute
-        var members = typeSymbol.GetMembers();
-        
-        foreach (var member in members)
+        // MvvmComponentBase components have automatic property notification
+        if (InheritsFromMvvmComponentBase(typeSymbol))
         {
-            var attributes = member.GetAttributes();
-            foreach (var attr in attributes)
-            {
-                var attrName = attr.AttributeClass?.Name;
-                if (attrName == "ObservablePropertyAttribute" || attrName == "ObservableProperty")
-                {
-                    return true;
-                }
-            }
+            return true;
         }
 
-        // Check if any property uses SetProperty in its setter by examining syntax
+        // Check for [ObservableProperty] attributes on fields
+        if (HasObservablePropertyAttribute(typeSymbol))
+        {
+            return true;
+        }
+
+        // Check if any property uses SetProperty in its setter
+        if (HasSetPropertyInProperties(typeSymbol))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool HasObservablePropertyAttribute(INamedTypeSymbol typeSymbol)
+    {
+        var members = typeSymbol.GetMembers()
+            .OfType<IFieldSymbol>()
+            .Where(field => field.GetAttributes().Any(attr =>
+                attr.AttributeClass?.Name is "ObservablePropertyAttribute" or "ObservableProperty"));
+
+        return members.Any();
+    }
+
+    private static bool HasSetPropertyInProperties(INamedTypeSymbol typeSymbol)
+    {
         var syntaxReferences = typeSymbol.DeclaringSyntaxReferences;
         foreach (var syntaxRef in syntaxReferences)
         {
@@ -132,15 +163,49 @@ public class StateHasChangedOveruseAnalyzer : DiagnosticAnalyzer
             if (syntax is ClassDeclarationSyntax classDeclaration)
             {
                 var properties = classDeclaration.Members.OfType<PropertyDeclarationSyntax>();
-                foreach (var property in properties)
+                if (properties.Any(property => property.ToString().Contains("SetProperty")))
                 {
-                    var propertyText = property.ToString();
-                    if (propertyText.Contains("SetProperty"))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
+        }
+        return false;
+    }
+
+    private static bool InheritsFromMvvmComponentBase(INamedTypeSymbol typeSymbol)
+    {
+        var baseType = typeSymbol.BaseType;
+        while (baseType != null)
+        {
+            var baseName = baseType.Name;
+            if (baseName == "MvvmComponentBase" ||
+                baseName == "MvvmOwningComponentBase" ||
+                baseName == "MvvmLayoutComponentBase")
+            {
+                return true;
+            }
+            baseType = baseType.BaseType;
+        }
+        return false;
+    }
+
+    private static bool InheritsFromViewModelBase(INamedTypeSymbol typeSymbol, Compilation compilation)
+    {
+        var viewModelBaseTypes = new[]
+        {
+            compilation.GetTypeByMetadataName(AnalyzerConstants.TypeNames.ViewModelBase),
+            compilation.GetTypeByMetadataName(AnalyzerConstants.TypeNames.RecipientViewModelBase),
+            compilation.GetTypeByMetadataName(AnalyzerConstants.TypeNames.ValidatorViewModelBase)
+        };
+
+        var baseType = typeSymbol.BaseType;
+        while (baseType != null)
+        {
+            if (viewModelBaseTypes.Any(vb => vb != null && SymbolEqualityComparer.Default.Equals(baseType, vb)))
+            {
+                return true;
+            }
+            baseType = baseType.BaseType;
         }
 
         return false;

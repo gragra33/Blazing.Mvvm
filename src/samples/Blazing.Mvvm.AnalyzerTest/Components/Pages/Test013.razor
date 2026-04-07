@@ -1,0 +1,12 @@
+@page "/test013"
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+@using Blazing.Mvvm.Components
+
+<!-- BLAZMVVM0013: Should use MvvmOwningComponentBase for DbContext -->
+@inherits MvvmComponentBase<Test013ViewModel>
+
+<PageTitle>Test013 - MvvmOwningComponentBase Usage</PageTitle>
+
+<h1>BLAZMVVM0013: MvvmOwningComponentBase Usage</h1>
+<p>ViewModel uses DbContext (scoped service) but component inherits from MvvmComponentBase instead of MvvmOwningComponentBase</p>
+<p>Data: @ViewModel.Data</p>

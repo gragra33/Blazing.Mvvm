@@ -1,0 +1,21 @@
+@page "/test014"
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+
+@inherits MvvmComponentBase<Test014ViewModel>
+
+<PageTitle>Test014 - StateHasChanged Overuse</PageTitle>
+
+<h1>BLAZMVVM0014: StateHasChanged Overuse</h1>
+<p>First Name: @ViewModel.FirstName</p>
+<p>Last Name: @ViewModel.LastName</p>
+
+<button @onclick="UpdateName">Update Name</button>
+
+@code {
+    private void UpdateName()
+    {
+        ViewModel.FirstName = "John";
+        ViewModel.LastName = "Doe";
+        StateHasChanged();
+    }
+}

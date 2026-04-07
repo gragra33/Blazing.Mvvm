@@ -1,0 +1,25 @@
+@page "/test004/{id:int}"
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+@using Blazing.Mvvm.Components
+
+<!-- BLAZMVVM0004 & BLAZMVVM0020: Route parameter 'id' but ViewModel property lacks [ViewParameter] -->
+@inherits MvvmComponentBase<Test004And020ViewModel>
+
+<PageTitle>Test004 - ViewParameter & Route Binding</PageTitle>
+
+<h1>BLAZMVVM0004 & BLAZMVVM0020</h1>
+<p>Route has {id} parameter but ViewModel.Id lacks [ViewParameter] attribute.</p>
+<p>Current ID: @ViewModel.Id</p>
+<p>Name: @ViewModel.Name</p>
+
+@code {
+    // BLAZMVVM0020: Route parameter 'id' exists but ViewModel.Id is missing [ViewParameter]
+    // BLAZMVVM0004: ViewParameter attribute should be used for route parameter binding
+    
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        // Accessing the Id which should be bound from route parameter
+        ViewModel.Name = $"Item {ViewModel.Id}";
+    }
+}

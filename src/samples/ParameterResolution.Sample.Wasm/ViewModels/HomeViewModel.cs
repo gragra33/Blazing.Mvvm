@@ -1,5 +1,5 @@
 using Blazing.Mvvm.ComponentModel;
-using Blazing.Mvvm.Components;
+using Microsoft.AspNetCore.Components;
 using CommunityToolkit.Mvvm.Input;
 
 namespace ParameterResolution.Sample.Wasm.ViewModels;
@@ -13,19 +13,19 @@ namespace ParameterResolution.Sample.Wasm.ViewModels;
 /// </remarks>
 public sealed partial class HomeViewModel : ViewModelBase
 {
-    private readonly IMvvmNavigationManager _navigationManager;
+    private readonly NavigationManager _navigationManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HomeViewModel"/> class.
     /// </summary>
-    /// <param name="navigationManager">The MVVM navigation manager for type-safe navigation.</param>
-    public HomeViewModel(IMvvmNavigationManager navigationManager)
+    /// <param name="navigationManager">The navigation manager used for route navigation.</param>
+    public HomeViewModel(NavigationManager navigationManager)
     {
         _navigationManager = navigationManager;
     }
 
     /// <summary>
-    /// Navigates to the <see cref="ParameterDemoViewModel"/> with the specified query string parameters.
+    /// Navigates to the parameter demo page with the specified query string parameters.
     /// </summary>
     /// <param name="queryString">
     /// The query string containing parameters to pass to the destination ViewModel.
@@ -37,6 +37,6 @@ public sealed partial class HomeViewModel : ViewModelBase
     [RelayCommand]
     private void NavigateWithParams(string queryString)
     {
-        _navigationManager.NavigateTo<ParameterDemoViewModel>(queryString);
+        _navigationManager.NavigateTo($"/demo{queryString}");
     }
 }

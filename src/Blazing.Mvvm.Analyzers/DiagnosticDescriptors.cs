@@ -77,17 +77,6 @@ public static class DiagnosticDescriptors
         helpLinkUri: "https://github.com/gragra33/Blazing.Mvvm/docs/analyzers/BLAZMVVM0006.md",
         customTags: WellKnownDiagnosticTags.CompilationEnd);
 
-    // BLAZMVVM0007: Lifecycle Method Override Analyzer
-    public static readonly DiagnosticDescriptor LifecycleMethodSuggestion = new(
-        id: "BLAZMVVM0007",
-        title: new LocalizableResourceString(nameof(Resources.BLAZMVVM0007_Title), Resources.ResourceManager, typeof(Resources)),
-        messageFormat: new LocalizableResourceString(nameof(Resources.BLAZMVVM0007_MessageFormat), Resources.ResourceManager, typeof(Resources)),
-        category: Category,
-        defaultSeverity: DiagnosticSeverity.Info,
-        isEnabledByDefault: true,
-        description: new LocalizableResourceString(nameof(Resources.BLAZMVVM0007_Description), Resources.ResourceManager, typeof(Resources)),
-        helpLinkUri: "https://github.com/gragra33/Blazing.Mvvm/docs/analyzers/BLAZMVVM0007.md");
-
     // BLAZMVVM0008: Observable Property Analyzer
     public static readonly DiagnosticDescriptor ObservablePropertyMissing = new(
         id: "BLAZMVVM0008",
@@ -130,7 +119,8 @@ public static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: new LocalizableResourceString(nameof(Resources.BLAZMVVM0011_Description), Resources.ResourceManager, typeof(Resources)),
-        helpLinkUri: "https://github.com/gragra33/Blazing.Mvvm/docs/analyzers/BLAZMVVM0011.md");
+        helpLinkUri: "https://github.com/gragra33/Blazing.Mvvm/docs/analyzers/BLAZMVVM0011.md",
+        customTags: WellKnownDiagnosticTags.CompilationEnd);
 
     // BLAZMVVM0012: Command Pattern Analyzer
     public static readonly DiagnosticDescriptor MethodShouldBeCommand = new(
@@ -186,17 +176,6 @@ public static class DiagnosticDescriptors
         isEnabledByDefault: true,
         description: new LocalizableResourceString(nameof(Resources.BLAZMVVM0016_Description), Resources.ResourceManager, typeof(Resources)),
         helpLinkUri: "https://github.com/gragra33/Blazing.Mvvm/docs/analyzers/BLAZMVVM0016.md");
-
-    // BLAZMVVM0017: RelayCommand Async Pattern Analyzer
-    public static readonly DiagnosticDescriptor AsyncVoidRelayCommand = new(
-        id: "BLAZMVVM0017",
-        title: new LocalizableResourceString(nameof(Resources.BLAZMVVM0017_Title), Resources.ResourceManager, typeof(Resources)),
-        messageFormat: new LocalizableResourceString(nameof(Resources.BLAZMVVM0017_MessageFormat), Resources.ResourceManager, typeof(Resources)),
-        category: Category,
-        defaultSeverity: DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: new LocalizableResourceString(nameof(Resources.BLAZMVVM0017_Description), Resources.ResourceManager, typeof(Resources)),
-        helpLinkUri: "https://github.com/gragra33/Blazing.Mvvm/docs/analyzers/BLAZMVVM0017.md");
 
     // BLAZMVVM0018: NotifyPropertyChangedFor Analyzer
     public static readonly DiagnosticDescriptor NotifyPropertyChangedForMissing = new(

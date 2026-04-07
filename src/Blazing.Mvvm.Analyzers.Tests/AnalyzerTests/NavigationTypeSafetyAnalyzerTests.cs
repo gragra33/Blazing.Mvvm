@@ -3,6 +3,8 @@ using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyCS = Blazing.Mvvm.Analyzers.Tests.CSharpAnalyzerVerifier<
     Blazing.Mvvm.Analyzers.Analyzers.NavigationTypeSafetyAnalyzer>;
+using VerifyCompilationEndCS = Blazing.Mvvm.Analyzers.Tests.CompilationEndAnalyzerVerifier<
+    Blazing.Mvvm.Analyzers.Analyzers.NavigationTypeSafetyAnalyzer>;
 
 namespace Blazing.Mvvm.Analyzers.Tests.AnalyzerTests;
 
@@ -18,7 +20,7 @@ public class NavigationTypeSafetyAnalyzerTests
         await VerifyCS.VerifyAnalyzerAsync(test);
     }
 
-    [Fact(Skip = "CompilationEndAction diagnostic not captured by test framework - analyzer works correctly in IDE")]
+    [Fact]
     public async Task NavigateToWithInvalidViewModel_ReportsDiagnostic()
     {
         const string test = @"
@@ -42,11 +44,9 @@ namespace TestNamespace
     }
 }";
 
-        var expected = new DiagnosticResult(DiagnosticDescriptors.InvalidNavigationTarget)
-            .WithLocation(0)
-            .WithArguments("TestViewModel");
-
-        await VerifyCS.VerifyAnalyzerAsync(test, expected);
+        await VerifyCompilationEndCS.VerifyAnalyzerAsync(
+            test,
+            new VerifyCompilationEndCS.ExpectedDiagnostic("0", DiagnosticDescriptors.InvalidNavigationTarget.Id, "TestViewModel"));
     }
 
     [Fact]

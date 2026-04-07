@@ -1,0 +1,14 @@
+@page "/test004simple"
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+@using Blazing.Mvvm.Components
+@using Microsoft.AspNetCore.Components
+
+<!-- Simple test for BLAZMVVM0004 -->
+@inherits MvvmComponentBase<Test004And020ViewModel>
+
+<h1>Simple BLAZMVVM0004 Test</h1>
+<p>This component does NOT have [Parameter] for ViewModel.Title</p>
+
+@code {
+    // No [Parameter] property for Title - should trigger BLAZMVVM0004
+}

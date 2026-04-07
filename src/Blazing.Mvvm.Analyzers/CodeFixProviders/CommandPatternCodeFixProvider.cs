@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Blazing.Mvvm.Analyzers.CodeFixProviders;
 
@@ -71,8 +72,16 @@ public sealed class CommandPatternCodeFixProvider : CodeFixProvider
         MethodDeclarationSyntax methodDeclaration,
         CancellationToken cancellationToken)
     {
+        var originalText = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
         if (root is not CompilationUnitSyntax compilationUnit)
+        {
+            return document;
+        }
+
+        if (methodDeclaration.AttributeLists
+            .SelectMany(list => list.Attributes)
+            .Any(attribute => attribute.Name.ToString() is "RelayCommand" or "RelayCommandAttribute"))
         {
             return document;
         }
@@ -81,9 +90,17 @@ public sealed class CommandPatternCodeFixProvider : CodeFixProvider
         var relayCommandAttribute = SyntaxFactory.Attribute(
             SyntaxFactory.ParseName("RelayCommand"));
 
+        var methodIndentation = methodDeclaration.GetLeadingTrivia()
+            .LastOrDefault(trivia => trivia.IsKind(SyntaxKind.WhitespaceTrivia));
+
+        if (methodIndentation.RawKind == 0)
+        {
+            methodIndentation = SyntaxFactory.Whitespace("        ");
+        }
+
         var attributeList = SyntaxFactory.AttributeList(
             SyntaxFactory.SingletonSeparatedList(relayCommandAttribute))
-            .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+            .WithTrailingTrivia(SyntaxFactory.EndOfLine("\n"));
 
         // Change method accessibility to private
         var publicModifier = methodDeclaration.Modifiers.FirstOrDefault(m => m.IsKind(SyntaxKind.PublicKeyword));
@@ -92,7 +109,12 @@ public sealed class CommandPatternCodeFixProvider : CodeFixProvider
         if (publicModifier != default)
         {
             // Replace public with private
-            newModifiers = newModifiers.Replace(publicModifier, SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
+            newModifiers = newModifiers.Replace(
+                publicModifier,
+                SyntaxFactory.Token(
+                    SyntaxFactory.TriviaList(methodIndentation),
+                    SyntaxKind.PrivateKeyword,
+                    SyntaxFactory.TriviaList(SyntaxFactory.Space)));
         }
         else if (!methodDeclaration.Modifiers.Any(m => 
             m.IsKind(SyntaxKind.PrivateKeyword) || 
@@ -100,7 +122,12 @@ public sealed class CommandPatternCodeFixProvider : CodeFixProvider
             m.IsKind(SyntaxKind.InternalKeyword)))
         {
             // No accessibility modifier - add private
-            newModifiers = newModifiers.Insert(0, SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
+            newModifiers = newModifiers.Insert(
+                0,
+                SyntaxFactory.Token(
+                    SyntaxFactory.TriviaList(methodIndentation),
+                    SyntaxKind.PrivateKeyword,
+                    SyntaxFactory.TriviaList(SyntaxFactory.Space)));
         }
 
         // Create new method with attribute and private modifier
@@ -108,6 +135,11 @@ public sealed class CommandPatternCodeFixProvider : CodeFixProvider
             .WithAttributeLists(methodDeclaration.AttributeLists.Add(attributeList))
             .WithModifiers(newModifiers)
             .WithLeadingTrivia(methodDeclaration.GetLeadingTrivia());
+
+        if (methodDeclaration.Body != null)
+        {
+            newMethodDeclaration = newMethodDeclaration.WithBody(methodDeclaration.Body);
+        }
 
         // Replace the method in the tree
         var newRoot = compilationUnit.ReplaceNode(methodDeclaration, newMethodDeclaration);
@@ -122,14 +154,26 @@ public sealed class CommandPatternCodeFixProvider : CodeFixProvider
 
             if (!hasUsing)
             {
-                var newUsing = SyntaxFactory.UsingDirective(
-                    SyntaxFactory.ParseName(usingDirective))
-                    .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+                var newUsing = SyntaxFactory.ParseCompilationUnit($"using {usingDirective};\n").Usings[0];
 
                 newRoot = newRoot.AddUsings(newUsing);
             }
         }
 
-        return document.WithSyntaxRoot(newRoot);
+        return document.WithText(NormalizeLineEndings(newRoot.ToFullString(), originalText));
+    }
+
+    private static SourceText NormalizeLineEndings(string text, SourceText originalText)
+    {
+        var original = originalText.ToString();
+        var hasLeadingBlankLine = original.StartsWith("\r\n", StringComparison.Ordinal) || original.StartsWith("\n", StringComparison.Ordinal);
+        var normalized = text.Replace("\r\n", "\n").TrimStart('\r', '\n');
+
+        if (hasLeadingBlankLine)
+        {
+            normalized = "\n" + normalized;
+        }
+
+        return SourceText.From(normalized, originalText.Encoding);
     }
 }

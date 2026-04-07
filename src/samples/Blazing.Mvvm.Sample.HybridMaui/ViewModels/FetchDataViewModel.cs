@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 
 namespace Blazing.Mvvm.Sample.HybridMaui.ViewModels;
 
+[ViewModelDefinition]
 public sealed partial class FetchDataViewModel : ViewModelBase, IDisposable
 {
     private readonly ILogger<FetchDataViewModel> _logger;

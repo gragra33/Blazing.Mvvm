@@ -3,6 +3,8 @@ using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyCS = Blazing.Mvvm.Analyzers.Tests.CSharpAnalyzerVerifier<
     Blazing.Mvvm.Analyzers.Analyzers.RouteParameterBindingAnalyzer>;
+using VerifyCompilationEndCS = Blazing.Mvvm.Analyzers.Tests.CompilationEndAnalyzerVerifier<
+    Blazing.Mvvm.Analyzers.Analyzers.RouteParameterBindingAnalyzer>;
 
 namespace Blazing.Mvvm.Analyzers.Tests.AnalyzerTests;
 
@@ -18,7 +20,7 @@ public class RouteParameterBindingAnalyzerTests
         await VerifyCS.VerifyAnalyzerAsync(test);
     }
 
-    [Fact(Skip = "CompilationEndAction diagnostic not captured by test framework - analyzer works correctly in IDE")]
+    [Fact]
     public async Task RouteParameterWithoutBindingProperty_ReportsDiagnostic()
     {
         const string test = @"
@@ -28,7 +30,6 @@ using Microsoft.AspNetCore.Components;
 
 namespace TestNamespace
 {
-    [Route(""/product/{id}"")]
     public class {|#0:ProductView|} : MvvmComponentBase<ProductViewModel>
     {
         // Missing [Parameter] for route parameter 'id'
@@ -40,11 +41,12 @@ namespace TestNamespace
     }
 }";
 
-        var expected = new DiagnosticResult(DiagnosticDescriptors.RouteParameterBindingMissing)
-            .WithLocation(0)
-            .WithArguments("id");
+        const string razor = "@page \"/product/{id}\"";
 
-        await VerifyCS.VerifyAnalyzerAsync(test, expected);
+        await VerifyCompilationEndCS.VerifyAnalyzerAsync(
+            test,
+            [("ProductView.razor", razor)],
+            new VerifyCompilationEndCS.ExpectedDiagnostic("0", DiagnosticDescriptors.RouteParameterBindingMissing.Id, "id"));
     }
 
     [Fact]
@@ -154,7 +156,7 @@ namespace TestNamespace
         await VerifyCS.VerifyAnalyzerAsync(test);
     }
 
-    [Fact(Skip = "CompilationEndAction diagnostic not captured by test framework - analyzer works correctly in IDE")]
+    [Fact]
     public async Task MultipleRouteParameters_PartiallyBound_ReportsDiagnostic()
     {
         const string test = @"
@@ -164,7 +166,6 @@ using Microsoft.AspNetCore.Components;
 
 namespace TestNamespace
 {
-    [Route(""/product/{category}/{id:int}"")]
     public class {|#0:ProductView|} : MvvmComponentBase<ProductViewModel>
     {
         [Parameter]
@@ -179,11 +180,12 @@ namespace TestNamespace
     }
 }";
 
-        var expected = new DiagnosticResult(DiagnosticDescriptors.RouteParameterBindingMissing)
-            .WithLocation(0)
-            .WithArguments("id");
+        const string razor = "@page \"/product/{category}/{id:int}\"";
 
-        await VerifyCS.VerifyAnalyzerAsync(test, expected);
+        await VerifyCompilationEndCS.VerifyAnalyzerAsync(
+            test,
+            [("ProductView.razor", razor)],
+            new VerifyCompilationEndCS.ExpectedDiagnostic("0", DiagnosticDescriptors.RouteParameterBindingMissing.Id, "id"));
     }
 
     [Fact]

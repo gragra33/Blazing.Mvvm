@@ -27,6 +27,12 @@ namespace TestNamespace
         [ObservableProperty]
         private string _name;
 
+        public string Name
+        {
+            get => _name;
+            set => SetProperty(ref _name, value);
+        }
+
         public void UpdateName(string newName)
         {
             Name = newName;
@@ -49,6 +55,12 @@ namespace TestNamespace
     {
         [ObservableProperty]
         private string _name;
+
+        public string Name
+        {
+            get => _name;
+            set => SetProperty(ref _name, value);
+        }
 
         public void UpdateName(string newName)
         {

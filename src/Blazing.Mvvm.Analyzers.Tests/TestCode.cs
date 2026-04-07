@@ -74,11 +74,19 @@ namespace CommunityToolkit.Mvvm.ComponentModel
 {
     using System;
 
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    public class ObservablePropertyAttribute : Attribute { }
+
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
     public class NotifyPropertyChangedForAttribute : Attribute
     {
         public NotifyPropertyChangedForAttribute(string propertyName) { }
     }
+}
+
+namespace Microsoft.AspNetCore.Http
+{
+    public interface IHttpContextAccessor { }
 }
 
 namespace Blazing.Mvvm.Components
@@ -96,6 +104,15 @@ namespace Blazing.Mvvm.Components
         where TViewModel : ViewModelBase
     {
     }
+
+    public class MvvmNavLink<TViewModel> where TViewModel : ViewModelBase
+    {
+    }
+}
+
+namespace Blazing.Mvvm.Components.Routing
+{
+    using Blazing.Mvvm.ComponentModel;
 
     public class MvvmNavLink<TViewModel> where TViewModel : ViewModelBase
     {

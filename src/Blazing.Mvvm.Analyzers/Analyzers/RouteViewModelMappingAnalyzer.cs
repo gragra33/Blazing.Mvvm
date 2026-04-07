@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -17,12 +18,13 @@ public class RouteViewModelMappingAnalyzer : DiagnosticAnalyzer
 
     public override void Initialize(AnalysisContext context)
     {
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        // Enable analysis of generated code (Razor components compile to generated C# code)
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
         context.EnableConcurrentExecution();
         
         context.RegisterCompilationStartAction(compilationContext =>
         {
-            var viewModels = new HashSet<string>();
+            var viewModels = new ConcurrentBag<string>();
 
             // Collect all ViewModel names
             compilationContext.RegisterSymbolAction(symbolContext =>
@@ -44,7 +46,7 @@ public class RouteViewModelMappingAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeRazorComponent(
         SyntaxNodeAnalysisContext context,
-        HashSet<string> viewModels)
+        ConcurrentBag<string> viewModels)
     {
         var classDeclaration = (ClassDeclarationSyntax)context.Node;
         var semanticModel = context.SemanticModel;

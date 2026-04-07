@@ -17,7 +17,7 @@ public class NotifyPropertyChangedForAnalyzer : DiagnosticAnalyzer
 
     public override void Initialize(AnalysisContext context)
     {
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
         context.EnableConcurrentExecution();
         
         context.RegisterSymbolAction(AnalyzeNamedType, SymbolKind.NamedType);
@@ -190,6 +190,31 @@ public class NotifyPropertyChangedForAnalyzer : DiagnosticAnalyzer
 
                 if (backingField != null)
                 {
+                    var hasNotification = backingField.GetAttributes().Any(attr =>
+                    {
+                        var attrName = attr.AttributeClass?.Name;
+                        var attrFullName = attr.AttributeClass?.ToDisplayString();
+
+                        var isNotifyAttribute = attrName == "NotifyPropertyChangedForAttribute" ||
+                                                attrName == "NotifyPropertyChangedFor" ||
+                                                attrFullName == "CommunityToolkit.Mvvm.ComponentModel.NotifyPropertyChangedForAttribute";
+
+                        if (!isNotifyAttribute)
+                        {
+                            return false;
+                        }
+
+                        return attr.ConstructorArguments.Any(arg =>
+                            arg.Kind == TypedConstantKind.Primitive &&
+                            arg.Value is string stringValue &&
+                            stringValue == computedProperty.Name);
+                    });
+
+                    if (hasNotification)
+                    {
+                        return;
+                    }
+
                     // Create unique key to prevent duplicate reporting
                     var key = $"{backingField.Name}:{computedProperty.Name}";
                     if (reportedPairs.Contains(key))

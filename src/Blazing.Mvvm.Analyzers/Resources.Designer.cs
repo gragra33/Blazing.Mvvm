@@ -277,7 +277,7 @@ namespace Blazing.Mvvm.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Constructor parameters in ViewModels should reference services that are registered in the dependency injection container to prevent runtime resolution failures..
+        ///   Looks up a localized string similar to ViewModels should use constructor injection for dependency injection instead of property injection with [Inject] attribute to follow MVVM best practices and enable proper testability..
         /// </summary>
         internal static string BLAZMVVM0009_Description {
             get {
@@ -286,7 +286,7 @@ namespace Blazing.Mvvm.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Constructor parameter &apos;{0}&apos; of type &apos;{1}&apos; may not be registered in the dependency injection container.
+        ///   Looks up a localized string similar to Property &apos;{0}&apos; uses [Inject] attribute - ViewModels should use constructor injection instead.
         /// </summary>
         internal static string BLAZMVVM0009_MessageFormat {
             get {
@@ -295,7 +295,7 @@ namespace Blazing.Mvvm.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Service may not be registered in DI container.
+        ///   Looks up a localized string similar to ViewModel should use constructor injection.
         /// </summary>
         internal static string BLAZMVVM0009_Title {
             get {

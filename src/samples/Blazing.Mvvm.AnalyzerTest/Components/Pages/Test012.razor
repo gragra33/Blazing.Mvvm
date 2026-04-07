@@ -1,0 +1,18 @@
+@page "/test012"
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+@using Blazing.Mvvm.Components
+
+@inherits MvvmComponentBase<Test012ViewModel>
+
+<PageTitle>Test012 - Command Pattern</PageTitle>
+
+<h1>BLAZMVVM0012: Command Pattern</h1>
+<p>Data: @ViewModel.Data</p>
+
+<!-- BLAZMVVM0012: Directly calling public methods instead of commands -->
+<button @onclick="ViewModel.LoadDataAsync">Load Data</button>
+<button @onclick="ViewModel.ResetData">Reset</button>
+
+@code {
+    // Direct method binding may trigger analyzer to recommend [RelayCommand]
+}

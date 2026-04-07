@@ -1,0 +1,49 @@
+@page "/test010"
+@using Blazing.Mvvm.AnalyzerTest.Data
+@inject ITestService TestService
+@inject HttpClient HttpClient
+
+<!-- BLAZMVVM0010: Page with route but no ViewModel (logic in code-behind) -->
+
+<PageTitle>Test010 - Route-ViewModel Mapping</PageTitle>
+
+<h1>BLAZMVVM0010: Route-ViewModel Mapping</h1>
+<p>This page has a route directive but doesn't use MVVM pattern.</p>
+<p>Data: @_data</p>
+<p>Status: @_status</p>
+<button @onclick="LoadData">Load Data</button>
+<button @onclick="ProcessData">Process Data</button>
+<button @onclick="SaveData">Save Data</button>
+
+@code {
+    private string _data = "No data";
+    private string _status = "Idle";
+
+    // Complex business logic in component instead of ViewModel - should trigger BLAZMVVM0010
+    private async Task LoadData()
+    {
+        _status = "Loading...";
+        await Task.Delay(100);
+        _data = await TestService.GetDataAsync();
+        _status = "Loaded";
+        StateHasChanged();
+    }
+    
+    private async Task ProcessData()
+    {
+        _status = "Processing...";
+        await Task.Delay(50);
+        _data = _data.ToUpper();
+        _status = "Processed";
+        StateHasChanged();
+    }
+    
+    private async Task SaveData()
+    {
+        _status = "Saving...";
+        await Task.Delay(75);
+        // Simulate saving
+        _status = "Saved";
+        StateHasChanged();
+    }
+}

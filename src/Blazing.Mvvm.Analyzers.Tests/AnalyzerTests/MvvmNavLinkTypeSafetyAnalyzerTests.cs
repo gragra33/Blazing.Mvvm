@@ -3,6 +3,8 @@ using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyCS = Blazing.Mvvm.Analyzers.Tests.CSharpAnalyzerVerifier<
     Blazing.Mvvm.Analyzers.Analyzers.MvvmNavLinkTypeSafetyAnalyzer>;
+using VerifyCompilationEndCS = Blazing.Mvvm.Analyzers.Tests.CompilationEndAnalyzerVerifier<
+    Blazing.Mvvm.Analyzers.Analyzers.MvvmNavLinkTypeSafetyAnalyzer>;
 
 namespace Blazing.Mvvm.Analyzers.Tests.AnalyzerTests;
 
@@ -18,12 +20,12 @@ public class MvvmNavLinkTypeSafetyAnalyzerTests
         await VerifyCS.VerifyAnalyzerAsync(test);
     }
 
-    [Fact(Skip = "CompilationEndAction diagnostic not captured by test framework - analyzer works correctly in IDE")]
+    [Fact]
     public async Task MvvmNavLinkWithInvalidViewModel_ReportsDiagnostic()
     {
         const string test = @"
 using Blazing.Mvvm.ComponentModel;
-using Blazing.Mvvm.Components;
+using Blazing.Mvvm.Components.Routing;
 
 namespace TestNamespace
 {
@@ -41,11 +43,9 @@ namespace TestNamespace
     }
 }";
 
-        var expected = new DiagnosticResult(DiagnosticDescriptors.MvvmNavLinkInvalidViewModel)
-            .WithLocation(0)
-            .WithArguments("UnregisteredViewModel");
-
-        await VerifyCS.VerifyAnalyzerAsync(test, expected);
+        await VerifyCompilationEndCS.VerifyAnalyzerAsync(
+            test,
+            new VerifyCompilationEndCS.ExpectedDiagnostic("0", DiagnosticDescriptors.MvvmNavLinkInvalidViewModel.Id, "UnregisteredViewModel"));
     }
 
     [Fact]
@@ -53,7 +53,7 @@ namespace TestNamespace
     {
         const string test = @"
 using Blazing.Mvvm.ComponentModel;
-using Blazing.Mvvm.Components;
+using Blazing.Mvvm.Components.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace TestNamespace
@@ -80,7 +80,7 @@ namespace TestNamespace
     {
         const string test = @"
 using Blazing.Mvvm.ComponentModel;
-using Blazing.Mvvm.Components;
+using Blazing.Mvvm.Components.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace TestNamespace
@@ -98,7 +98,7 @@ namespace TestNamespace
     {
     }
 
-    public class ProductView : MvvmComponentBase<ProductViewModel>
+    public class ProductView : Blazing.Mvvm.Components.MvvmComponentBase<ProductViewModel>
     {
     }
 }";
@@ -106,11 +106,11 @@ namespace TestNamespace
         await VerifyCS.VerifyAnalyzerAsync(test);
     }
 
-    [Fact(Skip = "CompilationEndAction diagnostic not captured by test framework - analyzer works correctly in IDE")]
+    [Fact]
     public async Task MvvmNavLinkWithNonViewModel_ReportsDiagnostic()
     {
         const string test = @"
-using Blazing.Mvvm.Components;
+using Blazing.Mvvm.Components.Routing;
 
 namespace TestNamespace
 {
@@ -128,19 +128,17 @@ namespace TestNamespace
     }
 }";
 
-        var expected = new DiagnosticResult(DiagnosticDescriptors.MvvmNavLinkInvalidViewModel)
-            .WithLocation(0)
-            .WithArguments("NotAViewModel");
-
-        await VerifyCS.VerifyAnalyzerAsync(test, expected);
+        await VerifyCompilationEndCS.VerifyAnalyzerAsync(
+            test,
+            new VerifyCompilationEndCS.ExpectedDiagnostic("0", DiagnosticDescriptors.MvvmNavLinkInvalidViewModel.Id, "NotAViewModel"));
     }
 
-    [Fact(Skip = "CompilationEndAction diagnostic not captured by test framework - analyzer works correctly in IDE")]
+    [Fact]
     public async Task MvvmNavLinkWithAbstractViewModel_ReportsDiagnostic()
     {
         const string test = @"
 using Blazing.Mvvm.ComponentModel;
-using Blazing.Mvvm.Components;
+using Blazing.Mvvm.Components.Routing;
 
 namespace TestNamespace
 {
@@ -157,10 +155,8 @@ namespace TestNamespace
     }
 }";
 
-        var expected = new DiagnosticResult(DiagnosticDescriptors.MvvmNavLinkInvalidViewModel)
-            .WithLocation(0)
-            .WithArguments("BaseViewModel");
-
-        await VerifyCS.VerifyAnalyzerAsync(test, expected);
+        await VerifyCompilationEndCS.VerifyAnalyzerAsync(
+            test,
+            new VerifyCompilationEndCS.ExpectedDiagnostic("0", DiagnosticDescriptors.MvvmNavLinkInvalidViewModel.Id, "BaseViewModel"));
     }
 }

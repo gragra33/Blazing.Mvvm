@@ -1,0 +1,37 @@
+@page "/test003"
+@using Blazing.Mvvm.AnalyzerTest.Data
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+@using Microsoft.AspNetCore.Components
+@inject ITestService TestService
+
+<!-- BLAZMVVM0003: Should inherit from MvvmComponentBase<Test003ViewModel> -->
+@inherits ComponentBase
+
+<PageTitle>Test003 - MvvmComponentBase Usage</PageTitle>
+
+<h1>BLAZMVVM0003: MvvmComponentBase Usage</h1>
+<p>Data: @_data</p>
+<button @onclick="LoadData">Load</button>
+
+@code {
+    // BLAZMVVM0003: Component has ViewModel property but inherits from ComponentBase
+    // Should inherit from MvvmComponentBase<Test003ViewModel> instead
+    public Test003ViewModel ViewModel { get; set; } = new();
+    
+    private string _data = "No data";
+    
+    // Complex business logic suggests this should be a ViewModel
+    private async Task LoadData()
+    {
+        await Task.Delay(100);
+        _data = await TestService.GetDataAsync();
+        StateHasChanged();
+    }
+    
+    // More logic suggesting ViewModel pattern
+    private void ProcessData()
+    {
+        // Complex processing
+        _data = _data.ToUpper();
+    }
+}

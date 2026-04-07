@@ -1,0 +1,21 @@
+@page "/test019"
+@using Blazing.Mvvm.AnalyzerTest.Data
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+@using Blazing.Mvvm.Components
+@inherits MvvmComponentBase<Test019ViewModel>
+
+<!-- BLAZMVVM0019: Using CascadingParameter for DI service instead of Inject -->
+
+<PageTitle>Test019 - CascadingParameter vs Inject</PageTitle>
+
+<h1>BLAZMVVM0019: CascadingParameter vs Inject</h1>
+<p>Using CascadingParameter for DI service instead of Inject attribute</p>
+
+@code {
+    // BLAZMVVM0019: Should use [Inject] for DI services
+    [CascadingParameter]
+    public ITestService TestService { get; set; } = null!;
+
+    [CascadingParameter]
+    public HttpClient HttpClient { get; set; } = null!;
+}

@@ -1,0 +1,27 @@
+@page "/test018"
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+@using Blazing.Mvvm.Components
+
+@inherits MvvmComponentBase<Test018ViewModel>
+
+<PageTitle>Test018 - NotifyPropertyChangedFor</PageTitle>
+
+<h1>BLAZMVVM0018: NotifyPropertyChangedFor</h1>
+
+<p>First Name: <input @bind="ViewModel.FirstName" /></p>
+<p>Last Name: <input @bind="ViewModel.LastName" /></p>
+
+<!-- BLAZMVVM0018: Computed property that won't update when dependencies change -->
+<p>Full Name: @ViewModel.FullName</p>
+
+<button @onclick="UpdateNames">Update Names</button>
+
+@code {
+    private void UpdateNames()
+    {
+        ViewModel.FirstName = "John";
+        ViewModel.LastName = "Doe";
+        // FullName won't update automatically - should trigger BLAZMVVM0018
+        // FirstName and LastName should have [NotifyPropertyChangedFor(nameof(FullName))]
+    }
+}

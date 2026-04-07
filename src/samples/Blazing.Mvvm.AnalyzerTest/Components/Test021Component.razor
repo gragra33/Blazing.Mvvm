@@ -1,0 +1,44 @@
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+@using Blazing.Mvvm.Components
+@using System.ComponentModel
+
+@inherits MvvmComponentBase<Test021ViewModel>
+
+<div class="card">
+    <div class="card-body">
+        <p>Counter: @ViewModel.Counter</p>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Counter { get; set; }
+
+    [Parameter]
+    public EventCallback<int> CounterChanged { get; set; }
+
+    // BLAZMVVM0021: Manual PropertyChanged subscription (obsolete pattern)
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+    }
+
+    private async void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.Counter) && 
+            ViewModel.Counter != Counter)
+        {
+            await CounterChanged.InvokeAsync(ViewModel.Counter);
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        }
+        base.Dispose(disposing);
+    }
+}

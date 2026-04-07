@@ -1,0 +1,16 @@
+@page "/test005"
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+@using Blazing.Mvvm.Components
+
+@inherits MvvmComponentBase<Test005ViewModel>
+
+<PageTitle>Test005 - Navigation Type Safety</PageTitle>
+
+<h1>BLAZMVVM0005: Navigation Type Safety</h1>
+<p>Click the button to trigger navigation to an unregistered ViewModel.</p>
+
+<button @onclick="ViewModel.NavigateToUnregisteredCommand.Execute">
+    Navigate to Unregistered ViewModel
+</button>
+
+<p>@ViewModel.Message</p>

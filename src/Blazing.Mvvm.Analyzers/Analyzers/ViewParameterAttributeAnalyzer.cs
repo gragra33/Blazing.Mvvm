@@ -1,13 +1,12 @@
 using System.Collections.Immutable;
-using System.Collections.Concurrent;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System.Diagnostics;
 
 namespace Blazing.Mvvm.Analyzers.Analyzers;
 
 /// <summary>
 /// Analyzer that ensures properties marked with [ViewParameter] in ViewModels have corresponding [Parameter] properties in Views.
+/// UPDATED: Using RegisterSymbolAction pattern like other working analyzers.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class ViewParameterAttributeAnalyzer : DiagnosticAnalyzer
@@ -17,138 +16,102 @@ public class ViewParameterAttributeAnalyzer : DiagnosticAnalyzer
 
     public override void Initialize(AnalysisContext context)
     {
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        // Enable analysis of generated code (Razor components compile to generated C# code)
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
         context.EnableConcurrentExecution();
         
-        context.RegisterCompilationStartAction(compilationContext =>
-        {
-            // Use thread-safe collections for concurrent execution
-            var viewModelParameters = new ConcurrentDictionary<INamedTypeSymbol, ConcurrentBag<IPropertySymbol>>(SymbolEqualityComparer.Default);
-            var allViews = new ConcurrentBag<INamedTypeSymbol>();
-
-            // Collect ViewModels and Views
-            compilationContext.RegisterSymbolAction(symbolContext =>
-            {
-                var namedType = (INamedTypeSymbol)symbolContext.Symbol;
-                
-                // Collect ViewModels with [ViewParameter] properties
-                if (IsViewModel(namedType))
-                {
-                    var viewParameterProps = GetViewParameterProperties(namedType);
-                    if (viewParameterProps.Count > 0)
-                    {
-                        viewModelParameters[namedType] = new ConcurrentBag<IPropertySymbol>(viewParameterProps);
-                        Debug.WriteLine($"[ViewParameterAnalyzer] Found ViewModel: {namedType.Name} with {viewParameterProps.Count} ViewParameter properties");
-                    }
-                }
-                
-                // Collect ALL Views (even without [Parameter] properties)
-                if (IsViewComponent(namedType))
-                {
-                    allViews.Add(namedType);
-                    Debug.WriteLine($"[ViewParameterAnalyzer] Found View: {namedType.Name}");
-                }
-            }, SymbolKind.NamedType);
-
-            // At compilation end, validate ViewParameter properties
-            compilationContext.RegisterCompilationEndAction(compilationEndContext =>
-            {
-                Debug.WriteLine($"[ViewParameterAnalyzer] CompilationEnd: Found {viewModelParameters.Count} ViewModels and {allViews.Count} Views");
-                
-                foreach (var kvp in viewModelParameters)
-                {
-                    var viewModelType = kvp.Key;
-                    var viewParamProperties = kvp.Value;
-                    
-                    Debug.WriteLine($"[ViewParameterAnalyzer] Analyzing ViewModel: {viewModelType.Name}");
-                    
-                    // Find corresponding View component
-                    var viewType = FindCorrespondingView(viewModelType, allViews);
-                    if (viewType == null)
-                    {
-                        Debug.WriteLine($"[ViewParameterAnalyzer] No View found for ViewModel: {viewModelType.Name}");
-                        continue;
-                    }
-
-                    Debug.WriteLine($"[ViewParameterAnalyzer] Found View: {viewType.Name} for ViewModel: {viewModelType.Name}");
-
-                    // Get View's [Parameter] properties (from the view we found)
-                    var viewParams = GetParameterPropertyNames(viewType);
-                    Debug.WriteLine($"[ViewParameterAnalyzer] View {viewType.Name} has {viewParams.Count} Parameter properties");
-
-                    // Check each [ViewParameter] property
-                    foreach (var viewParamProperty in viewParamProperties)
-                    {
-                        Debug.WriteLine($"[ViewParameterAnalyzer] Checking ViewParameter: {viewParamProperty.Name}");
-                        if (!viewParams.Contains(viewParamProperty.Name))
-                        {
-                            Debug.WriteLine($"[ViewParameterAnalyzer] DIAGNOSTIC: Property {viewParamProperty.Name} not found in View");
-                            
-                            // Report diagnostic on the ViewModel property
-                            var diagnostic = Diagnostic.Create(
-                                DiagnosticDescriptors.ViewParameterMismatch,
-                                viewParamProperty.Locations[0],
-                                viewParamProperty.Name);
-
-                            compilationEndContext.ReportDiagnostic(diagnostic);
-                        }
-                        else
-                        {
-                            Debug.WriteLine($"[ViewParameterAnalyzer] OK: Property {viewParamProperty.Name} found in View");
-                        }
-                    }
-                }
-            });
-        });
+        // Analyze generated component types directly - runs AFTER Razor source generation
+        context.RegisterSymbolAction(AnalyzeNamedType, SymbolKind.NamedType);
     }
 
-    private static bool IsViewModel(INamedTypeSymbol typeSymbol)
+    private static void AnalyzeNamedType(SymbolAnalysisContext context)
     {
-        // Check if name ends with "ViewModel"
-        if (!typeSymbol.Name.EndsWith(AnalyzerConstants.Naming.ViewModelSuffix))
+        var componentType = (INamedTypeSymbol)context.Symbol;
+
+        // Only analyze classes that inherit from MvvmComponentBase<TViewModel>
+        if (!InheritsFromMvvmComponentBase(componentType))
         {
-            return false;
+            return;
         }
 
-        // Must be a concrete class
-        if (typeSymbol.TypeKind != TypeKind.Class || typeSymbol.IsAbstract)
+        // Get the ViewModel type from the component's base class
+        var viewModelType = GetViewModelTypeParameter(componentType);
+        if (viewModelType == null)
         {
-            return false;
+            return;
         }
 
-        return true;
+        // Get properties with [ViewParameter] from ViewModel
+        var viewParameterProperties = GetViewParameterProperties(viewModelType);
+        if (viewParameterProperties.Count == 0)
+        {
+            return;
+        }
+
+        // Get properties with [Parameter] from the View (generated component)
+        var viewParameterNames = GetParameterPropertyNames(componentType);
+
+        // Check each [ViewParameter] property in ViewModel
+        foreach (var viewParamProp in viewParameterProperties)
+        {
+            // If View doesn't have matching [Parameter] property, report diagnostic
+            if (!viewParameterNames.Contains(viewParamProp.Name, StringComparer.OrdinalIgnoreCase))
+            {
+                var location = viewParamProp.Locations.FirstOrDefault() ?? componentType.Locations.FirstOrDefault() ?? Location.None;
+
+                var diagnostic = Diagnostic.Create(
+                    DiagnosticDescriptors.ViewParameterMismatch,
+                    location,
+                    viewParamProp.Name);
+
+                context.ReportDiagnostic(diagnostic);
+            }
+        }
     }
 
-    private static bool IsViewComponent(INamedTypeSymbol typeSymbol)
+    private static bool InheritsFromMvvmComponentBase(INamedTypeSymbol componentType)
     {
-        // Check if inherits from MvvmComponentBase<TViewModel> or MvvmOwningComponentBase<TViewModel>
-        var baseType = typeSymbol.BaseType;
-        while (baseType != null)
+        // Walk up the inheritance chain to find MvvmComponentBase<TViewModel> or MvvmOwningComponentBase<TViewModel>
+        var current = componentType.BaseType;
+        while (current != null)
         {
-            // Check both the original definition's display string and the name
-            var originalDefinition = baseType.OriginalDefinition;
+            var originalDefinition = current.OriginalDefinition;
             var displayString = originalDefinition.ToDisplayString();
-            
-            // Check if it's MvvmComponentBase<TViewModel> or MvvmOwningComponentBase<TViewModel>
+
             if (displayString.StartsWith("Blazing.Mvvm.Components.MvvmComponentBase<") ||
-                displayString.StartsWith("Blazing.Mvvm.Components.MvvmOwningComponentBase<") ||
-                displayString == "Blazing.Mvvm.Components.MvvmComponentBase" ||
-                displayString == "Blazing.Mvvm.Components.MvvmOwningComponentBase")
+                displayString.StartsWith("Blazing.Mvvm.Components.MvvmOwningComponentBase<"))
             {
                 return true;
             }
-            
-            baseType = baseType.BaseType;
-        }
 
+            current = current.BaseType;
+        }
         return false;
     }
 
-    private static List<IPropertySymbol> GetViewParameterProperties(INamedTypeSymbol typeSymbol)
+    private static INamedTypeSymbol? GetViewModelTypeParameter(INamedTypeSymbol componentType)
+    {
+        // Walk up the inheritance chain to find MvvmComponentBase<TViewModel>
+        var current = componentType.BaseType;
+        while (current != null)
+        {
+            if ((current.Name == "MvvmComponentBase" || current.Name == "MvvmOwningComponentBase") &&
+                current.ContainingNamespace.ToString().StartsWith("Blazing.Mvvm") &&
+                current.TypeArguments.Length == 1)
+            {
+                return current.TypeArguments[0] as INamedTypeSymbol;
+            }
+
+            current = current.BaseType;
+        }
+        return null;
+    }
+
+    private static List<IPropertySymbol> GetViewParameterProperties(INamedTypeSymbol viewModelType)
     {
         var properties = new List<IPropertySymbol>();
 
-        foreach (var member in typeSymbol.GetMembers())
+        foreach (var member in viewModelType.GetMembers())
         {
             if (member is not IPropertySymbol property)
                 continue;
@@ -170,11 +133,11 @@ public class ViewParameterAttributeAnalyzer : DiagnosticAnalyzer
         return properties;
     }
 
-    private static HashSet<string> GetParameterPropertyNames(INamedTypeSymbol typeSymbol)
+    private static HashSet<string> GetParameterPropertyNames(INamedTypeSymbol componentType)
     {
         var properties = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var member in typeSymbol.GetMembers())
+        foreach (var member in componentType.GetMembers())
         {
             if (member is not IPropertySymbol property)
                 continue;
@@ -184,7 +147,7 @@ public class ViewParameterAttributeAnalyzer : DiagnosticAnalyzer
             {
                 var attrName = attr.AttributeClass?.Name;
                 var attrNamespace = attr.AttributeClass?.ContainingNamespace?.ToDisplayString();
-                
+
                 return (attrName == "Parameter" || attrName == "ParameterAttribute") &&
                        (attrNamespace == "Microsoft.AspNetCore.Components" || attrNamespace == null);
             });
@@ -196,47 +159,5 @@ public class ViewParameterAttributeAnalyzer : DiagnosticAnalyzer
         }
 
         return properties;
-    }
-
-    private static INamedTypeSymbol? FindCorrespondingView(
-        INamedTypeSymbol viewModelType, 
-        IEnumerable<INamedTypeSymbol> allViews)
-    {
-        // Search for View that uses this ViewModel as type parameter
-        foreach (var viewType in allViews)
-        {
-            // Check if this View uses the ViewModel as type parameter
-            if (IsViewForViewModel(viewType, viewModelType))
-            {
-                return viewType;
-            }
-        }
-
-        return null;
-    }
-
-    private static bool IsViewForViewModel(INamedTypeSymbol viewType, INamedTypeSymbol viewModelType)
-    {
-        // Check if View's base type is MvvmComponentBase<TViewModel> where TViewModel matches
-        var baseType = viewType.BaseType;
-        while (baseType != null)
-        {
-            var originalDefinition = baseType.OriginalDefinition;
-            var displayString = originalDefinition.ToDisplayString();
-            
-            // Check if this is MvvmComponentBase or MvvmOwningComponentBase
-            if ((displayString.StartsWith("Blazing.Mvvm.Components.MvvmComponentBase<") ||
-                 displayString.StartsWith("Blazing.Mvvm.Components.MvvmOwningComponentBase<") ||
-                 displayString == "Blazing.Mvvm.Components.MvvmComponentBase" ||
-                 displayString == "Blazing.Mvvm.Components.MvvmOwningComponentBase") &&
-                baseType.TypeArguments.Length == 1)
-            {
-                var viewModelTypeArg = baseType.TypeArguments[0];
-                return SymbolEqualityComparer.Default.Equals(viewModelTypeArg, viewModelType);
-            }
-            baseType = baseType.BaseType;
-        }
-
-        return false;
     }
 }

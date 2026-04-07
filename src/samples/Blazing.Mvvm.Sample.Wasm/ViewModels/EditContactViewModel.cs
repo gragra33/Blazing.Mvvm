@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Blazing.Mvvm.Sample.Wasm.ViewModels;
 
+[ViewModelDefinition]
 public sealed partial class EditContactViewModel : ViewModelBase, IDisposable
 {
     private readonly ILogger<EditContactViewModel> _logger;

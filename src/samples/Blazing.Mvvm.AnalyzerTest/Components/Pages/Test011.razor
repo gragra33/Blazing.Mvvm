@@ -1,0 +1,16 @@
+@page "/test011"
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+@using Blazing.Mvvm.Components
+@using Blazing.Mvvm.Components.Routing
+
+@inherits MvvmComponentBase<Test005ViewModel>
+
+<PageTitle>Test011 - MvvmNavLink Type Safety</PageTitle>
+
+<h1>BLAZMVVM0011: MvvmNavLink Type Safety</h1>
+<p>MvvmNavLink referencing unregistered ViewModel</p>
+
+<!-- BLAZMVVM0011: Referencing unregistered ViewModel -->
+<MvvmNavLink TViewModel="UnregisteredTargetViewModel">
+    Link to Unregistered ViewModel
+</MvvmNavLink>
