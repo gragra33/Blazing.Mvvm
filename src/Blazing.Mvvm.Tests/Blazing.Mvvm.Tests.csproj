@@ -26,7 +26,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Blazing.Mvvm\Blazing.Mvvm.csproj" />
     <ProjectReference Include="..\samples\libs\Blazing.Mvvm.Sample.Shared\Blazing.Mvvm.Sample.Shared.csproj" />
-    <ProjectReference Include="..\samples\Blazing.Mvvm.Sample.WebApp\Blazing.Mvvm.Sample.WebApp.Client\Blazing.Mvvm.Sample.WebApp.Client.csproj" />
   </ItemGroup>
 
 </Project>

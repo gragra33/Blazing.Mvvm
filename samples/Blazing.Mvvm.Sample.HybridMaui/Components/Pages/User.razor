@@ -1,0 +1,101 @@
+@page "/users/{userId}"
+@inject NavigationManager NavigationManager
+@inherits MvvmComponentBase<UserViewModel>
+
+<PageTitle>User Details</PageTitle>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <button class="btn btn-link p-0" @onclick="ViewModel.BackToUsersCommand.Execute">Users</button>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">@(ViewModel.User?.Name ?? "User Details")</li>
+    </ol>
+</nav>
+
+@* Debug Information *@
+<div class="alert alert-info mb-3">
+    <strong><i class="bi bi-bug"></i> Route Parameter Debug:</strong>
+    <ul class="mb-0">
+        <li><strong>UserId Parameter:</strong> @(UserId ?? "null")</li>
+        <li><strong>ViewModel.UserId:</strong> @(ViewModel.UserId ?? "null")</li>
+        <li><strong>Current URL:</strong> @NavigationManager.Uri</li>
+    </ul>
+</div>
+
+@if (ViewModel.IsLoading)
+{
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else if (ViewModel.UserNotFound)
+{
+    <div class="alert alert-danger">
+        <h4 class="alert-heading">User Not Found</h4>
+        <p>The user with ID <strong>@UserId</strong> could not be found.</p>
+        <hr>
+        <button class="btn btn-primary" @onclick="ViewModel.BackToUsersCommand.Execute">
+            Back to Users List
+        </button>
+    </div>
+}
+else if (ViewModel.User != null)
+{
+    <h1><i class="bi bi-person-circle"></i> @ViewModel.User.Name</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-info-circle"></i> User Information</h5>
+            <dl class="row">
+                <dt class="col-sm-3">User ID:</dt>
+                <dd class="col-sm-9">@ViewModel.User.Id</dd>
+
+                <dt class="col-sm-3">Name:</dt>
+                <dd class="col-sm-9">@ViewModel.User.Name</dd>
+
+                <dt class="col-sm-3">Email:</dt>
+                <dd class="col-sm-9"><i class="bi bi-envelope"></i> @ViewModel.User.Email</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-file-text"></i> Posts (@ViewModel.Posts.Count)</h2>
+        <button class="btn btn-secondary" @onclick="ViewModel.ViewUserPostsCommand.Execute">
+            <i class="bi bi-list-ul"></i> View All Posts
+        </button>
+    </div>
+
+    @if (ViewModel.Posts.Any())
+    {
+        <div class="row">
+            @foreach (var post in ViewModel.Posts)
+            {
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@post.Title</h5>
+                            <p class="card-text">@post.Preview</p>
+                            <button class="btn btn-sm btn-primary" 
+                                    @onclick="() => ViewModel.ViewPostCommand.Execute(post.Id)">
+                                <i class="bi bi-book-half"></i> Read More
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> This user has no posts yet.
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public string? UserId { get; set; }
+}

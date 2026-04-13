@@ -1,0 +1,50 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <DisableImplicitLibraryPacksFolder>true</DisableImplicitLibraryPacksFolder>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="Avalonia" Version="11.2.0" />
+    <PackageVersion Include="Avalonia.Desktop" Version="11.2.0" />
+    <PackageVersion Include="Avalonia.Diagnostics" Version="11.2.0" />
+    <PackageVersion Include="Avalonia.Markup.Xaml.Loader" Version="11.2.0" />
+    <PackageVersion Include="Avalonia.ReactiveUI" Version="11.2.0" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.2.0" />
+    <PackageVersion Include="Avalonia.Themes.Simple" Version="11.2.0" />
+    <PackageVersion Include="Blazing.Mvvm" Version="3.2.0" />
+    <PackageVersion Include="Blazing.Mvvm.Base" Version="3.2.0" />
+    <!-- Temporary limitation: sample projects intentionally omit Blazing.Mvvm.Analyzers until a restorable published package/feed is consistently available for sample consumers. -->
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageVersion Include="Markdig" Version="0.37.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.WebUtilities" Version="8.0.10" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.AspNetCore.WebUtilities" Version="9.0.0" Condition="'$(TargetFramework)' == 'net9.0'" />
+    <PackageVersion Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.0" Condition="'$(TargetFramework)' == 'net10.0'" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView" Version="8.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.90" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="8.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="8.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="8.0.90" />
+    <PackageVersion Include="Nito.AsyncEx.Coordination" Version="1.0.2" />
+    <PackageVersion Include="Refit" Version="7.2.22" />
+  </ItemGroup>
+</Project>

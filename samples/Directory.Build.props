@@ -1,0 +1,26 @@
+<Project>
+  <PropertyGroup>
+    <BlazingMvvmRepoRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..'))</BlazingMvvmRepoRoot>
+    <BlazingMvvmSourceRoot>$([MSBuild]::NormalizeDirectory('$(BlazingMvvmRepoRoot)', 'src'))</BlazingMvvmSourceRoot>
+    <UseBlazingMvvmLocalSource>false</UseBlazingMvvmLocalSource>
+  </PropertyGroup>
+
+  <Import Project="Directory.Build.local.props" Condition="Exists('Directory.Build.local.props')" />
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12</LangVersion>
+    <ApplicationDisplayVersion>3.2.0</ApplicationDisplayVersion>
+    <ApplicationVersion>3</ApplicationVersion>
+    <AssemblyVersion>3.2.0.0</AssemblyVersion>
+    <FileVersion>3.2.0.0</FileVersion>
+    <Version>3.2.0</Version>
+    <RepositoryUrl>https://github.com/gragra33/Blazing.Mvvm</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Copyright>MIT Licence</Copyright>
+    <Authors>Graeme Grant (@gragra33)</Authors>
+    <!-- Samples stay warning-tolerant so package-consumer examples can evolve independently of src/test policy. -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>

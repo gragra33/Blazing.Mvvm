@@ -1,0 +1,164 @@
+﻿@page "/demo"
+@inherits MvvmComponentBase<ParameterDemoViewModel>
+
+<PageTitle>Parameter Demo - @ViewModel.Title</PageTitle>
+
+<h1>Parameter Resolution in Action</h1>
+
+<div class="alert alert-success">
+    <h4 class="alert-heading">
+        <span class="oi oi-check" aria-hidden="true"></span> Parameters Successfully Resolved!
+    </h4>
+    <p class="mb-0">The ViewModel received the following parameter values from the URL query string:</p>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="mb-0">Interactive Counter Demo</h3>
+    </div>
+    <div class="card-body">
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h4 class="mb-0">ParameterDemo (Host Page)</h4>
+            </div>
+            <div class="card-body">
+                <CounterComponent @bind-Counter=@ViewModel.Counter />
+                <div class="btn-group" role="group">
+                    <button class="btn btn-primary" @onclick="ViewModel.IncrementCounterCommand.Execute">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Increment
+                    </button>
+                    <button class="btn btn-danger" @onclick="ViewModel.DecrementCounterCommand.Execute">
+                        <span class="oi oi-minus" aria-hidden="true"></span> Decrement
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3 alert alert-info">
+            <p class="mb-0">
+                <strong>Note:</strong> The counter value is bound to the <code>Counter</code> property in the ViewModel, 
+                which was initially resolved from the <code>Count</code> query parameter using 
+                <code>[ViewParameter("Count")]</code>.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="mb-0">Received Parameters</h3>
+    </div>
+    <div class="card-body">
+        <pre class="bg-light p-3 rounded">@ViewModel.DisplayMessage</pre>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="mb-0">ViewModel Code</h3>
+    </div>
+    <div class="card-body">
+        <pre class="bg-light p-3 rounded overflow-auto"><code>public sealed partial class ParameterDemoViewModel : ViewModelBase
+{
+    // Maps to "Title" parameter
+    [ObservableProperty]
+    [property: ViewParameter]
+    private string _title = default!;
+
+    // Maps to "Count" parameter (note different names)
+    [ObservableProperty]
+    [property: ViewParameter("Count")]
+    private int _counter;
+
+    // Maps to "Content" parameter
+    [ViewParameter]
+    public string? Content { get; set; }
+
+    // Commands using RelayCommand from CommunityToolkit.Mvvm
+    [RelayCommand]
+    private void IncrementCounter()
+    {
+        Counter++;
+        UpdateDisplayMessage();
+    }
+
+    [RelayCommand]
+    private void DecrementCounter()
+    {
+        Counter--;
+        UpdateDisplayMessage();
+    }
+}</code></pre>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="mb-0">View Code</h3>
+    </div>
+    <div class="card-body">
+        <pre class="bg-light p-3 rounded overflow-auto"><code>@@page "/demo"
+@@inherits MvvmComponentBase&lt;ParameterDemoViewModel&gt;
+
+&lt;button class="btn btn-primary" 
+        @@onclick="ViewModel.IncrementCounterCommand.Execute"&gt;
+    &lt;span class="oi oi-plus"&gt;&lt;/span&gt; Increment
+&lt;/button&gt;
+&lt;button class="btn btn-danger" 
+        @@onclick="ViewModel.DecrementCounterCommand.Execute"&gt;
+    &lt;span class="oi oi-minus"&gt;&lt;/span&gt; Decrement
+&lt;/button&gt;
+
+@@code {
+    // These parameters are resolved from query string
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string Title { get; set; } = default!;
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public int Count { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? Content { get; set; }
+}</code></pre>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="mb-0">How It Works</h3>
+    </div>
+    <div class="card-body">
+        <ol class="mb-0">
+            <li>The <strong>View</strong> defines parameters with <code>[Parameter]</code> and <code>[SupplyParameterFromQuery]</code> attributes</li>
+            <li>The <strong>ViewModel</strong> defines properties with <code>[ViewParameter]</code> attribute</li>
+            <li>Blazing.Mvvm automatically <strong>resolves</strong> the parameter values from the View to the ViewModel</li>
+            <li>The <code>[ViewParameter("Name")]</code> attribute allows <strong>custom name mapping</strong> (like Count → Counter)</li>
+            <li>The <code>[RelayCommand]</code> attribute generates command properties that can be invoked from the View</li>
+            <li>Commands update the ViewModel properties and automatically notify the View of changes</li>
+        </ol>
+    </div>
+</div>
+
+<div class="mt-3 mb-3">
+    <a href="/" class="btn btn-primary">
+        <span class="oi oi-arrow-left me-1" aria-hidden="true"></span> Back to Home
+    </a>
+</div>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string Title { get; set; } = null!;
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public int Count { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? Content { get; set; }
+}

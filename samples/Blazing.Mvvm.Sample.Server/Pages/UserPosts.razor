@@ -1,0 +1,89 @@
+@page "/users/{userId}/posts"
+@inject NavigationManager NavigationManager
+@inherits MvvmComponentBase<UserPostsViewModel>
+
+<PageTitle>User Posts</PageTitle>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <button class="btn btn-link p-0" @onclick="ViewModel.BackToUsersCommand.Execute">Users</button>
+        </li>
+        <li class="breadcrumb-item">
+            <button class="btn btn-link p-0" @onclick="ViewModel.BackToUserCommand.Execute">@(ViewModel.User?.Name ?? UserId)</button>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Posts</li>
+    </ol>
+</nav>
+
+@* Debug Information *@
+<div class="alert alert-info mb-3">
+    <strong><i class="bi bi-bug"></i> Route Parameter Debug:</strong>
+    <ul class="mb-0">
+        <li><strong>UserId Parameter:</strong> @(UserId ?? "null")</li>
+        <li><strong>ViewModel.UserId:</strong> @(ViewModel.UserId ?? "null")</li>
+        <li><strong>User Loaded:</strong> @(ViewModel.User?.Name ?? "Not loaded")</li>
+        <li><strong>Current URL:</strong> @NavigationManager.Uri</li>
+    </ul>
+</div>
+
+@if (ViewModel.IsLoading)
+{
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else if (ViewModel.UserNotFound)
+{
+    <div class="alert alert-danger">
+        <h4 class="alert-heading">User Not Found</h4>
+        <p>The user with ID <strong>@UserId</strong> could not be found.</p>
+        <hr>
+        <button class="btn btn-primary" @onclick="ViewModel.BackToUsersCommand.Execute">
+            Back to Users List
+        </button>
+    </div>
+}
+else if (ViewModel.User != null)
+{
+    <h1><i class="bi bi-file-text"></i> Posts by @ViewModel.User.Name</h1>
+
+    @if (ViewModel.Posts.Any())
+    {
+        <div class="list-group">
+            @foreach (var post in ViewModel.Posts)
+            {
+                <div class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1"><i class="bi bi-chat-left-text"></i> @post.Title</h5>
+                        <small class="text-muted">Post #@post.Id</small>
+                    </div>
+                    <p class="mb-1">@post.Preview</p>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-primary" 
+                                @onclick="() => ViewModel.ViewPostCommand.Execute(post.Id)">
+                            <i class="bi bi-book-half"></i> Read Full Post
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> <strong>@ViewModel.User.Name</strong> has not written any posts yet.
+        </div>
+    }
+
+    <div class="mt-3">
+        <button class="btn btn-secondary" @onclick="ViewModel.BackToUserCommand.Execute">
+            <i class="bi bi-arrow-left"></i> Back to User Details
+        </button>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string? UserId { get; set; }
+}
