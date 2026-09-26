@@ -1,4 +1,5 @@
 ﻿using Blazing.Mvvm.ComponentModel;
+using Blazing.Mvvm.Components;
 using Microsoft.AspNetCore.Components;
 
 namespace Blazing.Mvvm.Tests.Infrastructure.Common;
@@ -26,6 +27,12 @@ public class MockServiceProvider : IServiceProvider
     public object? GetService(Type serviceType)
     {
         if (serviceType == typeof(IComponentActivator))
+        {
+            return null;
+        }
+
+        // Only AddMvvm registers the transient ViewModel factory; auto-mocking one would replay a mocked service collection
+        if (serviceType == typeof(TransientViewModelFactory))
         {
             return null;
         }

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Blazing.Mvvm.ComponentModel;
 using Blazing.Mvvm.Components.TwoWayBinding;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -14,6 +14,11 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
     where TViewModel : IViewModelBase
 {
     private TViewModel? _viewModel;
+
+    /// <summary>
+    /// Indicates whether this component created <see cref="_viewModel"/> itself and must dispose it.
+    /// </summary>
+    private bool _ownsViewModel;
 
     /// <summary>
     /// Helper for automatic two-way binding between View parameters and ViewModel properties.
@@ -37,10 +42,19 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
     /// <summary>
     /// The <c>ViewModel</c> associated with this component, resolved from the dependency injection container.
     /// </summary>
+    /// <remarks>
+    /// When <see cref="LibraryConfiguration.DisposeTransientViewModels"/> is enabled, a ViewModel registered as transient is
+    /// created for this component rather than tracked by the container, and is disposed when this component is disposed.
+    /// A ViewModel assigned through the setter is never disposed by this component.
+    /// </remarks>
     protected virtual TViewModel ViewModel
     {
-        get => _viewModel ??= ViewModelResolver.Resolve(this, Services);
-        set => _viewModel = value;
+        get => _viewModel ??= ViewModelResolver.Resolve(this, Services, out _ownsViewModel);
+        set
+        {
+            _ownsViewModel &= ReferenceEquals(_viewModel, value);
+            _viewModel = value;
+        }
     }
 
     /// <inheritdoc/>
@@ -116,6 +130,12 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
             // Dispose two-way binding helper if it was initialized
             _bindingHelper?.Dispose();
             _bindingHelper = null;
+
+            // A ViewModel this component created is not tracked by the container, so nothing else will dispose it
+            if (_ownsViewModel)
+            {
+                _viewModel?.Dispose();
+            }
         }
 
         IsDisposed = true;
