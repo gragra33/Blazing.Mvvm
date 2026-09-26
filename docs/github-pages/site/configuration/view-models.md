@@ -59,6 +59,34 @@ public sealed partial class MyViewModel : ViewModelBase
 > [!WARNING]
 > If you previously implemented `public void Dispose()` yourself, change that to `protected override void Dispose(bool disposing)` so the base class can keep its cleanup behavior.
 
+### When a ViewModel is disposed
+
+Who disposes a ViewModel depends on its registered lifetime and on the component base type:
+
+| ViewModel lifetime | [`MvvmComponentBase`](xref:Blazing.Mvvm.Components.MvvmComponentBase`1) / [`MvvmLayoutComponentBase`](xref:Blazing.Mvvm.Components.MvvmLayoutComponentBase`1) | [`MvvmOwningComponentBase`](xref:Blazing.Mvvm.Components.MvvmOwningComponentBase`1) |
+| --- | --- | --- |
+| Transient (the default) | Disposed with the component | Disposed with the component's service scope |
+| Scoped | Disposed when the circuit (Server) or application (WebAssembly) scope ends | Disposed with the component's service scope |
+| Singleton | Disposed when the application stops | Disposed when the application stops |
+
+The dependency injection container keeps every disposable transient service it creates until its scope ends. On Blazor Server that scope is the whole circuit, and on Blazor WebAssembly it is the whole application, so a transient ViewModel resolved from it would stay in memory after its page closed, and one more would accumulate on every visit. To prevent that, `MvvmComponentBase` and `MvvmLayoutComponentBase` create a transient ViewModel from its registration themselves instead of asking the container for it, and dispose it when the component is disposed.
+
+The ViewModel's constructor dependencies are still resolved from the component's service provider, so scoped services such as authentication state or a per-circuit cache stay shared with the rest of the circuit. This is the difference from `MvvmOwningComponentBase`, which gives the component a service scope of its own, and therefore its own copy of every scoped dependency.
+
+> [!NOTE]
+> Only the ViewModel changes owner. A disposable **transient** service injected into the ViewModel is still created and held by the circuit's container. If such a dependency must be released with the page, inherit from `MvvmOwningComponentBase` or inject a factory and dispose what it creates in `Dispose(bool disposing)`.
+
+A ViewModel that receives its own key through `[ServiceKey]` can only be constructed by the container, so it is always resolved from the container and disposed with its scope.
+
+To restore the earlier behavior, in which the container owns transient ViewModels, turn the option off:
+
+```csharp
+builder.Services.AddMvvm(options =>
+{
+    options.DisposeTransientViewModels = false;
+});
+```
+
 ## Service registration
 
 ViewModels are registered as transient services by default. Use [`ViewModelDefinition`](xref:Blazing.Mvvm.ComponentModel.ViewModelDefinitionAttribute) to choose another lifetime:
@@ -120,7 +148,7 @@ Reference the key on the component with `ViewModelKey`:
 ## When to use each component base type
 
 - [`MvvmComponentBase<TViewModel>`](xref:Blazing.Mvvm.Components.MvvmComponentBase`1): default choice for most pages and components
-- [`MvvmOwningComponentBase<TViewModel>`](xref:Blazing.Mvvm.Components.MvvmOwningComponentBase`1): use when the component needs its own scoped dependency lifetime
+- [`MvvmOwningComponentBase<TViewModel>`](xref:Blazing.Mvvm.Components.MvvmOwningComponentBase`1): use when the component needs its own scoped dependency lifetime; its ViewModel and every scoped dependency are created in a new scope and disposed with the component
 - [`MvvmLayoutComponentBase<TViewModel>`](xref:Blazing.Mvvm.Components.MvvmLayoutComponentBase`1): use when the layout itself owns a ViewModel
 
 ## Related topics
