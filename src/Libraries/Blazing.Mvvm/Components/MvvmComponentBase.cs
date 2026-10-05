@@ -10,7 +10,11 @@ namespace Blazing.Mvvm.Components;
 /// Provides a base Blazor component that resolves and manages a ViewModel of type <typeparamref name="TViewModel"/>.
 /// </summary>
 /// <typeparam name="TViewModel">The type of the ViewModel associated with this component.</typeparam>
-public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TViewModel>
+/// <remarks>
+/// Extend cleanup by overriding <see cref="Dispose(bool)"/>. A derived component that implements <see cref="IAsyncDisposable"/>
+/// itself receives the renderer's only disposal call, which bypasses this class's cleanup.
+/// </remarks>
+public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TViewModel>, IAsyncDisposable
     where TViewModel : IViewModelBase
 {
     /// <summary>
@@ -19,9 +23,14 @@ public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TView
     private TViewModel? _viewModel;
 
     /// <summary>
-    /// Indicates whether this component created <see cref="_viewModel"/> itself and must dispose it.
+    /// The ViewModel this component created and must dispose, kept apart from <see cref="_viewModel"/> so that assigning another ViewModel does not lose it.
     /// </summary>
-    private bool _ownsViewModel;
+    private IViewModelBase? _ownedViewModel;
+
+    /// <summary>
+    /// The ViewModel whose <see cref="INotifyPropertyChanged.PropertyChanged"/> event this component subscribed to.
+    /// </summary>
+    private IViewModelBase? _subscribedViewModel;
 
     /// <summary>
     /// Helper for automatic two-way binding between View parameters and ViewModel properties.
@@ -50,17 +59,26 @@ public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TView
     /// </summary>
     /// <remarks>
     /// When <see cref="LibraryConfiguration.DisposeTransientViewModels"/> is enabled, a ViewModel registered as transient is
-    /// created for this component rather than tracked by the container, and is disposed when this component is disposed.
-    /// A ViewModel assigned through the setter is never disposed by this component.
+    /// created for this component rather than tracked by the container, and is disposed when this component is disposed,
+    /// asynchronously when it implements <see cref="IAsyncDisposable"/>. A ViewModel assigned through the setter is never
+    /// disposed by this component, and assigning one does not release the component's claim on the ViewModel it created.
     /// </remarks>
     protected virtual TViewModel ViewModel
     {
-        get => _viewModel ??= ViewModelResolver.Resolve(this, Services, out _ownsViewModel);
-        set
+        get
         {
-            _ownsViewModel &= ReferenceEquals(_viewModel, value);
-            _viewModel = value;
+            if (_viewModel is null)
+            {
+                _viewModel = ViewModelResolver.Resolve(this, Services, CanOwnViewModel(), out var isOwnedByView);
+                if (isOwnedByView)
+                {
+                    _ownedViewModel = _viewModel;
+                }
+            }
+
+            return _viewModel;
         }
+        set => _viewModel = value;
     }
 
     /// <summary>
@@ -71,6 +89,43 @@ public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TView
         Dispose(true);
         GC.SuppressFinalize(this);
     }
+
+    /// <summary>
+    /// Disposes the component and awaits asynchronous disposal of a ViewModel this component owns.
+    /// </summary>
+    /// <remarks>
+    /// The renderer calls only this method when a component implements both disposal interfaces. It runs the synchronous
+    /// disposal path through <see cref="IDisposable"/>, so a derived component that re-implements <see cref="IDisposable"/>
+    /// still receives the call, and then releases the owned ViewModel even when that re-implementation skips the base cleanup.
+    /// </remarks>
+    /// <returns>A <see cref="ValueTask"/> representing the asynchronous dispose operation.</returns>
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        // Take an async-disposable ViewModel out of the synchronous path so it is disposed once, asynchronously
+        var asyncDisposableViewModel = _ownedViewModel as IAsyncDisposable;
+        if (asyncDisposableViewModel is not null)
+        {
+            _ownedViewModel = null;
+        }
+
+        ((IDisposable)this).Dispose();
+
+        _ownedViewModel?.Dispose();
+        _ownedViewModel = null;
+
+        if (asyncDisposableViewModel is not null)
+        {
+            await asyncDisposableViewModel.DisposeAsync();
+        }
+    }
+
+    /// <summary>
+    /// Determines whether the renderer's disposal call reaches this base class. A derived component that re-implements
+    /// <see cref="IAsyncDisposable"/> receives that call itself, so a ViewModel it owned would never be released.
+    /// </summary>
+    /// <returns><see langword="true"/> if this component can own and dispose its ViewModel; otherwise, <see langword="false"/>.</returns>
+    private bool CanOwnViewModel()
+        => GetType().GetInterfaceMap(typeof(IAsyncDisposable)).TargetMethods[0].DeclaringType == typeof(MvvmComponentBase<TViewModel>);
 
     /// <summary>
     /// Invoked after the component has rendered.
@@ -92,7 +147,8 @@ public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TView
     /// </summary>
     protected override void OnInitialized()
     {
-        ViewModel.PropertyChanged += OnPropertyChanged;
+        _subscribedViewModel = ViewModel;
+        _subscribedViewModel.PropertyChanged += OnPropertyChanged;
         ViewModel.OnInitialized();
 
         // Automatically initialize two-way binding helper
@@ -153,8 +209,9 @@ public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TView
 
         if (disposing)
         {
-            ViewModel.PropertyChanged -= OnPropertyChanged;
-            if (ViewModel is ObservableRecipient observableRecipient)
+            var subscribedViewModel = _subscribedViewModel ?? (IViewModelBase)ViewModel;
+            subscribedViewModel.PropertyChanged -= OnPropertyChanged;
+            if (subscribedViewModel is ObservableRecipient observableRecipient)
             {
                 observableRecipient.IsActive = false;
             }
@@ -164,10 +221,8 @@ public abstract class MvvmComponentBase<TViewModel> : ComponentBase, IView<TView
             _bindingHelper = null;
 
             // A ViewModel this component created is not tracked by the container, so nothing else will dispose it
-            if (_ownsViewModel)
-            {
-                _viewModel?.Dispose();
-            }
+            _ownedViewModel?.Dispose();
+            _ownedViewModel = null;
         }
 
         IsDisposed = true;

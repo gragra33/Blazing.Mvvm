@@ -144,21 +144,28 @@ public class TransientViewModelFactoryTests
     }
 
     /// <summary>
-    /// Tests that a factory registration is invoked to create the ViewModel.
+    /// Tests that a factory registration is left to the container without invoking the factory, because a factory may return
+    /// a shared instance that the View must not dispose.
     /// </summary>
     [Fact]
-    public void GivenFactoryRegistration_WhenCreating_ThenInvokesFactory()
+    public void GivenFactoryRegistration_WhenCreating_ThenDeclinesWithoutInvokingFactory()
     {
         // Arrange
-        var created = new DisposalTrackingViewModel();
-        _services.AddTransient<IDisposalTrackingViewModel>(_ => created);
+        var isFactoryInvoked = false;
+        _services.AddTransient<IDisposalTrackingViewModel>(_ =>
+        {
+            isFactoryInvoked = true;
+            return new DisposalTrackingViewModel();
+        });
         var sut = new TransientViewModelFactory(_services);
 
         // Act
-        sut.TryCreate(typeof(IDisposalTrackingViewModel), null, _services.BuildServiceProvider(), out var viewModel);
+        var isCreated = sut.TryCreate(typeof(IDisposalTrackingViewModel), null, _services.BuildServiceProvider(), out var viewModel);
 
         // Assert
-        viewModel.ShouldBeSameAs(created);
+        isCreated.ShouldBeFalse();
+        viewModel.ShouldBeNull();
+        isFactoryInvoked.ShouldBeFalse();
     }
 
     /// <summary>
@@ -183,25 +190,26 @@ public class TransientViewModelFactoryTests
     }
 
     /// <summary>
-    /// Tests that a keyed factory registration receives the requested key.
+    /// Tests that a keyed factory registration is left to the container without invoking the factory.
     /// </summary>
     [Fact]
-    public void GivenKeyedFactoryRegistration_WhenCreating_ThenPassesKeyToFactory()
+    public void GivenKeyedFactoryRegistration_WhenCreating_ThenDeclinesWithoutInvokingFactory()
     {
         // Arrange
-        object? receivedKey = null;
-        _services.AddKeyedTransient<IDisposalTrackingViewModel>("Key", (_, key) =>
+        var isFactoryInvoked = false;
+        _services.AddKeyedTransient<IDisposalTrackingViewModel>("Key", (_, _) =>
         {
-            receivedKey = key;
+            isFactoryInvoked = true;
             return new DisposalTrackingViewModel();
         });
         var sut = new TransientViewModelFactory(_services);
 
         // Act
-        sut.TryCreate(typeof(IDisposalTrackingViewModel), "Key", _services.BuildServiceProvider(), out _);
+        var isCreated = sut.TryCreate(typeof(IDisposalTrackingViewModel), "Key", _services.BuildServiceProvider(), out _);
 
         // Assert
-        receivedKey.ShouldBe("Key");
+        isCreated.ShouldBeFalse();
+        isFactoryInvoked.ShouldBeFalse();
     }
 
     /// <summary>

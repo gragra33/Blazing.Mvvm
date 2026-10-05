@@ -60,18 +60,13 @@ internal sealed class TransientViewModelFactory
             return false;
         }
 
-        if (descriptor.IsKeyedService)
+        // A factory may return a shared or container-tracked instance, so only a type this method constructs is owned
+        if (descriptor.IsKeyedService ? descriptor.KeyedImplementationFactory is not null : descriptor.ImplementationFactory is not null)
         {
-            viewModel = descriptor.KeyedImplementationFactory is not null
-                ? descriptor.KeyedImplementationFactory(serviceProvider, serviceKey)
-                : CreateFromType(descriptor.KeyedImplementationType, serviceProvider);
+            return false;
         }
-        else
-        {
-            viewModel = descriptor.ImplementationFactory is not null
-                ? descriptor.ImplementationFactory(serviceProvider)
-                : CreateFromType(descriptor.ImplementationType, serviceProvider);
-        }
+
+        viewModel = CreateFromType(descriptor.IsKeyedService ? descriptor.KeyedImplementationType : descriptor.ImplementationType, serviceProvider);
 
         return viewModel is not null;
     }

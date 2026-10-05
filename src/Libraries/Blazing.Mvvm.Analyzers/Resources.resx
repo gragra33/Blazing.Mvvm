@@ -318,4 +318,13 @@
   <data name="BLAZMVVM0021_TypeMismatch_Description" xml:space="preserve">
     <value>Automatic two-way binding requires the EventCallback&lt;T&gt; parameter to use the same generic type as the matching component [Parameter] property.</value>
   </data>
+  <data name="BLAZMVVM0022_Title" xml:space="preserve">
+    <value>View bypasses the MVVM base class disposal</value>
+  </data>
+  <data name="BLAZMVVM0022_MessageFormat" xml:space="preserve">
+    <value>View '{0}' implements {1} itself, which bypasses the disposal in {2}</value>
+  </data>
+  <data name="BLAZMVVM0022_Description" xml:space="preserve">
+    <value>The renderer calls only the disposal method a component implements itself. A View that implements IDisposable or IAsyncDisposable on top of MvvmComponentBase, MvvmOwningComponentBase or MvvmLayoutComponentBase therefore skips the base class cleanup: its ViewModel stays subscribed and active, and a ViewModel or service scope the View owns may never be released. Override Dispose(bool) to extend cleanup instead. When cleanup must be asynchronous, call Dispose() from DisposeAsync so the base class cleanup still runs.</value>
+  </data>
 </root>

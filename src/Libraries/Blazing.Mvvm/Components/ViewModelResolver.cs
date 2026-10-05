@@ -48,14 +48,16 @@ internal static class ViewModelResolver
     /// <typeparam name="TViewModel">The type of the ViewModel to resolve. Must implement <see cref="IViewModelBase"/>.</typeparam>
     /// <param name="view">The View for which to resolve the ViewModel.</param>
     /// <param name="serviceProvider">The service provider used for dependency resolution.</param>
+    /// <param name="canOwnViewModel">Whether the View's disposal reaches the code that would release an owned ViewModel.</param>
     /// <param name="isOwnedByView">
     /// When this method returns, <see langword="true"/> if the View owns the ViewModel and must dispose it; otherwise, <see langword="false"/>.
     /// </param>
     /// <returns>The resolved ViewModel instance.</returns>
-    public static TViewModel Resolve<TViewModel>(IView<TViewModel> view, IServiceProvider serviceProvider, out bool isOwnedByView)
+    public static TViewModel Resolve<TViewModel>(IView<TViewModel> view, IServiceProvider serviceProvider, bool canOwnViewModel, out bool isOwnedByView)
         where TViewModel : IViewModelBase
     {
-        if (serviceProvider.GetService<TransientViewModelFactory>() is { } factory
+        if (canOwnViewModel
+            && serviceProvider.GetService<TransientViewModelFactory>() is { } factory
             && factory.TryCreate(typeof(TViewModel), GetViewModelKey(view)?.Key, serviceProvider, out var viewModel))
         {
             isOwnedByView = true;
