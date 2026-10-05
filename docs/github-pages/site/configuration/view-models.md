@@ -80,6 +80,9 @@ The ViewModel's constructor dependencies are resolved from the component's servi
 
 #### Transient ViewModels the container still owns
 
+> [!WARNING]
+> A transient ViewModel registered with a **factory**, such as `AddTransient<IMyViewModel>(sp => ...)`, still leaks on Blazor Server and Blazor WebAssembly: one more instance stays in memory on every visit until the circuit or application ends. This case has no library-level fix, and Microsoft has the same issue open ([dotnet/aspnetcore #26676](https://github.com/dotnet/aspnetcore/issues/26676)). Register ViewModels by type, as `AddMvvm` and `[ViewModelDefinition]` do, so the component can own and dispose them.
+
 The component leaves these transient ViewModels to the container, which disposes them when its scope ends, exactly as when the option is off:
 
 - **Factory registrations**, such as `AddTransient<IMyViewModel>(sp => ...)`. A factory can return an instance that other code shares, for example `sp => sp.GetRequiredService<MyViewModel>()` forwarding to a singleton, and disposing it with one page would break every other user. The container offers no way to release an instance it is tracking, and Microsoft's own design work on this for Blazor Server remains open ([dotnet/aspnetcore #26676](https://github.com/dotnet/aspnetcore/issues/26676)). Register ViewModels by type, as `AddMvvm` and `[ViewModelDefinition]` do, to have the component own them.
