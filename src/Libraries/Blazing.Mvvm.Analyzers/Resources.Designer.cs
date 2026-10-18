@@ -662,5 +662,32 @@ namespace Blazing.Mvvm.Analyzers {
                 return ResourceManager.GetString("BLAZMVVM0021_TypeMismatch_MessageFormat", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The renderer calls only the disposal method a component implements itself. A View that implements IDisposable or IAsyncDisposable on top of MvvmComponentBase, MvvmOwningComponentBase or MvvmLayoutComponentBase therefore skips the base class cleanup....
+        /// </summary>
+        internal static string BLAZMVVM0022_Description {
+            get {
+                return ResourceManager.GetString("BLAZMVVM0022_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to View &apos;{0}&apos; implements {1} itself, which bypasses the disposal in {2}.
+        /// </summary>
+        internal static string BLAZMVVM0022_MessageFormat {
+            get {
+                return ResourceManager.GetString("BLAZMVVM0022_MessageFormat", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to View bypasses the MVVM base class disposal.
+        /// </summary>
+        internal static string BLAZMVVM0022_Title {
+            get {
+                return ResourceManager.GetString("BLAZMVVM0022_Title", resourceCulture);
+            }
+        }
     }
 }

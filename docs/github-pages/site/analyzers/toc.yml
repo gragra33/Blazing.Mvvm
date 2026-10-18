@@ -40,3 +40,5 @@
   href: BLAZMVVM0020.md
 - name: BLAZMVVM0021 - EventCallback Two-Way Binding
   href: BLAZMVVM0021.md
+- name: BLAZMVVM0022 - View Disposal Bypass
+  href: BLAZMVVM0022.md

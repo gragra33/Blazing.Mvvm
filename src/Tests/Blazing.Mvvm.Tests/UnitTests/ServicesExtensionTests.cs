@@ -30,6 +30,24 @@ public class ServicesExtensionTests
     }
 
     /// <summary>
+    /// Tests that AddMvvm registers the transient ViewModel factory only when <see cref="LibraryConfiguration.DisposeTransientViewModels"/> is enabled.
+    /// </summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void GivenAddMvvm_WhenDisposeTransientViewModelsConfigured_ThenFactoryRegisteredOnlyWhenEnabled(bool isEnabled)
+    {
+        // Arrange
+        var sut = new ServiceCollection();
+
+        // Act
+        sut.AddMvvm(c => c.DisposeTransientViewModels = isEnabled);
+
+        // Assert
+        sut.Any(descriptor => descriptor.ServiceType == typeof(TransientViewModelFactory)).ShouldBe(isEnabled);
+    }
+
+    /// <summary>
     /// Tests that AddMvvm registers services with the correct lifetime based on hosting model type.
     /// </summary>
     [Theory]
