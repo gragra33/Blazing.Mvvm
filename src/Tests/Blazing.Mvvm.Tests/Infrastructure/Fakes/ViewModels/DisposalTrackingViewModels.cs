@@ -1,4 +1,5 @@
 using Blazing.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazing.Mvvm.Tests.Infrastructure.Fakes;
@@ -21,6 +22,57 @@ public class DisposalTrackingViewModel : ViewModelBase, IDisposalTrackingViewMod
 {
     /// <inheritdoc/>
     public int DisposeCount { get; private set; }
+
+    /// <inheritdoc/>
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            DisposeCount++;
+        }
+
+        base.Dispose(disposing);
+    }
+}
+
+/// <summary>
+/// A disposal-tracking ViewModel with cleanup that only runs asynchronously.
+/// </summary>
+public sealed class AsyncDisposalTrackingViewModel : DisposalTrackingViewModel, IAsyncDisposable
+{
+    /// <summary>
+    /// Gets the number of times <see cref="DisposeAsync"/> has been called.
+    /// </summary>
+    public int DisposeAsyncCount { get; private set; }
+
+    /// <inheritdoc/>
+    public ValueTask DisposeAsync()
+    {
+        DisposeAsyncCount++;
+        Dispose();
+        return ValueTask.CompletedTask;
+    }
+}
+
+/// <summary>
+/// A message used to register a recipient ViewModel with a messenger.
+/// </summary>
+public sealed record DisposalTrackingMessage;
+
+/// <summary>
+/// A disposal-tracking recipient ViewModel, activated by its View and registered with the supplied messenger while active.
+/// </summary>
+/// <param name="messenger">The messenger the ViewModel registers with when activated.</param>
+public sealed class RecipientDisposalTrackingViewModel(IMessenger messenger)
+    : RecipientViewModelBase(messenger), IDisposalTrackingViewModel, IRecipient<DisposalTrackingMessage>
+{
+    /// <inheritdoc/>
+    public int DisposeCount { get; private set; }
+
+    /// <inheritdoc/>
+    public void Receive(DisposalTrackingMessage message)
+    {
+    }
 
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
