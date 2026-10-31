@@ -664,7 +664,7 @@ namespace Blazing.Mvvm.Analyzers {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to The renderer calls only the disposal method a component implements itself. A View that implements IDisposable or IAsyncDisposable on top of MvvmComponentBase, MvvmOwningComponentBase or MvvmLayoutComponentBase therefore skips the base class cleanup....
+        ///   Looks up a localized string similar to A View that implements IAsyncDisposable on top of MvvmComponentBase, MvvmOwningComponentBase or MvvmLayoutComponentBase receives the renderer's only disposal call, so the base class cleanup never runs....
         /// </summary>
         internal static string BLAZMVVM0022_Description {
             get {

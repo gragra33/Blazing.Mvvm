@@ -16,6 +16,11 @@ internal static class ViewModelResolver
     private static readonly ConcurrentDictionary<Type, ViewModelKeyAttribute?> _vmKeyAttributes = [];
 
     /// <summary>
+    /// Caches, for each View type, whether the renderer's disposal call reaches the base class that releases an owned ViewModel.
+    /// </summary>
+    private static readonly ConcurrentDictionary<Type, bool> _baseDisposalReached = [];
+
+    /// <summary>
     /// Resolves a ViewModel instance for the specified View, using the provided <see cref="IServiceProvider"/>.
     /// If the View has a <see cref="ViewModelKeyAttribute"/>, resolves a keyed ViewModel; otherwise, resolves a standard ViewModel.
     /// </summary>
@@ -48,7 +53,7 @@ internal static class ViewModelResolver
     /// <typeparam name="TViewModel">The type of the ViewModel to resolve. Must implement <see cref="IViewModelBase"/>.</typeparam>
     /// <param name="view">The View for which to resolve the ViewModel.</param>
     /// <param name="serviceProvider">The service provider used for dependency resolution.</param>
-    /// <param name="canOwnViewModel">Whether the View's disposal reaches the code that would release an owned ViewModel.</param>
+    /// <param name="canOwnViewModel">Whether the View's own state allows it to take ownership of another ViewModel.</param>
     /// <param name="isOwnedByView">
     /// When this method returns, <see langword="true"/> if the View owns the ViewModel and must dispose it; otherwise, <see langword="false"/>.
     /// </param>
@@ -58,6 +63,7 @@ internal static class ViewModelResolver
     {
         if (canOwnViewModel
             && serviceProvider.GetService<TransientViewModelFactory>() is { } factory
+            && IsBaseDisposalReached(view.GetType())
             && factory.TryCreate(typeof(TViewModel), GetViewModelKey(view)?.Key, serviceProvider, out var viewModel))
         {
             isOwnedByView = true;
@@ -67,6 +73,18 @@ internal static class ViewModelResolver
         isOwnedByView = false;
         return Resolve(view, serviceProvider);
     }
+
+    /// <summary>
+    /// Determines whether the renderer's disposal call reaches the base class. A View that re-implements
+    /// <see cref="IAsyncDisposable"/> receives that call itself, so a ViewModel it owned would never be released.
+    /// </summary>
+    /// <param name="viewType">The View's type.</param>
+    /// <returns><see langword="true"/> if the View can own and dispose its ViewModel; otherwise, <see langword="false"/>.</returns>
+    private static bool IsBaseDisposalReached(Type viewType)
+        => _baseDisposalReached.GetOrAdd(viewType, static type =>
+            type.GetInterfaceMap(typeof(IAsyncDisposable)).TargetMethods[0].DeclaringType is { IsGenericType: true } declaringType
+            && declaringType.GetGenericTypeDefinition() is var definition
+            && (definition == typeof(MvvmComponentBase<>) || definition == typeof(MvvmLayoutComponentBase<>)));
 
     /// <summary>
     /// Gets the <see cref="ViewModelKeyAttribute"/> declared on the View's type, caching the lookup per type.

@@ -55,6 +55,101 @@ public sealed class AsyncDisposalTrackingViewModel : DisposalTrackingViewModel, 
 }
 
 /// <summary>
+/// A disposal-tracking ViewModel whose asynchronous disposal completes only when the test opens its gate.
+/// </summary>
+public sealed class GatedAsyncDisposalTrackingViewModel : DisposalTrackingViewModel, IAsyncDisposable
+{
+    /// <summary>
+    /// Gets the gate that <see cref="DisposeAsync"/> waits on.
+    /// </summary>
+    public TaskCompletionSource Gate { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        await Gate.Task;
+        Dispose();
+    }
+}
+
+/// <summary>
+/// A disposal-tracking ViewModel whose cleanup calls back once into the supplied action.
+/// </summary>
+public sealed class ReentrantDisposalTrackingViewModel : DisposalTrackingViewModel
+{
+    /// <summary>
+    /// Gets or sets the action invoked by the first disposal.
+    /// </summary>
+    public Action? OnDispose { get; set; }
+
+    /// <inheritdoc/>
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+
+        var onDispose = OnDispose;
+        OnDispose = null;
+        onDispose?.Invoke();
+    }
+}
+
+/// <summary>
+/// Counts the ViewModels constructed with it.
+/// </summary>
+public sealed class DisposalTrackingCreationCounter
+{
+    /// <summary>
+    /// Gets or sets the number of ViewModels constructed.
+    /// </summary>
+    public int Count { get; set; }
+}
+
+/// <summary>
+/// A disposal-tracking ViewModel that records its construction.
+/// </summary>
+public sealed class CountedDisposalTrackingViewModel : DisposalTrackingViewModel
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CountedDisposalTrackingViewModel"/> class.
+    /// </summary>
+    /// <param name="counter">The counter to increment.</param>
+    public CountedDisposalTrackingViewModel(DisposalTrackingCreationCounter counter)
+        => counter.Count++;
+}
+
+/// <summary>
+/// An open generic disposal-tracking ViewModel, which the container closes on request.
+/// </summary>
+/// <typeparam name="T">The closing type.</typeparam>
+public sealed class OpenGenericDisposalTrackingViewModel<T> : DisposalTrackingViewModel;
+
+/// <summary>
+/// A disposal-tracking ViewModel with two public constructors, one of them marked for <see cref="ActivatorUtilities"/>, which the container ignores.
+/// </summary>
+public sealed class MarkedConstructorDisposalTrackingViewModel : DisposalTrackingViewModel
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MarkedConstructorDisposalTrackingViewModel"/> class.
+    /// </summary>
+    [ActivatorUtilitiesConstructor]
+    public MarkedConstructorDisposalTrackingViewModel()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MarkedConstructorDisposalTrackingViewModel"/> class.
+    /// </summary>
+    /// <param name="dependency">The dependency the container supplies.</param>
+    public MarkedConstructorDisposalTrackingViewModel(DisposalTrackingDependency dependency)
+        => Dependency = dependency;
+
+    /// <summary>
+    /// Gets the dependency, which is set only when the container's choice of constructor was used.
+    /// </summary>
+    public DisposalTrackingDependency? Dependency { get; }
+}
+
+/// <summary>
 /// A message used to register a recipient ViewModel with a messenger.
 /// </summary>
 public sealed record DisposalTrackingMessage;
@@ -114,6 +209,20 @@ public sealed class KeyedDependentDisposalTrackingViewModel([FromKeyedServices("
     /// </summary>
     public DisposalTrackingDependency Dependency { get; } = dependency;
 }
+
+#if NET10_0_OR_GREATER
+/// <summary>
+/// A disposal-tracking ViewModel whose dependency inherits the key the ViewModel was resolved with.
+/// </summary>
+/// <param name="dependency">The dependency registered under the ViewModel's own key.</param>
+public sealed class InheritedKeyDisposalTrackingViewModel([FromKeyedServices] DisposalTrackingDependency dependency) : DisposalTrackingViewModel
+{
+    /// <summary>
+    /// Gets the dependency the ViewModel was constructed with.
+    /// </summary>
+    public DisposalTrackingDependency Dependency { get; } = dependency;
+}
+#endif
 
 /// <summary>
 /// A disposal-tracking ViewModel that receives its own service key, which only the container can supply.

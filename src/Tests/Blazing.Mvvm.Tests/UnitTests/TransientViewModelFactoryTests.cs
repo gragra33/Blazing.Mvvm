@@ -212,6 +212,88 @@ public class TransientViewModelFactoryTests
         isFactoryInvoked.ShouldBeFalse();
     }
 
+#if NET10_0_OR_GREATER
+    /// <summary>
+    /// Tests that a ViewModel whose dependency inherits the resolving key is left to the container, because the factory would
+    /// otherwise silently inject the unkeyed registration.
+    /// </summary>
+    [Fact]
+    public void GivenDependencyInheritingKey_WhenCreating_ThenDeclinesAndContainerSuppliesKeyedDependency()
+    {
+        // Arrange
+        var keyed = new DisposalTrackingDependency();
+        _services.AddKeyedSingleton("Key", keyed);
+        _services.AddSingleton(new DisposalTrackingDependency());
+        _services.AddKeyedTransient<IDisposalTrackingViewModel, InheritedKeyDisposalTrackingViewModel>("Key");
+        var sut = new TransientViewModelFactory(_services);
+        var provider = _services.BuildServiceProvider();
+
+        // Act
+        var isCreated = sut.TryCreate(typeof(IDisposalTrackingViewModel), "Key", provider, out _);
+
+        // Assert
+        isCreated.ShouldBeFalse();
+        provider.GetRequiredKeyedService<IDisposalTrackingViewModel>("Key")
+            .ShouldBeOfType<InheritedKeyDisposalTrackingViewModel>().Dependency.ShouldBeSameAs(keyed);
+    }
+#endif
+
+    /// <summary>
+    /// Tests that a ViewModel with more than one public constructor is left to the container, so the View gets the same
+    /// constructor the container would choose rather than the one marked for <see cref="ActivatorUtilities"/>.
+    /// </summary>
+    [Fact]
+    public void GivenViewModelWithTwoPublicConstructors_WhenCreating_ThenDeclines()
+    {
+        // Arrange
+        _services.AddSingleton<DisposalTrackingDependency>();
+        _services.AddTransient<IDisposalTrackingViewModel, MarkedConstructorDisposalTrackingViewModel>();
+        var sut = new TransientViewModelFactory(_services);
+        var provider = _services.BuildServiceProvider();
+
+        // Act
+        var isCreated = sut.TryCreate(typeof(IDisposalTrackingViewModel), null, provider, out _);
+
+        // Assert
+        isCreated.ShouldBeFalse();
+        provider.GetRequiredService<IDisposalTrackingViewModel>()
+            .ShouldBeOfType<MarkedConstructorDisposalTrackingViewModel>().Dependency.ShouldNotBeNull();
+    }
+
+    /// <summary>
+    /// Tests that an open generic registration is left to the container, because the lookup is by exact service type.
+    /// </summary>
+    [Fact]
+    public void GivenOpenGenericRegistration_WhenCreatingClosedType_ThenDeclines()
+    {
+        // Arrange
+        _services.AddTransient(typeof(OpenGenericDisposalTrackingViewModel<>));
+        var sut = new TransientViewModelFactory(_services);
+
+        // Act
+        var isCreated = sut.TryCreate(typeof(OpenGenericDisposalTrackingViewModel<int>), null, _services.BuildServiceProvider(), out _);
+
+        // Assert
+        isCreated.ShouldBeFalse();
+    }
+
+    /// <summary>
+    /// Tests that a registration under <see cref="KeyedService.AnyKey"/> is left to the container, because the lookup is by exact key.
+    /// </summary>
+    [Fact]
+    public void GivenAnyKeyRegistration_WhenCreatingWithKey_ThenDeclines()
+    {
+        // Arrange
+        _services.AddKeyedTransient<IDisposalTrackingViewModel, DisposalTrackingViewModel>(KeyedService.AnyKey);
+        var sut = new TransientViewModelFactory(_services);
+
+        // Act
+        var isCreated = sut.TryCreate(typeof(IDisposalTrackingViewModel), "Key", _services.BuildServiceProvider(), out _);
+
+        // Assert
+        isCreated.ShouldBeFalse();
+    }
+
     /// <summary>
     /// Tests that a ViewModel which receives its own service key is left to the container, which is the only thing that can supply it.
     /// </summary>

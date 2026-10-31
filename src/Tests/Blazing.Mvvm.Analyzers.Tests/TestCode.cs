@@ -127,6 +127,8 @@ namespace Blazing.Mvvm.Components
 
         System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync() => default;
 
+        protected virtual System.Threading.Tasks.ValueTask DisposeAsyncCore() => default;
+
         protected virtual void Dispose(bool disposing)
         {
         }

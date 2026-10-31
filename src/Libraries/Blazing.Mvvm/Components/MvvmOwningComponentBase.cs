@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Blazing.Mvvm.ComponentModel;
 using Blazing.Mvvm.Components.TwoWayBinding;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -47,12 +47,17 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     /// <returns>A <see cref="ValueTask"/> representing the asynchronous dispose operation.</returns>
     public async ValueTask DisposeAsync()
     {
-        await DisposeAsyncCore();
-
-        // The is to call the base class implementation as it won't be called when this is being disposed
-        // https://github.com/dotnet/aspnetcore/issues/25873
-        // https://github.com/dotnet/aspnetcore/discussions/25817
-        ((IDisposable)this).Dispose();
+        try
+        {
+            await DisposeAsyncCore();
+        }
+        finally
+        {
+            // The is to call the base class implementation as it won't be called when this is being disposed
+            // https://github.com/dotnet/aspnetcore/issues/25873
+            // https://github.com/dotnet/aspnetcore/discussions/25817
+            ((IDisposable)this).Dispose();
+        }
 
         GC.SuppressFinalize(this);
     }

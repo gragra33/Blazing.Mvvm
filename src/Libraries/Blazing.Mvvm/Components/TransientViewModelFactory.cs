@@ -77,19 +77,34 @@ internal sealed class TransientViewModelFactory
     /// <param name="implementationType">The type to construct.</param>
     /// <param name="serviceProvider">The service provider that resolves the constructor dependencies.</param>
     /// <returns>
-    /// The new instance, or <see langword="null"/> when the type has no implementation type or a constructor receives its own
-    /// service key through <see cref="ServiceKeyAttribute"/>, which only the container can supply.
+    /// The new instance, or <see langword="null"/> when there is no implementation type, when it does not have exactly one public
+    /// constructor, the only case in which this method and the container are documented to choose the same one, or when that
+    /// constructor depends on the key the ViewModel was resolved with.
     /// </returns>
-    private static object? CreateFromType(Type? implementationType, IServiceProvider serviceProvider)
+    private static object? CreateFromType(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type? implementationType,
+        IServiceProvider serviceProvider)
     {
         if (implementationType is null
-            || implementationType.GetConstructors().Any(constructor => constructor.GetParameters().Any(parameter => parameter.IsDefined(typeof(ServiceKeyAttribute)))))
+            || implementationType.GetConstructors() is not [var constructor]
+            || constructor.GetParameters().Any(RequiresContainerKey))
         {
             return null;
         }
 
         return ActivatorUtilities.CreateInstance(serviceProvider, implementationType);
     }
+
+    /// <summary>
+    /// Determines whether a constructor parameter depends on the key the ViewModel was resolved with, which only the container
+    /// knows: <see cref="ServiceKeyAttribute"/>, or a <see cref="FromKeyedServicesAttribute"/> with no key of its own, which
+    /// inherits that key on .NET 10 and later.
+    /// </summary>
+    /// <param name="parameter">The constructor parameter to inspect.</param>
+    /// <returns><see langword="true"/> if only the container can supply the parameter; otherwise, <see langword="false"/>.</returns>
+    private static bool RequiresContainerKey(ParameterInfo parameter)
+        => parameter.IsDefined(typeof(ServiceKeyAttribute))
+            || parameter.GetCustomAttribute<FromKeyedServicesAttribute>() is { Key: null };
 
     /// <summary>
     /// Indexes the ViewModel registrations in <paramref name="services"/> by service type and key, keeping the last registration
