@@ -24,6 +24,7 @@ public class LibraryConfigurationTests
         config.ParameterResolutionMode.ShouldBe(ParameterResolutionMode.None);
         config.ViewModelAssemblies.ShouldBeEmpty();
         config.BasePath.ShouldBeNull();
+        config.DisposeTransientViewModels.ShouldBeTrue();
     }
 
     /// <summary>

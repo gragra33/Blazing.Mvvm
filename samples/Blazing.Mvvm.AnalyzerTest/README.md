@@ -39,6 +39,7 @@ This sample is configured to remain buildable while still surfacing most analyze
 | **Test015And016ViewModel.cs** | BLAZMVVM0015, BLAZMVVM0016 | Missing IDisposable + Messenger registration without cleanup                        |
 | **Test018ViewModel.cs**       | BLAZMVVM0018               | Missing [NotifyPropertyChangedFor] for computed properties                          |
 | **Test021ViewModel.cs**       | BLAZMVVM0021               | `[ViewParameter]` backing property for automatic EventCallback two-way binding       |
+| **Test022ViewModel.cs**       | None (its View triggers 0022) | ViewModel for the page that bypasses MvvmComponentBase disposal                      |
 | **IndexViewModel.cs**         | None                       | Properly configured ViewModel for home page                                         |
 
 ### Razor Components Created
@@ -56,6 +57,7 @@ This sample is configured to remain buildable while still surfacing most analyze
 | **Components/Pages/Test019.razor**                 | BLAZMVVM0019                         | Using [CascadingParameter] for DI services instead of [Inject]             |
 | **Components/Pages/Test021.razor**                 | None (child component triggers 0021) | Parent for EventCallback testing                                           |
 | **Components/Test021Component.razor**              | BLAZMVVM0021                         | Canonical obsolete manual two-way binding pattern (sample diagnostic case) |
+| **Components/Pages/Test022.razor**                 | BLAZMVVM0022                         | Page implements IAsyncDisposable itself, bypassing MvvmComponentBase disposal |
 
 ## Analyzer Coverage Summary
 
@@ -84,6 +86,7 @@ The sample currently demonstrates 19 analyzers. `BLAZMVVM0007` and `BLAZMVVM0017
 | **BLAZMVVM0019** | CascadingParameter vs Inject    | Info     | Test019.razor                       | ? Covered |
 | **BLAZMVVM0020** | Route Parameter Binding         | Warning  | Test004.razor                       | ? Covered |
 | **BLAZMVVM0021** | EventCallback Two-Way Binding   | Info/Warning | Test021Component.razor + code-behind tests | ? Covered |
+| **BLAZMVVM0022** | View Disposal Bypass            | Warning  | Test022.razor                       | ? Covered |
 
 ## Build status
 
@@ -155,6 +158,7 @@ grep "BLAZMVVM" build-log.txt
 - **BLAZMVVM0019**: `Components/Pages/Test019.razor`
 - **BLAZMVVM0020**: `Components/Pages/Test004.razor`
 - **BLAZMVVM0021**: `Components/Test021Component.razor`
+- **BLAZMVVM0022**: `Components/Pages/Test022.razor`
 
 ## Recommendations
 
