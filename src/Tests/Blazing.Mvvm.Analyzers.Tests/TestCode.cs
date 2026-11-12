@@ -134,9 +134,14 @@ namespace Blazing.Mvvm.Components
         }
     }
 
-    public abstract class MvvmOwningComponentBase<TViewModel> : MvvmComponentBase<TViewModel>
+    public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase, System.IAsyncDisposable
         where TViewModel : ViewModelBase
     {
+        public TViewModel ViewModel { get; set; }
+
+        public System.Threading.Tasks.ValueTask DisposeAsync() => default;
+
+        protected virtual System.Threading.Tasks.ValueTask DisposeAsyncCore() => default;
     }
 
     public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase, System.IDisposable, System.IAsyncDisposable
@@ -149,6 +154,8 @@ namespace Blazing.Mvvm.Components
         }
 
         System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync() => default;
+
+        protected virtual System.Threading.Tasks.ValueTask DisposeAsyncCore() => default;
 
         protected virtual void Dispose(bool disposing)
         {

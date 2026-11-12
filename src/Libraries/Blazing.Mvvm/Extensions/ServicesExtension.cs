@@ -66,7 +66,15 @@ public static class ServicesExtension
         AddMvvmNavigationManager(services, configuration); // This now correctly registers MvvmNavigationManager as Scoped for Server/WebApp
         AddViewModels(services, configuration.ViewModelAssemblies);
 
-        if (configuration.DisposeTransientViewModels)
+        // Follow the options instance an earlier call registered, which is the one the container resolves, rather than this
+        // call's options, so that a later call cannot enable ownership an earlier call opted out of
+        var effectiveConfiguration = services.LastOrDefault(descriptor =>
+                descriptor.ServiceType == typeof(IOptions<LibraryConfiguration>) && !descriptor.IsKeyedService)?
+            .ImplementationInstance is IOptions<LibraryConfiguration> registeredOptions
+            ? registeredOptions.Value
+            : configuration;
+
+        if (effectiveConfiguration.DisposeTransientViewModels)
         {
             services.TryAddSingleton(new TransientViewModelFactory(services));
         }

@@ -235,3 +235,122 @@ public sealed class ServiceKeyDisposalTrackingViewModel([ServiceKey] string serv
     /// </summary>
     public string ServiceKey { get; } = serviceKey;
 }
+
+/// <summary>
+/// A disposal-tracking ViewModel whose <see cref="OnInitializedAsync"/> waits on a gate, and which records any lifecycle call
+/// made after it was disposed. Such a call throws <see cref="ObjectDisposedException"/>, as it would for a ViewModel that
+/// releases a resource in <c>Dispose(bool)</c> and uses it in its lifecycle methods.
+/// </summary>
+public class LifecycleRecordingViewModel : DisposalTrackingViewModel
+{
+    /// <summary>
+    /// Gets the gate that <see cref="OnInitializedAsync"/> waits on.
+    /// </summary>
+    public TaskCompletionSource InitializationGate { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    /// <summary>
+    /// Gets the lifecycle methods called after the ViewModel was disposed.
+    /// </summary>
+    public List<string> CallsAfterDisposal { get; } = [];
+
+    /// <inheritdoc/>
+    public override Task OnInitializedAsync()
+        => InitializationGate.Task;
+
+    /// <inheritdoc/>
+    public override void OnParametersSet()
+        => Record(nameof(OnParametersSet));
+
+    /// <inheritdoc/>
+    public override Task OnParametersSetAsync()
+    {
+        Record(nameof(OnParametersSetAsync));
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc/>
+    public override bool ShouldRender()
+    {
+        Record(nameof(ShouldRender));
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public override void OnAfterRender(bool firstRender)
+        => Record(nameof(OnAfterRender));
+
+    /// <inheritdoc/>
+    public override Task OnAfterRenderAsync(bool firstRender)
+    {
+        Record(nameof(OnAfterRenderAsync));
+        return Task.CompletedTask;
+    }
+
+    private void Record(string lifecycleMethod)
+    {
+        if (DisposeCount > 0)
+        {
+            CallsAfterDisposal.Add(lifecycleMethod);
+            throw new ObjectDisposedException(nameof(LifecycleRecordingViewModel));
+        }
+    }
+}
+
+/// <summary>
+/// A disposal-tracking ViewModel whose disposal throws after it has been recorded.
+/// </summary>
+public sealed class ThrowingDisposalTrackingViewModel : DisposalTrackingViewModel
+{
+    /// <inheritdoc/>
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        throw new ApplicationException("ViewModel cleanup failed");
+    }
+}
+
+/// <summary>
+/// A disposal-tracking ViewModel whose asynchronous disposal throws after it has been recorded.
+/// </summary>
+public sealed class ThrowingAsyncDisposalTrackingViewModel : DisposalTrackingViewModel, IAsyncDisposable
+{
+    /// <summary>
+    /// Gets the number of times <see cref="DisposeAsync"/> has been called.
+    /// </summary>
+    public int DisposeAsyncCount { get; private set; }
+
+    /// <inheritdoc/>
+    public ValueTask DisposeAsync()
+    {
+        DisposeAsyncCount++;
+        throw new ApplicationException("ViewModel asynchronous cleanup failed");
+    }
+}
+
+/// <summary>
+/// A scoped service whose asynchronous disposal waits on a gate, which holds a service scope's disposal open.
+/// </summary>
+public sealed class ScopeDisposalGate : IAsyncDisposable
+{
+    /// <summary>
+    /// Gets the gate that <see cref="DisposeAsync"/> waits on.
+    /// </summary>
+    public TaskCompletionSource Gate { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+        => await Gate.Task;
+}
+
+/// <summary>
+/// A <see cref="LifecycleRecordingViewModel"/> that depends on a <see cref="ScopeDisposalGate"/>, so the scope that created
+/// it disposes the ViewModel first and then waits on the gate.
+/// </summary>
+/// <param name="scopeDisposalGate">The gate that holds the scope's disposal open.</param>
+public sealed class ScopeGatedLifecycleViewModel(ScopeDisposalGate scopeDisposalGate) : LifecycleRecordingViewModel
+{
+    /// <summary>
+    /// Gets the gate that holds the scope's disposal open.
+    /// </summary>
+    public ScopeDisposalGate ScopeDisposalGate { get; } = scopeDisposalGate;
+}

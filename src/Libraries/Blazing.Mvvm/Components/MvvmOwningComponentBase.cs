@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Blazing.Mvvm.ComponentModel;
 using Blazing.Mvvm.Components.TwoWayBinding;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -27,6 +27,17 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     private TwoWayBindingHelper<TViewModel>? _bindingHelper;
 
     /// <summary>
+    /// Whether asynchronous disposal has started. The service scope, and with it the ViewModel, is disposed in
+    /// <see cref="DisposeAsyncCore"/>, before <see cref="OwningComponentBase.IsDisposed"/> becomes <see langword="true"/>.
+    /// </summary>
+    private bool _isDisposingAsync;
+
+    /// <summary>
+    /// Gets a value indicating whether disposal has started, after which lifecycle calls are no longer forwarded to the ViewModel.
+    /// </summary>
+    private bool IsReleased => IsDisposed || _isDisposingAsync;
+
+    /// <summary>
     /// Gets or sets the parameter resolver used to set parameters on the View and ViewModel.
     /// </summary>
     [Inject]
@@ -44,9 +55,21 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     /// <summary>
     /// Disposes the component asynchronously and releases unmanaged resources.
     /// </summary>
+    /// <remarks>
+    /// A call made after disposal has started or finished returns without doing anything and without waiting for the earlier
+    /// call to complete. Disposal has started once this method has been called, or once <see cref="IDisposable.Dispose"/>
+    /// has reached the base class.
+    /// </remarks>
     /// <returns>A <see cref="ValueTask"/> representing the asynchronous dispose operation.</returns>
     public async ValueTask DisposeAsync()
     {
+        if (IsReleased)
+        {
+            return;
+        }
+
+        _isDisposingAsync = true;
+
         try
         {
             await DisposeAsyncCore();
@@ -101,15 +124,28 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     /// <summary>
     /// Sets parameters on the component and ViewModel.
     /// </summary>
+    /// <remarks>
+    /// Not forwarded once disposal has started, which happens when the component is removed while
+    /// <see cref="OnInitializedAsync"/> is still running.
+    /// </remarks>
     protected override void OnParametersSet()
-        => ViewModel.OnParametersSet();
+    {
+        if (!IsReleased)
+        {
+            ViewModel.OnParametersSet();
+        }
+    }
 
     /// <summary>
     /// Asynchronously sets parameters on the component and ViewModel.
     /// </summary>
+    /// <remarks>
+    /// Not forwarded once disposal has started, which happens when the component is removed while
+    /// <see cref="OnInitializedAsync"/> is still running.
+    /// </remarks>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected override Task OnParametersSetAsync()
-        => ViewModel.OnParametersSetAsync();
+        => IsReleased ? Task.CompletedTask : ViewModel.OnParametersSetAsync();
 
     /// <summary>
     /// Sets parameters from the given <see cref="ParameterView"/> on both the View and its ViewModel using the <see cref="ParameterResolver"/>.
@@ -126,9 +162,12 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     /// <summary>
     /// Determines whether the component should render.
     /// </summary>
+    /// <remarks>
+    /// Returns <see langword="false"/> without asking the ViewModel once disposal has started.
+    /// </remarks>
     /// <returns><c>true</c> if the component should render; otherwise, <c>false</c>.</returns>
     protected override bool ShouldRender()
-        => ViewModel.ShouldRender();
+        => !IsReleased && ViewModel.ShouldRender();
 
     /// <summary>
     /// Disposes the component and releases unmanaged resources.

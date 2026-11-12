@@ -797,6 +797,411 @@ public class TransientViewModelDisposalTests : BunitContext
     }
 
     /// <summary>
+    /// Tests that a View removed while its ViewModel's <c>OnInitializedAsync</c> is still running stops forwarding lifecycle
+    /// calls to the disposed ViewModel, so nothing reaches the renderer as an unhandled exception.
+    /// </summary>
+    /// <param name="isLayout">Whether the component is a layout rather than a View.</param>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GivenSlowInitialization_WhenViewRemovedBeforeItCompletes_ThenDisposedViewModelGetsNoLifecycleCalls(bool isLayout)
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddTransient<LifecycleRecordingViewModel>();
+        IComponent component = isLayout ? Render<LifecycleTestLayout>().Instance : Render<LifecycleTestView>().Instance;
+        Func<int> onParametersSetCount = isLayout
+            ? () => ((LifecycleTestLayout)component).OnParametersSetCount
+            : () => ((LifecycleTestView)component).OnParametersSetCount;
+        var viewModel = isLayout ? ((LifecycleTestLayout)component).CurrentViewModel : ((LifecycleTestView)component).CurrentViewModel;
+        await DisposeComponentsAsync();
+        viewModel.DisposeCount.ShouldBe(1);
+        onParametersSetCount().ShouldBe(0);
+
+        // Act
+        viewModel.InitializationGate.SetResult();
+        await SettleRendererAsync();
+
+        // Assert
+        onParametersSetCount().ShouldBe(1, "the framework's continuation must have run, or the absence assertions below prove nothing");
+        viewModel.CallsAfterDisposal.ShouldBeEmpty();
+        Renderer.UnhandledException.IsCompleted.ShouldBeFalse();
+    }
+
+    /// <summary>
+    /// Tests that an owning View removed while its ViewModel's <c>OnInitializedAsync</c> is still running stops forwarding
+    /// lifecycle calls to the ViewModel its service scope has already disposed.
+    /// </summary>
+    [Fact]
+    public async Task GivenSlowInitialization_WhenOwningViewRemovedBeforeItCompletes_ThenDisposedViewModelGetsNoLifecycleCalls()
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddTransient<LifecycleRecordingViewModel>();
+        var view = Render<LifecycleTestOwningView>().Instance;
+        var viewModel = view.CurrentViewModel;
+        await DisposeComponentsAsync();
+        viewModel.DisposeCount.ShouldBe(1);
+        view.OnParametersSetCount.ShouldBe(0);
+
+        // Act
+        viewModel.InitializationGate.SetResult();
+        await SettleRendererAsync();
+
+        // Assert
+        view.OnParametersSetCount.ShouldBe(1, "the framework's continuation must have run, or the absence assertions below prove nothing");
+        viewModel.CallsAfterDisposal.ShouldBeEmpty();
+        Renderer.UnhandledException.IsCompleted.ShouldBeFalse();
+    }
+
+    /// <summary>
+    /// Tests that an owning View stops forwarding lifecycle calls as soon as asynchronous disposal starts, while its service
+    /// scope is still being disposed and the base class has not yet marked the component disposed.
+    /// </summary>
+    [Fact]
+    public async Task GivenOwningViewScopeStillDisposing_WhenSlowInitializationCompletes_ThenDisposedViewModelGetsNoLifecycleCalls()
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddScoped<ScopeDisposalGate>();
+        Services.AddTransient<LifecycleRecordingViewModel, ScopeGatedLifecycleViewModel>();
+        var view = Render<LifecycleTestOwningView>().Instance;
+        var viewModel = (ScopeGatedLifecycleViewModel)view.CurrentViewModel;
+        var disposal = ((IAsyncDisposable)view).DisposeAsync().AsTask();
+        viewModel.DisposeCount.ShouldBe(1);
+        disposal.IsCompleted.ShouldBeFalse("the scope is still waiting on its gate");
+
+        // Act
+        viewModel.InitializationGate.SetResult();
+        await SettleRendererAsync();
+
+        // Assert
+        view.OnParametersSetCount.ShouldBe(1, "the framework's continuation must have run, or the absence assertions below prove nothing");
+        viewModel.CallsAfterDisposal.ShouldBeEmpty();
+        Renderer.UnhandledException.IsCompleted.ShouldBeFalse();
+        viewModel.ScopeDisposalGate.Gate.SetResult();
+        await disposal;
+    }
+
+    /// <summary>
+    /// Tests that an owning View disposed again, asynchronously or after a direct <c>Dispose()</c>, does nothing the second
+    /// time rather than reaching its already-disposed service scope.
+    /// </summary>
+    /// <param name="isSynchronousFirst">Whether <see cref="IDisposable.Dispose"/> is the first call.</param>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GivenDisposedOwningView_WhenDisposedAsyncAgain_ThenNothingThrowsAndViewModelDisposedOnce(bool isSynchronousFirst)
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddTransient<IDisposalTrackingViewModel, DisposalTrackingViewModel>();
+        var view = Render<OwningDisposalTestView>().Instance;
+        var viewModel = view.CurrentViewModel;
+        if (isSynchronousFirst)
+        {
+            ((IDisposable)view).Dispose();
+        }
+        else
+        {
+            await view.DisposeAsync();
+        }
+
+        // Act and assert
+        await Should.NotThrowAsync(view.DisposeAsync().AsTask());
+        viewModel.DisposeCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// Tests that a re-entrant <c>DisposeAsync</c> on an owning View, made while its service scope is still being disposed,
+    /// returns at once and leaves the first call to finish the cleanup.
+    /// </summary>
+    [Fact]
+    public async Task GivenOwningViewScopeStillDisposing_WhenDisposedAsyncAgain_ThenSecondCallReturnsAndFirstCompletes()
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddScoped<ScopeDisposalGate>();
+        Services.AddTransient<LifecycleRecordingViewModel, ScopeGatedLifecycleViewModel>();
+        var view = Render<LifecycleTestOwningView>().Instance;
+        var viewModel = (ScopeGatedLifecycleViewModel)view.CurrentViewModel;
+        var first = ((IAsyncDisposable)view).DisposeAsync().AsTask();
+        first.IsCompleted.ShouldBeFalse("the scope is still waiting on its gate");
+
+        // Act
+        var second = ((IAsyncDisposable)view).DisposeAsync().AsTask();
+
+        // Assert
+        second.IsCompletedSuccessfully.ShouldBeTrue();
+        view.IsComponentDisposed.ShouldBeFalse("the second call must not tear the component down while the first is still disposing its scope");
+        viewModel.ScopeDisposalGate.Gate.SetResult();
+        await first;
+        view.IsComponentDisposed.ShouldBeTrue();
+        viewModel.DisposeCount.ShouldBe(1);
+        viewModel.InitializationGate.SetResult();
+    }
+
+    /// <summary>
+    /// Tests that a direct <c>Dispose()</c> while <c>DisposeAsyncCore</c> is running leaves the ViewModel usable until that
+    /// cleanup finishes, after which the asynchronous disposal disposes it once.
+    /// </summary>
+    /// <param name="isLayout">Whether the component is a layout rather than a View.</param>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GivenDisposeAsyncCoreRunning_WhenDisposeCalledDirectly_ThenViewModelDisposedOnlyAfterCore(bool isLayout)
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddTransient<IDisposalTrackingViewModel, DisposalTrackingViewModel>();
+        IGatedCoreComponent component = isLayout ? Render<GatedCoreTestLayout>().Instance : Render<GatedCoreTestView>().Instance;
+        var disposeAsync = ((IAsyncDisposable)component).DisposeAsync().AsTask();
+
+        // Act
+        ((IDisposable)component).Dispose();
+        var disposeCountDuringCore = component.CurrentViewModel.DisposeCount;
+        component.CoreGate.SetResult();
+        await disposeAsync;
+
+        // Assert
+        disposeCountDuringCore.ShouldBe(0);
+        component.DisposeCountAtCoreEnd.ShouldBe(0);
+        component.CurrentViewModel.DisposeCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// Tests that a direct <c>Dispose()</c> still releases the owned ViewModel when a <c>Dispose(bool)</c> override skips the base class.
+    /// </summary>
+    /// <param name="isLayout">Whether the component is a layout rather than a View.</param>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void GivenDisposeBoolOverrideSkippingBase_WhenDisposeCalledDirectly_ThenViewModelDisposed(bool isLayout)
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddTransient<IDisposalTrackingViewModel, DisposalTrackingViewModel>();
+        IComponent component = isLayout ? Render<SkipBaseDisposeTestLayout>().Instance : Render<SkipBaseDisposeTestView>().Instance;
+        var viewModel = ((IViewModelComponent)component).CurrentViewModel;
+
+        // Act
+        ((IDisposable)component).Dispose();
+
+        // Assert
+        viewModel.DisposeCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// Tests that a direct <c>Dispose()</c> disposes an owned ViewModel synchronously only, even when it also has asynchronous cleanup.
+    /// </summary>
+    [Fact]
+    public void GivenAsyncDisposableViewModel_WhenDisposeCalledDirectly_ThenOnlySynchronousDisposeRuns()
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddTransient<IDisposalTrackingViewModel, AsyncDisposalTrackingViewModel>();
+        var view = Render<DisposalTestView>().Instance;
+        var viewModel = (AsyncDisposalTrackingViewModel)view.CurrentViewModel;
+
+        // Act
+        view.Dispose();
+
+        // Assert
+        viewModel.DisposeCount.ShouldBe(1);
+        viewModel.DisposeAsyncCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// Tests that when both <c>DisposeAsyncCore</c> and the ViewModel's disposal throw, both failures are reported.
+    /// </summary>
+    /// <param name="isLayout">Whether the component is a layout rather than a View.</param>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GivenCoreAndViewModelBothThrowing_WhenDisposingAsync_ThenBothFailuresReported(bool isLayout)
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddTransient<IDisposalTrackingViewModel, ThrowingDisposalTrackingViewModel>();
+        IComponent component = isLayout ? Render<AsyncCoreTestLayout>().Instance : Render<AsyncCoreTestView>().Instance;
+        ((ITrackedComponent)component).IsThrowing = true;
+
+        // Act
+        var exception = await Should.ThrowAsync<AggregateException>(((IAsyncDisposable)component).DisposeAsync().AsTask());
+
+        // Assert
+        exception.Flatten().InnerExceptions.Select(inner => inner.GetType())
+            .ShouldBe([typeof(InvalidOperationException), typeof(ApplicationException)], ignoreOrder: true);
+    }
+
+    /// <summary>
+    /// Tests that when a <c>Dispose(bool)</c> override and the ViewModel's disposal both throw on a direct <c>Dispose()</c>,
+    /// both failures are reported and the ViewModel is still disposed.
+    /// </summary>
+    /// <param name="isLayout">Whether the component is a layout rather than a View.</param>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void GivenOverrideAndViewModelBothThrowing_WhenDisposeCalledDirectly_ThenBothFailuresReported(bool isLayout)
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddTransient<IDisposalTrackingViewModel, ThrowingDisposalTrackingViewModel>();
+        IComponent component = isLayout ? Render<ThrowingDisposeTestLayout>().Instance : Render<ThrowingDisposeTestView>().Instance;
+        var viewModel = ((ITrackedComponent)component).CurrentViewModel;
+        ((ITrackedComponent)component).IsThrowing = true;
+
+        // Act
+        var exception = Should.Throw<AggregateException>(((IDisposable)component).Dispose);
+
+        // Assert
+        exception.InnerExceptions.Select(inner => inner.GetType())
+            .ShouldBe([typeof(InvalidOperationException), typeof(ApplicationException)]);
+        viewModel.DisposeCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// Tests that a single disposal failure is rethrown as itself rather than wrapped.
+    /// </summary>
+    [Fact]
+    public async Task GivenOnlyViewModelThrowing_WhenDisposingAsync_ThenFailureRethrownUnwrapped()
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddTransient<IDisposalTrackingViewModel, ThrowingDisposalTrackingViewModel>();
+        var view = Render<DisposalTestView>().Instance;
+
+        // Act and assert
+        await Should.ThrowAsync<ApplicationException>(((IAsyncDisposable)view).DisposeAsync().AsTask());
+    }
+
+#if NET9_0_OR_GREATER
+    /// <summary>
+    /// Tests that a component owns its transient ViewModel only when rendering interactively. Under static rendering and
+    /// prerendering the request scope disposes it, before the scoped services it depends on.
+    /// </summary>
+    /// <param name="isLayout">Whether the component is a layout rather than a View.</param>
+    /// <param name="isInteractive">Whether the renderer reports interactive rendering.</param>
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task GivenRenderMode_WhenComponentDisposed_ThenViewModelOwnedOnlyWhenInteractive(bool isLayout, bool isInteractive)
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddTransient<IDisposalTrackingViewModel, DisposalTrackingViewModel>();
+        SetRendererInfo(new RendererInfo(isInteractive ? "Server" : "Static", isInteractive));
+        var (_, viewModel) = RenderTracked(isLayout);
+
+        // Act
+        await DisposeComponentsAsync();
+
+        // Assert
+        viewModel.DisposeCount.ShouldBe(isInteractive ? 1 : 0);
+    }
+#endif
+
+    /// <summary>
+    /// Tests that when a component re-implements <see cref="IDisposable"/> without calling the base class, the asynchronous
+    /// disposal still releases the owned ViewModel, and a failure there is reported rather than lost.
+    /// </summary>
+    /// <param name="isLayout">Whether the component is a layout rather than a View.</param>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GivenDisposeReimplementationAndThrowingViewModel_WhenDisposingAsync_ThenViewModelReleasedAndFailureReported(bool isLayout)
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddTransient<IDisposalTrackingViewModel, ThrowingDisposalTrackingViewModel>();
+        IComponent component = isLayout ? Render<DisposeReimplementingTestLayout>().Instance : Render<DisposeReimplementingTestView>().Instance;
+        var viewModel = ((IViewModelComponent)component).CurrentViewModel;
+
+        // Act
+        await Should.ThrowAsync<ApplicationException>(((IAsyncDisposable)component).DisposeAsync().AsTask());
+
+        // Assert
+        viewModel.DisposeCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// Tests that an owned ViewModel's asynchronous disposal runs once and that its failure is reported.
+    /// </summary>
+    /// <param name="isLayout">Whether the component is a layout rather than a View.</param>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GivenThrowingAsyncDisposableViewModel_WhenDisposingAsync_ThenDisposedOnceAndFailureReported(bool isLayout)
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddTransient<IDisposalTrackingViewModel, ThrowingAsyncDisposalTrackingViewModel>();
+        var (component, viewModel) = RenderTracked(isLayout);
+
+        // Act
+        await Should.ThrowAsync<ApplicationException>(((IAsyncDisposable)component).DisposeAsync().AsTask());
+
+        // Assert
+        ((ThrowingAsyncDisposalTrackingViewModel)viewModel).DisposeAsyncCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// Tests that <c>Dispose(false)</c>, the finalizer convention, skips the managed cleanup, including the owned ViewModel.
+    /// </summary>
+    /// <param name="isLayout">Whether the component is a layout rather than a View.</param>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void GivenDisposeFalse_WhenCalled_ThenManagedCleanupSkipped(bool isLayout)
+    {
+        // Arrange
+        AddMvvm();
+        Services.AddTransient<IDisposalTrackingViewModel, DisposalTrackingViewModel>();
+        IUnmanagedDisposalComponent component = isLayout ? Render<UnmanagedDisposalTestLayout>().Instance : Render<UnmanagedDisposalTestView>().Instance;
+
+        // Act
+        component.DisposeUnmanaged();
+
+        // Assert
+        component.CurrentViewModel.DisposeCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// Tests that a layout deactivates a recipient ViewModel when it is disposed, so a strong-reference messenger does not keep it alive.
+    /// </summary>
+    [Fact]
+    public async Task GivenRecipientViewModel_WhenLayoutDisposed_ThenDeactivatedAndUnregistered()
+    {
+        // Arrange
+        AddMvvm();
+        var messenger = new StrongReferenceMessenger();
+        Services.AddSingleton<IMessenger>(messenger);
+        Services.AddTransient<IDisposalTrackingViewModel, RecipientDisposalTrackingViewModel>();
+        var viewModel = (RecipientDisposalTrackingViewModel)Render<DisposalTestLayout>().Instance.CurrentViewModel;
+
+        // Act
+        await DisposeComponentsAsync();
+
+        // Assert
+        viewModel.IsActive.ShouldBeFalse();
+        messenger.IsRegistered<DisposalTrackingMessage>(viewModel).ShouldBeFalse();
+    }
+
+    /// <summary>
+    /// Lets continuations queued on the renderer's dispatcher run to completion.
+    /// </summary>
+    private async Task SettleRendererAsync()
+    {
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            await Task.Yield();
+            await Renderer.Dispatcher.InvokeAsync(() => { });
+        }
+    }
+
+    /// <summary>
     /// Registers the Blazing.Mvvm services without scanning any assembly for ViewModels.
     /// </summary>
     /// <param name="isDisposeTransientViewModelsEnabled">The value for <see cref="LibraryConfiguration.DisposeTransientViewModels"/>.</param>
@@ -1105,7 +1510,7 @@ public class TransientViewModelDisposalTests : BunitContext
     /// <summary>
     /// A View that adds its own synchronous disposal, as <c>@implements IDisposable</c> with a <c>Dispose</c> method does.
     /// </summary>
-    public class DisposeReimplementingTestView : MvvmComponentBase<IDisposalTrackingViewModel>, IDisposable
+    public class DisposeReimplementingTestView : MvvmComponentBase<IDisposalTrackingViewModel>, IDisposable, IViewModelComponent
     {
         /// <summary>
         /// Gets the ViewModel the View resolved.
@@ -1163,5 +1568,248 @@ public class TransientViewModelDisposalTests : BunitContext
             OverrideCount++;
             base.Dispose(disposing);
         }
+    }
+
+    /// <summary>
+    /// A View or layout that exposes the ViewModel it resolved.
+    /// </summary>
+    public interface IViewModelComponent
+    {
+        /// <summary>
+        /// Gets the ViewModel the component resolved.
+        /// </summary>
+        IDisposalTrackingViewModel CurrentViewModel { get; }
+    }
+
+    /// <summary>
+    /// A View or layout whose <c>DisposeAsyncCore</c> waits on a gate the test opens.
+    /// </summary>
+    public interface IGatedCoreComponent : IViewModelComponent
+    {
+        /// <summary>
+        /// Gets the gate that <c>DisposeAsyncCore</c> waits on.
+        /// </summary>
+        TaskCompletionSource CoreGate { get; }
+
+        /// <summary>
+        /// Gets the ViewModel's dispose count when <c>DisposeAsyncCore</c> finished, or -1 if it did not finish.
+        /// </summary>
+        int DisposeCountAtCoreEnd { get; }
+    }
+
+    /// <summary>
+    /// A View whose <c>DisposeAsyncCore</c> waits on a gate.
+    /// </summary>
+    public class GatedCoreTestView : MvvmComponentBase<IDisposalTrackingViewModel>, IGatedCoreComponent
+    {
+        /// <inheritdoc/>
+        public IDisposalTrackingViewModel CurrentViewModel => ViewModel;
+
+        /// <inheritdoc/>
+        public TaskCompletionSource CoreGate { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        /// <inheritdoc/>
+        public int DisposeCountAtCoreEnd { get; private set; } = -1;
+
+        /// <inheritdoc/>
+        protected override async ValueTask DisposeAsyncCore()
+        {
+            await CoreGate.Task;
+            DisposeCountAtCoreEnd = ViewModel.DisposeCount;
+            await base.DisposeAsyncCore();
+        }
+    }
+
+    /// <summary>
+    /// A layout whose <c>DisposeAsyncCore</c> waits on a gate.
+    /// </summary>
+    public class GatedCoreTestLayout : MvvmLayoutComponentBase<IDisposalTrackingViewModel>, IGatedCoreComponent
+    {
+        /// <inheritdoc/>
+        public IDisposalTrackingViewModel CurrentViewModel => ViewModel;
+
+        /// <inheritdoc/>
+        public TaskCompletionSource CoreGate { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        /// <inheritdoc/>
+        public int DisposeCountAtCoreEnd { get; private set; } = -1;
+
+        /// <inheritdoc/>
+        protected override async ValueTask DisposeAsyncCore()
+        {
+            await CoreGate.Task;
+            DisposeCountAtCoreEnd = ViewModel.DisposeCount;
+            await base.DisposeAsyncCore();
+        }
+    }
+
+    /// <summary>
+    /// A View whose <c>Dispose(bool)</c> override does not call the base class.
+    /// </summary>
+    public class SkipBaseDisposeTestView : MvvmComponentBase<IDisposalTrackingViewModel>, IViewModelComponent
+    {
+        /// <inheritdoc/>
+        public IDisposalTrackingViewModel CurrentViewModel => ViewModel;
+
+        /// <summary>
+        /// Does nothing, so the base class cleanup never runs.
+        /// </summary>
+        /// <param name="disposing">Ignored.</param>
+        protected override void Dispose(bool disposing)
+        {
+        }
+    }
+
+    /// <summary>
+    /// A layout whose <c>Dispose(bool)</c> override does not call the base class.
+    /// </summary>
+    public class SkipBaseDisposeTestLayout : MvvmLayoutComponentBase<IDisposalTrackingViewModel>, IViewModelComponent
+    {
+        /// <inheritdoc/>
+        public IDisposalTrackingViewModel CurrentViewModel => ViewModel;
+
+        /// <summary>
+        /// Does nothing, so the base class cleanup never runs.
+        /// </summary>
+        /// <param name="disposing">Ignored.</param>
+        protected override void Dispose(bool disposing)
+        {
+        }
+    }
+
+    /// <summary>
+    /// A View whose ViewModel records lifecycle calls made after disposal.
+    /// </summary>
+    public class LifecycleTestView : MvvmComponentBase<LifecycleRecordingViewModel>
+    {
+        /// <summary>
+        /// Gets the ViewModel the View resolved.
+        /// </summary>
+        public LifecycleRecordingViewModel CurrentViewModel => ViewModel;
+
+        /// <summary>
+        /// Gets the number of times the framework called <c>OnParametersSet</c> on the View.
+        /// </summary>
+        public int OnParametersSetCount { get; private set; }
+
+        /// <inheritdoc/>
+        protected override void OnParametersSet()
+        {
+            OnParametersSetCount++;
+            base.OnParametersSet();
+        }
+    }
+
+    /// <summary>
+    /// An owning View that exposes the ViewModel it resolved from its service scope.
+    /// </summary>
+    public class OwningDisposalTestView : MvvmOwningComponentBase<IDisposalTrackingViewModel>
+    {
+        /// <summary>
+        /// Gets the ViewModel the View resolved.
+        /// </summary>
+        public IDisposalTrackingViewModel CurrentViewModel => ViewModel;
+    }
+
+    /// <summary>
+    /// An owning View whose ViewModel records lifecycle calls made after disposal.
+    /// </summary>
+    public class LifecycleTestOwningView : MvvmOwningComponentBase<LifecycleRecordingViewModel>
+    {
+        /// <summary>
+        /// Gets the ViewModel the View resolved.
+        /// </summary>
+        public LifecycleRecordingViewModel CurrentViewModel => ViewModel;
+
+        /// <summary>
+        /// Gets a value indicating whether the base class has marked the View disposed.
+        /// </summary>
+        public bool IsComponentDisposed => IsDisposed;
+
+        /// <summary>
+        /// Gets the number of times the framework called <c>OnParametersSet</c> on the View.
+        /// </summary>
+        public int OnParametersSetCount { get; private set; }
+
+        /// <inheritdoc/>
+        protected override void OnParametersSet()
+        {
+            OnParametersSetCount++;
+            base.OnParametersSet();
+        }
+    }
+
+    /// <summary>
+    /// A layout whose ViewModel records lifecycle calls made after disposal.
+    /// </summary>
+    public class LifecycleTestLayout : MvvmLayoutComponentBase<LifecycleRecordingViewModel>
+    {
+        /// <summary>
+        /// Gets the ViewModel the layout resolved.
+        /// </summary>
+        public LifecycleRecordingViewModel CurrentViewModel => ViewModel;
+
+        /// <summary>
+        /// Gets the number of times the framework called <c>OnParametersSet</c> on the layout.
+        /// </summary>
+        public int OnParametersSetCount { get; private set; }
+
+        /// <inheritdoc/>
+        protected override void OnParametersSet()
+        {
+            OnParametersSetCount++;
+            base.OnParametersSet();
+        }
+    }
+
+    /// <summary>
+    /// A layout that adds its own synchronous disposal without calling the base class.
+    /// </summary>
+    public class DisposeReimplementingTestLayout : MvvmLayoutComponentBase<IDisposalTrackingViewModel>, IDisposable, IViewModelComponent
+    {
+        /// <inheritdoc/>
+        public IDisposalTrackingViewModel CurrentViewModel => ViewModel;
+
+        /// <summary>
+        /// Does nothing, so the base class cleanup never runs.
+        /// </summary>
+        public new void Dispose()
+        {
+        }
+    }
+
+    /// <summary>
+    /// A View or layout that can be disposed through the finalizer convention, <c>Dispose(false)</c>.
+    /// </summary>
+    public interface IUnmanagedDisposalComponent : IViewModelComponent
+    {
+        /// <summary>
+        /// Calls <c>Dispose(false)</c>.
+        /// </summary>
+        void DisposeUnmanaged();
+    }
+
+    /// <summary>
+    /// A View that exposes <c>Dispose(false)</c>.
+    /// </summary>
+    public class UnmanagedDisposalTestView : MvvmComponentBase<IDisposalTrackingViewModel>, IUnmanagedDisposalComponent
+    {
+        /// <inheritdoc/>
+        public IDisposalTrackingViewModel CurrentViewModel => ViewModel;
+
+        /// <inheritdoc/>
+        public void DisposeUnmanaged() => Dispose(false);
+    }
+
+    /// <summary>
+    /// A layout that exposes <c>Dispose(false)</c>.
+    /// </summary>
+    public class UnmanagedDisposalTestLayout : MvvmLayoutComponentBase<IDisposalTrackingViewModel>, IUnmanagedDisposalComponent
+    {
+        /// <inheritdoc/>
+        public IDisposalTrackingViewModel CurrentViewModel => ViewModel;
+
+        /// <inheritdoc/>
+        public void DisposeUnmanaged() => Dispose(false);
     }
 }

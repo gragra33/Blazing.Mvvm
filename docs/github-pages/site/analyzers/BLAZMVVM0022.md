@@ -18,9 +18,11 @@ A View that derives from [`MvvmComponentBase<TViewModel>`](xref:Blazing.Mvvm.Com
 - the service scope of an `MvvmOwningComponentBase` View is not released;
 - a transient ViewModel stays with the container until its scope ends.
 
-**A View that re-implements `IDisposable` without calling the base disposal.** The base class still calls the View's method and still releases what it owns, but the View stays subscribed to its ViewModel and a recipient ViewModel stays active. With a scoped or singleton ViewModel, that keeps the closed View alive. A re-implementation that calls `base.Dispose()` or `Dispose(true)` directly in that method is not reported. A call made through a helper method is not recognised, so suppress the diagnostic with `#pragma warning disable BLAZMVVM0022` in that case.
+**A View that re-implements `IDisposable` without calling the base disposal.** The base class still calls the View's method and still releases what it owns, but the View stays subscribed to its ViewModel and a recipient ViewModel stays active. With a scoped or singleton ViewModel, that keeps the closed View alive.
 
-The rule reports the method that implements the interface, on the type that declares it.
+A re-implementation is not reported when it calls the base disposal: `base.Dispose()` or `Dispose(true)` for `IDisposable`, or `await base.DisposeAsync()` for `IAsyncDisposable`, which only `MvvmOwningComponentBase` exposes. A parameterless `base.Dispose()` or `base.DisposeAsync()` counts only when it reaches the MVVM base class, directly or through an intermediate class whose method calls the base in turn; a call that lands on an intermediate method hiding the base one does not. An intermediate class from another assembly cannot be inspected, so a call that lands on it always counts. The call counts in the method body or in a local function, including under an `if`, but not when it appears only inside a lambda or anonymous method, which may never run. A call made through a separate helper method is not recognised, so suppress the diagnostic with `#pragma warning disable BLAZMVVM0022` in that case.
+
+The rule reports the method that implements the interface, on the type that declares it. It also reports a View that re-lists `IDisposable` or `IAsyncDisposable` when the interface then maps to a method an intermediate class declared to hide the base method, such as `public new void Dispose() { }`, because re-listing turns that hidden method into the one Blazor calls. That diagnostic is on the View that re-lists the interface, not on the classes that derive from it.
 
 ## Examples
 
@@ -82,7 +84,7 @@ Extend the base class cleanup by overriding `Dispose(bool)`:
 }
 ```
 
-When cleanup must be asynchronous, override `DisposeAsyncCore`. It runs before the base class cleanup, while the ViewModel is still usable:
+When cleanup must be asynchronous, override `DisposeAsyncCore`. It runs before the base class cleanup, while the ViewModel can still be called:
 
 ```razor
 @page "/orders"
@@ -102,7 +104,7 @@ When cleanup must be asynchronous, override `DisposeAsyncCore`. It runs before t
         }
         catch (JSDisconnectedException)
         {
-            // The circuit has gone, and the browser released the module with it
+            // JS interop is unavailable once the circuit has disconnected
         }
 
         await base.DisposeAsyncCore();
