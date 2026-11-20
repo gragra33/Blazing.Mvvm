@@ -927,4 +927,367 @@ namespace TestNamespace
 
         await VerifyCS.VerifyAnalyzerAsync(test, expected);
     }
+
+    [Theory]
+    [InlineData("void IDisposable.{|#0:Dispose|}() => Dispose(true);")]
+    [InlineData("public new void {|#0:Dispose|}() { Dispose(true); }")]
+    public async Task ViewCallingDisposeBoolThatResolvesToHidingMethod_ReportsDiagnostic(string viewMethod)
+    {
+        var test = @"
+using System;
+using Blazing.Mvvm.Components;
+using Blazing.Mvvm.ComponentModel;
+
+namespace TestNamespace
+{
+    public class MyViewBase : MvvmComponentBase<TestViewModel>
+    {
+        protected new virtual void Dispose(bool disposing) { }
+    }
+
+    public class MyView : MyViewBase, IDisposable
+    {
+        " + viewMethod + @"
+    }
+
+    public class TestViewModel : ViewModelBase
+    {
+    }
+}";
+
+        var expected = new DiagnosticResult(DiagnosticDescriptors.ViewDisposalBypassed)
+            .WithLocation(0)
+            .WithArguments("MyView", "IDisposable", "MvvmComponentBase");
+
+        await VerifyCS.VerifyAnalyzerAsync(test, expected);
+    }
+
+    [Fact]
+    public async Task ViewCallingOwnDisposeBoolOverrideSkippingBase_ReportsDiagnostic()
+    {
+        const string test = @"
+using System;
+using Blazing.Mvvm.Components;
+using Blazing.Mvvm.ComponentModel;
+
+namespace TestNamespace
+{
+    public class MyView : MvvmComponentBase<TestViewModel>, IDisposable
+    {
+        void IDisposable.{|#0:Dispose|}() => Dispose(true);
+
+        protected override void Dispose(bool disposing) { }
+    }
+
+    public class TestViewModel : ViewModelBase
+    {
+    }
+}";
+
+        var expected = new DiagnosticResult(DiagnosticDescriptors.ViewDisposalBypassed)
+            .WithLocation(0)
+            .WithArguments("MyView", "IDisposable", "MvvmComponentBase");
+
+        await VerifyCS.VerifyAnalyzerAsync(test, expected);
+    }
+
+    [Fact]
+    public async Task ViewCallingOwnDisposeBoolOverrideCallingBase_NoDiagnostic()
+    {
+        const string test = @"
+using System;
+using Blazing.Mvvm.Components;
+using Blazing.Mvvm.ComponentModel;
+
+namespace TestNamespace
+{
+    public class MyView : MvvmComponentBase<TestViewModel>, IDisposable
+    {
+        void IDisposable.Dispose() => Dispose(true);
+
+        protected override void Dispose(bool disposing) => base.Dispose(disposing);
+    }
+
+    public class TestViewModel : ViewModelBase
+    {
+    }
+}";
+
+        await VerifyCS.VerifyAnalyzerAsync(test);
+    }
+
+    [Fact]
+    public async Task ViewCallingDisposeBoolThatResolvesToHidingMethodCallingBase_NoDiagnostic()
+    {
+        const string test = @"
+using System;
+using Blazing.Mvvm.Components;
+using Blazing.Mvvm.ComponentModel;
+
+namespace TestNamespace
+{
+    public class MyViewBase : MvvmComponentBase<TestViewModel>
+    {
+        protected new virtual void Dispose(bool disposing) => base.Dispose(disposing);
+    }
+
+    public class MyView : MyViewBase, IDisposable
+    {
+        void IDisposable.Dispose() => Dispose(true);
+    }
+
+    public class TestViewModel : ViewModelBase
+    {
+    }
+}";
+
+        await VerifyCS.VerifyAnalyzerAsync(test);
+    }
+
+    [Theory]
+    [InlineData("public new void Dispose() { Dispose(true); }")]
+    [InlineData("public new void Dispose() { base.Dispose(true); }")]
+    public async Task ViewRelistingIDisposableMappedToIntermediateCallingHidingDisposeBool_ReportsDiagnostic(string intermediateMethod)
+    {
+        var test = @"
+using System;
+using Blazing.Mvvm.Components;
+using Blazing.Mvvm.ComponentModel;
+
+namespace TestNamespace
+{
+    public class MyHidingBase : MvvmComponentBase<TestViewModel>
+    {
+        protected new virtual void Dispose(bool disposing) { }
+    }
+
+    public class MyViewBase : MyHidingBase
+    {
+        " + intermediateMethod + @"
+    }
+
+    public class {|#0:MyView|} : MyViewBase, IDisposable
+    {
+    }
+
+    public class TestViewModel : ViewModelBase
+    {
+    }
+}";
+
+        var expected = new DiagnosticResult(DiagnosticDescriptors.ViewDisposalBypassed)
+            .WithLocation(0)
+            .WithArguments("MyView", "IDisposable", "MvvmComponentBase");
+
+        await VerifyCS.VerifyAnalyzerAsync(test, expected);
+    }
+
+    [Fact]
+    public async Task ViewRelistingIDisposableMappedToBaseCallBindingToOptionalParameterOverload_ReportsDiagnostic()
+    {
+        const string test = @"
+using System;
+using Blazing.Mvvm.Components;
+using Blazing.Mvvm.ComponentModel;
+
+namespace TestNamespace
+{
+    public class MyHidingBase : MvvmComponentBase<TestViewModel>
+    {
+        public void Dispose(int unused = 0) { }
+    }
+
+    public class MyViewBase : MyHidingBase
+    {
+        public new void Dispose() => base.Dispose();
+    }
+
+    public class {|#0:MyView|} : MyViewBase, IDisposable
+    {
+    }
+
+    public class TestViewModel : ViewModelBase
+    {
+    }
+}";
+
+        var expected = new DiagnosticResult(DiagnosticDescriptors.ViewDisposalBypassed)
+            .WithLocation(0)
+            .WithArguments("MyView", "IDisposable", "MvvmComponentBase");
+
+        await VerifyCS.VerifyAnalyzerAsync(test, expected);
+    }
+
+    [Theory]
+    [InlineData("public void Dispose(int unused = 0) => base.Dispose();", "void IDisposable.Dispose() => base.Dispose();")]
+    [InlineData("protected void Dispose(bool disposing, int unused = 0) => base.Dispose(disposing);", "void IDisposable.Dispose() => Dispose(true);")]
+    public async Task ViewCallBindingToOptionalParameterOverloadCallingBase_NoDiagnostic(string intermediateMethod, string viewMethod)
+    {
+        var test = @"
+using System;
+using Blazing.Mvvm.Components;
+using Blazing.Mvvm.ComponentModel;
+
+namespace TestNamespace
+{
+    public class MyViewBase : MvvmComponentBase<TestViewModel>
+    {
+        " + intermediateMethod + @"
+    }
+
+    public class MyView : MyViewBase, IDisposable
+    {
+        " + viewMethod + @"
+    }
+
+    public class TestViewModel : ViewModelBase
+    {
+    }
+}";
+
+        await VerifyCS.VerifyAnalyzerAsync(test);
+    }
+
+    [Theory]
+    [InlineData("public new void Dispose(bool disposing = false) => base.Dispose(disposing);")]
+    [InlineData("public void Dispose(bool disposing = false, int unused = 0) => base.Dispose(disposing);")]
+    public async Task ViewCallBindingToOverloadDefaultingDisposingToFalse_ReportsDiagnostic(string intermediateMethod)
+    {
+        var test = @"
+using System;
+using Blazing.Mvvm.Components;
+using Blazing.Mvvm.ComponentModel;
+
+namespace TestNamespace
+{
+    public class MyViewBase : MvvmComponentBase<TestViewModel>
+    {
+        " + intermediateMethod + @"
+    }
+
+    public class MyView : MyViewBase, IDisposable
+    {
+        void IDisposable.{|#0:Dispose|}() => base.Dispose();
+    }
+
+    public class TestViewModel : ViewModelBase
+    {
+    }
+}";
+
+        var expected = new DiagnosticResult(DiagnosticDescriptors.ViewDisposalBypassed)
+            .WithLocation(0)
+            .WithArguments("MyView", "IDisposable", "MvvmComponentBase");
+
+        await VerifyCS.VerifyAnalyzerAsync(test, expected);
+    }
+
+    [Theory]
+    [InlineData("public new void Dispose(bool disposing = false) => base.Dispose(disposing);")]
+    [InlineData("public void Dispose(bool disposing = false, int unused = 0) => base.Dispose(disposing);")]
+    public async Task ViewRelistingIDisposableMappedToBaseCallDefaultingDisposingToFalse_ReportsDiagnostic(string hidingMethod)
+    {
+        var test = @"
+using System;
+using Blazing.Mvvm.Components;
+using Blazing.Mvvm.ComponentModel;
+
+namespace TestNamespace
+{
+    public class MyHidingBase : MvvmComponentBase<TestViewModel>
+    {
+        " + hidingMethod + @"
+    }
+
+    public class MyViewBase : MyHidingBase
+    {
+        public new void Dispose() => base.Dispose();
+    }
+
+    public class {|#0:MyView|} : MyViewBase, IDisposable
+    {
+    }
+
+    public class TestViewModel : ViewModelBase
+    {
+    }
+}";
+
+        var expected = new DiagnosticResult(DiagnosticDescriptors.ViewDisposalBypassed)
+            .WithLocation(0)
+            .WithArguments("MyView", "IDisposable", "MvvmComponentBase");
+
+        await VerifyCS.VerifyAnalyzerAsync(test, expected);
+    }
+
+    [Theory]
+    [InlineData("public new void Dispose(bool disposing = true) => base.Dispose(disposing);")]
+    [InlineData("public void Dispose(bool disposing = true, int unused = 0) => base.Dispose(disposing);")]
+    public async Task BaseCallDefaultingDisposingToTrue_NoDiagnostic(string hidingMethod)
+    {
+        var test = @"
+using System;
+using Blazing.Mvvm.Components;
+using Blazing.Mvvm.ComponentModel;
+
+namespace TestNamespace
+{
+    public class MyHidingBase : MvvmComponentBase<TestViewModel>
+    {
+        " + hidingMethod + @"
+    }
+
+    public class MyViewBase : MyHidingBase
+    {
+        public new void Dispose() => base.Dispose();
+    }
+
+    public class MyRelistingView : MyViewBase, IDisposable
+    {
+    }
+
+    public class MyView : MyHidingBase, IDisposable
+    {
+        void IDisposable.Dispose() => base.Dispose();
+    }
+
+    public class TestViewModel : ViewModelBase
+    {
+    }
+}";
+
+        await VerifyCS.VerifyAnalyzerAsync(test);
+    }
+
+    [Fact]
+    public async Task ViewRelistingIDisposableMappedToBaseCallBindingToOptionalParameterOverloadCallingBase_NoDiagnostic()
+    {
+        const string test = @"
+using System;
+using Blazing.Mvvm.Components;
+using Blazing.Mvvm.ComponentModel;
+
+namespace TestNamespace
+{
+    public class MyHidingBase : MvvmComponentBase<TestViewModel>
+    {
+        public void Dispose(int unused = 0) => base.Dispose();
+    }
+
+    public class MyViewBase : MyHidingBase
+    {
+        public new void Dispose() => base.Dispose();
+    }
+
+    public class MyView : MyViewBase, IDisposable
+    {
+    }
+
+    public class TestViewModel : ViewModelBase
+    {
+    }
+}";
+
+        await VerifyCS.VerifyAnalyzerAsync(test);
+    }
 }

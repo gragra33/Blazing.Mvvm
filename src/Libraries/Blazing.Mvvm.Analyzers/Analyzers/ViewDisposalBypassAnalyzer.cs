@@ -164,10 +164,12 @@ public class ViewDisposalBypassAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Determines whether an invocation runs the base disposal: <c>Dispose(bool)</c> on the View itself, or a parameterless
-    /// <c>Dispose()</c> or <c>DisposeAsync()</c> on the View that reaches the MVVM base class's disposal (see
-    /// <see cref="ReachesMvvmBaseDisposal"/>). Excluded are calls on another object such as a field, the method calling itself,
-    /// an unrelated overload, and <c>Dispose(false)</c>, which skips the managed cleanup.
+    /// Determines whether an invocation runs the base disposal: a call on the View with no written arguments, or with one
+    /// written argument to a <c>Dispose(bool)</c>, where the method the call binds to reaches the MVVM base class's disposal
+    /// (see <see cref="ReachesMvvmBaseDisposal"/>). Parameters the call leaves to their default values do not change that, so
+    /// a call binding to an overload with extra optional parameters is followed like any other. Excluded are calls on another
+    /// object such as a field, the method calling itself, an unrelated overload, and a <c>Dispose(bool)</c> that receives
+    /// <see langword="false"/>, written or by default, which skips the managed cleanup.
     /// </summary>
     private static bool IsBaseDisposalCall(IInvocationOperation invocation, IMethodSymbol method, string disposalMethodName, ImmutableArray<INamedTypeSymbol> mvvmBases, CancellationToken cancellationToken)
     {
@@ -179,34 +181,46 @@ public class ViewDisposalBypassAnalyzer : DiagnosticAnalyzer
             return false;
         }
 
-        return target.Parameters.Length switch
+        var takesDisposingFlag = disposalMethodName == "Dispose"
+            && target.Parameters.Length > 0
+            && target.Parameters[0].Type.SpecialType == SpecialType.System_Boolean;
+        if (takesDisposingFlag
+            && invocation.Arguments.FirstOrDefault(argument => argument.Parameter?.Ordinal == 0)?.Value.ConstantValue is { HasValue: true, Value: false })
+        {
+            return false;
+        }
+
+        // An omitted optional argument appears as a default-value argument, so only the written ones decide the overload's role
+        return invocation.Arguments.Count(argument => argument.ArgumentKind != ArgumentKind.DefaultValue) switch
         {
             0 => ReachesMvvmBaseDisposal(target, mvvmBases, cancellationToken),
-            1 => disposalMethodName == "Dispose"
-                && target.Parameters[0].Type.SpecialType == SpecialType.System_Boolean
-                && invocation.Arguments[0].Value.ConstantValue is not { HasValue: true, Value: false },
+            1 => takesDisposingFlag && ReachesMvvmBaseDisposal(target, mvvmBases, cancellationToken),
             _ => false
         };
     }
 
     /// <summary>
-    /// Determines whether a parameterless disposal method runs the MVVM base class's cleanup: it is declared on an MVVM base
-    /// class, or on an intermediate class whose method calls the base disposal in turn. A method an intermediate class
-    /// declared to hide the base method, without calling it, does not. A method compiled into another assembly has no
-    /// source to inspect and is assumed to reach the base, so a correct View is never reported for it.
+    /// Determines whether a disposal method runs the MVVM base class's cleanup: it is declared on an MVVM base class, or on an
+    /// intermediate class whose method calls the base disposal in turn. A method an intermediate class declared to hide the
+    /// base method, without calling it, does not. A method compiled into another assembly has no source to inspect and is
+    /// assumed to reach the base, so a correct View is never reported for it.
     /// </summary>
     private static bool ReachesMvvmBaseDisposal(IMethodSymbol method, ImmutableArray<INamedTypeSymbol> mvvmBases, CancellationToken cancellationToken)
         => IsMvvmBase(method.ContainingType, mvvmBases)
             || method.DeclaringSyntaxReferences.IsEmpty
             || method.DeclaringSyntaxReferences.Any(reference =>
-                SyntaxCallsBaseDisposal(reference.GetSyntax(cancellationToken), method.Name, method.ContainingType, mvvmBases, cancellationToken));
+                SyntaxCallsBaseDisposal(reference.GetSyntax(cancellationToken), method, mvvmBases, cancellationToken));
 
     /// <summary>
     /// A syntactic version of <see cref="IsBaseDisposalCall"/>, for a method declared on another class, whose operations this
-    /// analyzer does not see from the type being analyzed: <c>base.Dispose()</c> or <c>base.DisposeAsync()</c> that reaches the
-    /// MVVM base class's disposal, or <c>Dispose(bool)</c> with any argument but the literal <see langword="false"/>.
+    /// analyzer does not see from the type being analyzed: <c>base.Dispose()</c>, <c>base.DisposeAsync()</c>, or
+    /// <c>Dispose(bool)</c> with any argument but the literal <see langword="false"/>, where the method found for the call reaches
+    /// the MVVM base class's disposal. A call without arguments that leaves a leading <c>Dispose(bool)</c> parameter to a
+    /// <see langword="false"/> default does not count. Without argument types the lookup (see <see cref="FindCallTarget"/>) takes a single
+    /// argument to be a <see cref="bool"/>, so a one-argument call that C# binds to another overload is matched to
+    /// <c>Dispose(bool)</c> instead.
     /// </summary>
-    private static bool SyntaxCallsBaseDisposal(SyntaxNode declaration, string disposalMethodName, INamedTypeSymbol declaringType, ImmutableArray<INamedTypeSymbol> mvvmBases, CancellationToken cancellationToken)
+    private static bool SyntaxCallsBaseDisposal(SyntaxNode declaration, IMethodSymbol method, ImmutableArray<INamedTypeSymbol> mvvmBases, CancellationToken cancellationToken)
         => declaration
             .DescendantNodes(node => node is not AnonymousFunctionExpressionSyntax)
             .OfType<InvocationExpressionSyntax>()
@@ -219,41 +233,82 @@ public class ViewDisposalBypassAnalyzer : DiagnosticAnalyzer
                     _ => (null, null)
                 };
 
-                if (name != disposalMethodName || receiver is not (null or BaseExpressionSyntax or ThisExpressionSyntax))
+                if (name != method.Name || receiver is not (null or BaseExpressionSyntax or ThisExpressionSyntax))
                 {
                     return false;
                 }
 
-                return invocation.ArgumentList.Arguments.Count switch
+                var arguments = invocation.ArgumentList.Arguments;
+                var isCandidate = arguments.Count switch
                 {
                     // Without arguments only base.X() leaves the method; X() and this.X() would call the method itself
-                    0 => receiver is BaseExpressionSyntax
-                        && FindParameterlessMethod(declaringType.BaseType, disposalMethodName) is { } baseMethod
-                        && ReachesMvvmBaseDisposal(baseMethod, mvvmBases, cancellationToken),
-                    1 => disposalMethodName == "Dispose"
-                        && !invocation.ArgumentList.Arguments[0].Expression.IsKind(SyntaxKind.FalseLiteralExpression),
+                    0 => receiver is BaseExpressionSyntax,
+                    1 => method.Name == "Dispose" && !arguments[0].Expression.IsKind(SyntaxKind.FalseLiteralExpression),
                     _ => false
                 };
+
+                var isBaseCall = receiver is BaseExpressionSyntax;
+                return isCandidate
+                    && FindCallTarget(isBaseCall ? method.ContainingType.BaseType : method.ContainingType, method.Name, arguments.Count, isPrivateAccessible: !isBaseCall) is { } target
+                    && !SymbolEqualityComparer.Default.Equals(target, method)
+                    && !(arguments.Count == 0 && DefaultsDisposingToFalse(target))
+                    && ReachesMvvmBaseDisposal(target, mvvmBases, cancellationToken);
             });
 
     /// <summary>
-    /// Finds the accessible parameterless instance method that <c>base.Name()</c> binds to from a class whose base is <paramref name="type"/>.
+    /// Finds the instance method that a call to <paramref name="name"/> with <paramref name="argumentCount"/> arguments binds to,
+    /// searching from <paramref name="type"/> up, as C# does: the most derived class with an applicable method wins, and within
+    /// it a method that takes exactly those arguments is preferred over one that relies on optional parameters. A single
+    /// argument is taken to be the <see cref="bool"/> of <c>Dispose(bool)</c>.
     /// </summary>
-    private static IMethodSymbol? FindParameterlessMethod(INamedTypeSymbol? type, string name)
+    /// <param name="type">The class the lookup starts from.</param>
+    /// <param name="name">The name of the method called.</param>
+    /// <param name="argumentCount">The number of arguments the call passes.</param>
+    /// <param name="isPrivateAccessible">Whether a private method declared on <paramref name="type"/> itself can be called.</param>
+    private static IMethodSymbol? FindCallTarget(INamedTypeSymbol? type, string name, int argumentCount, bool isPrivateAccessible)
     {
         for (var current = type; current is not null; current = current.BaseType)
         {
-            var method = current.GetMembers(name)
-                .OfType<IMethodSymbol>()
-                .FirstOrDefault(candidate => candidate.Parameters.IsEmpty && !candidate.IsStatic && candidate.DeclaredAccessibility != Accessibility.Private);
-            if (method is not null)
+            IMethodSymbol? withOptionalParameters = null;
+            foreach (var candidate in current.GetMembers(name).OfType<IMethodSymbol>())
             {
-                return method;
+                if (candidate.IsStatic
+                    || (candidate.DeclaredAccessibility == Accessibility.Private && !(isPrivateAccessible && SymbolEqualityComparer.Default.Equals(current, type)))
+                    || candidate.Parameters.Length < argumentCount
+                    || (argumentCount == 1 && candidate.Parameters[0].Type.SpecialType != SpecialType.System_Boolean)
+                    || candidate.Parameters.Skip(argumentCount).Any(parameter => !parameter.IsOptional && !parameter.IsParams))
+                {
+                    continue;
+                }
+
+                if (candidate.Parameters.Length == argumentCount)
+                {
+                    return candidate;
+                }
+
+                withOptionalParameters ??= candidate;
+            }
+
+            if (withOptionalParameters is not null)
+            {
+                return withOptionalParameters;
             }
         }
 
         return null;
     }
+
+    /// <summary>
+    /// Determines whether a call without arguments to <paramref name="method"/> passes <see langword="false"/> to a leading
+    /// <c>Dispose(bool)</c> parameter through its default value, which skips the managed cleanup.
+    /// </summary>
+    /// <param name="method">The method the call binds to.</param>
+    private static bool DefaultsDisposingToFalse(IMethodSymbol method)
+        => method.Name == "Dispose"
+            && method.Parameters.Length > 0
+            && method.Parameters[0].Type.SpecialType == SpecialType.System_Boolean
+            && method.Parameters[0].HasExplicitDefaultValue
+            && method.Parameters[0].ExplicitDefaultValue is false;
 
     private static bool IsMvvmBase(INamedTypeSymbol type, ImmutableArray<INamedTypeSymbol> mvvmBases)
         => mvvmBases.Any(mvvmBase => SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, mvvmBase));
