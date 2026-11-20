@@ -59,6 +59,84 @@ public sealed partial class MyViewModel : ViewModelBase
 > [!WARNING]
 > If you previously implemented `public void Dispose()` yourself, change that to `protected override void Dispose(bool disposing)` so the base class can keep its cleanup behavior.
 
+### When a ViewModel is disposed
+
+Who disposes a ViewModel depends on its registered lifetime and on the component base type:
+
+| ViewModel lifetime | [`MvvmComponentBase`](xref:Blazing.Mvvm.Components.MvvmComponentBase`1) / [`MvvmLayoutComponentBase`](xref:Blazing.Mvvm.Components.MvvmLayoutComponentBase`1) | [`MvvmOwningComponentBase`](xref:Blazing.Mvvm.Components.MvvmOwningComponentBase`1) |
+| --- | --- | --- |
+| Transient (the default) | Disposed with the component, except in the cases in [Transient ViewModels the container still owns](#transient-viewmodels-the-container-still-owns) | Disposed with the component's service scope |
+| Scoped | Disposed when the circuit (Server) or application (WebAssembly) scope ends | Disposed with the component's service scope |
+| Singleton | Disposed when the application stops | Disposed when the application stops |
+
+The dependency injection container keeps every disposable transient service it creates until its scope ends ([Disposable transient services captured by container](https://learn.microsoft.com/dotnet/core/extensions/dependency-injection/guidelines#disposable-transient-services-captured-by-container)). On Blazor Server that scope is the whole circuit, and on Blazor WebAssembly it is the whole application, so a transient ViewModel resolved from it would stay in memory after its page closed, and one more would accumulate on every visit.
+
+To prevent that, `MvvmComponentBase` and `MvvmLayoutComponentBase` follow Microsoft's guidance for a transient disposable that must be released before its scope ends: they create the ViewModel outside the container with `ActivatorUtilities.CreateInstance`, while still using the container for its dependencies ([IDisposable guidance for transient and shared instances](https://learn.microsoft.com/dotnet/core/extensions/dependency-injection/guidelines#idisposable-guidance-for-transient-and-shared-instances)). The component owns that ViewModel and disposes it when the component is disposed, awaiting `DisposeAsync` when the ViewModel implements `IAsyncDisposable`. Assigning another ViewModel through the `ViewModel` setter does not change this: the component still disposes the ViewModel it created, and never disposes one it was given.
+
+The ViewModel's constructor dependencies are resolved from the component's service provider, so scoped services such as authentication state or a per-circuit cache stay shared with the rest of the circuit. This is the difference from `MvvmOwningComponentBase`, which gives the component a service scope of its own, and therefore its own copy of every scoped dependency.
+
+> [!NOTE]
+> Only the ViewModel changes owner. A disposable **transient** service injected into the ViewModel is still created and held by the circuit's container. If such a dependency must be released with the page, inherit from `MvvmOwningComponentBase` or inject a factory and dispose what it creates in `Dispose(bool disposing)`.
+
+#### Transient ViewModels the container still owns
+
+> [!WARNING]
+> In the cases below the container creates the transient ViewModel and keeps it until the circuit (Blazor Server) or application (Blazor WebAssembly) ends, so one more instance stays in memory on every visit, exactly as when the option is off. To have the component own and dispose a ViewModel, register it by type, as `AddMvvm` and `[ViewModelDefinition]` do, and give it a single public constructor. Neither enforces the constructor rule, and a ViewModel outside it falls back to the container without a diagnostic.
+
+- **Factory registrations**, such as `AddTransient<IMyViewModel>(sp => ...)`. A factory can return an instance that other code shares, for example `sp => sp.GetRequiredService<MyViewModel>()` forwarding to a singleton, and disposing it with one page would break every other user. The container offers no way to release an instance it is tracking, and Microsoft's own design work on this for Blazor Server remains open ([dotnet/aspnetcore #26676](https://github.com/dotnet/aspnetcore/issues/26676)).
+- **ViewModels whose constructor depends on the key they were resolved with**, through `[ServiceKey]` or a `[FromKeyedServices]` with no key of its own. Only the container knows that key.
+- **ViewModels with more than one public constructor.** `ActivatorUtilities` and the container do not choose between constructors in the same way ([Constructor selection rules](https://learn.microsoft.com/dotnet/core/extensions/dependency-injection/overview#constructor-selection-rules)), so the container builds these, to guarantee the same constructor as before.
+- **Open generic registrations**, such as `AddTransient(typeof(IMyViewModel<>), typeof(MyViewModel<>))`. An open generic ViewModel class that `AddMvvm` finds by scanning an assembly is registered this way.
+- **Keyed ViewModels registered with `KeyedService.AnyKey`.**
+- **ViewModels rendered statically, on .NET 9 and later.** During static server-side rendering and prerendering the request scope ends with the response, so the container disposes the ViewModel without leaking it, and before the scoped services it depends on. This includes components rendered with `HtmlRenderer`; create a service scope for it rather than passing the root provider, or its transient ViewModels stay until the application stops.
+- **ViewModels of a View that implements `IAsyncDisposable` itself.** Blazor calls only the View's own `DisposeAsync` ([ASP.NET Core Razor component disposal](https://learn.microsoft.com/aspnet/core/blazor/components/component-disposal)), so the base class cannot be sure its disposal runs. Analyzer [BLAZMVVM0022](../analyzers/BLAZMVVM0022.md) reports this pattern; override `DisposeAsyncCore` instead, and the component keeps owning its ViewModel:
+
+  ```razor
+  @inherits MvvmComponentBase<OrdersViewModel>
+
+  @code {
+      private IJSObjectReference? _module;
+
+      protected override async ValueTask DisposeAsyncCore()
+      {
+          try
+          {
+              if (_module is not null)
+              {
+                  await _module.DisposeAsync();
+              }
+          }
+          catch (JSDisconnectedException)
+          {
+              // JS interop is unavailable once the circuit has disconnected
+          }
+
+          await base.DisposeAsyncCore();
+      }
+  }
+  ```
+
+> [!NOTE]
+> The component decides ownership by reading the `IServiceCollection`, so a ViewModel registered or decorated directly in a **third-party container**, such as Autofac, may be constructed differently from what that container would return. Apps on a third-party container should set `DisposeTransientViewModels = false`.
+
+An owned ViewModel is disposed as soon as its component is, even if work it started is still running, such as a slow `OnInitializedAsync` when the user navigates away. Once disposal has started the component stops forwarding `OnParametersSet`, `OnParametersSetAsync`, `ShouldRender`, `OnAfterRender` and `OnAfterRenderAsync` to the ViewModel, and stops setting its `[ViewParameter]` properties, so the framework's remaining lifecycle steps cannot reach it. That includes a ViewModel whose `OnAfterRender` causes its own View to be removed, which on Blazor Server can dispose it before the framework calls `OnAfterRenderAsync`. `MvvmOwningComponentBase` does the same, because its service scope disposes the ViewModel at that point too. The ViewModel's own code can still run after disposal, though: whatever follows an `await` in `OnInitializedAsync`, and any `AsyncRelayCommand` that was executing. That code must not use state released in `Dispose(bool)`. Cancel it there, as the `CancellationTokenSource` example above does, and do not keep a reference to the ViewModel in anything that outlives the page.
+
+Because the component disposes its ViewModel when the user leaves the page, an exception thrown from the ViewModel's `Dispose` surfaces then too, rather than when the circuit or application ends. Blazor treats it as an unhandled rendering exception, which on Blazor Server ends the circuit. The component still disposes the ViewModel when its own cleanup throws first; a single failure is rethrown as it is, and several are reported together in an `AggregateException`, which can contain another `AggregateException`.
+
+> [!WARNING]
+> On **.NET 8** the component cannot tell static rendering from interactive rendering, so it also owns its ViewModel during static server-side rendering and prerendering. There the ViewModel is disposed **after** the scoped services the request resolved for it, so its `Dispose(bool)` must not use them, for example to flush a unit of work. On .NET 9 and later the request scope owns the ViewModel in those modes and disposes it first.
+
+A component owns at most one ViewModel. If it clears its ViewModel through the setter and reads the property again, the next instance comes from the container. Calling a component's `Dispose()` directly, rather than letting Blazor dispose it, skips `DisposeAsyncCore` and disposes an owned ViewModel synchronously even when it implements `IAsyncDisposable`. A direct `Dispose()` made while `DisposeAsyncCore` is still running does nothing, and the asynchronous disposal finishes the cleanup. A direct `Dispose()` starts disposal even when a `Dispose(bool)` override skips the base class: lifecycle calls stop reaching the ViewModel, the component owns no further ViewModel, and the renderer's later asynchronous disposal does nothing, so `DisposeAsyncCore` never runs.
+
+To restore the earlier behavior, in which the container owns transient ViewModels, turn the option off:
+
+```csharp
+builder.Services.AddMvvm(options =>
+{
+    options.DisposeTransientViewModels = false;
+});
+```
+
 ## Service registration
 
 ViewModels are registered as transient services by default. Use [`ViewModelDefinition`](xref:Blazing.Mvvm.ComponentModel.ViewModelDefinitionAttribute) to choose another lifetime:
@@ -120,7 +198,7 @@ Reference the key on the component with `ViewModelKey`:
 ## When to use each component base type
 
 - [`MvvmComponentBase<TViewModel>`](xref:Blazing.Mvvm.Components.MvvmComponentBase`1): default choice for most pages and components
-- [`MvvmOwningComponentBase<TViewModel>`](xref:Blazing.Mvvm.Components.MvvmOwningComponentBase`1): use when the component needs its own scoped dependency lifetime
+- [`MvvmOwningComponentBase<TViewModel>`](xref:Blazing.Mvvm.Components.MvvmOwningComponentBase`1): use when the component needs its own scoped dependency lifetime; its ViewModel and every scoped dependency are created in a new scope and disposed with the component
 - [`MvvmLayoutComponentBase<TViewModel>`](xref:Blazing.Mvvm.Components.MvvmLayoutComponentBase`1): use when the layout itself owns a ViewModel
 
 ## Related topics

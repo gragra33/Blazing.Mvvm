@@ -49,6 +49,45 @@ public sealed class LibraryConfiguration
     public bool EnableMultiRouteTemplates { get; set; } = true;
 
     /// <summary>
+    /// Gets or sets a value indicating whether a View disposes its transient ViewModel when the View itself is disposed.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The dependency injection container keeps every disposable transient service it creates until its scope ends. On Blazor Server
+    /// that is the end of the circuit, and on Blazor WebAssembly it is the end of the application, so without this option every visit
+    /// to a page leaves its transient ViewModel in memory.
+    /// </para>
+    /// <para>
+    /// When enabled (default), <see cref="MvvmComponentBase{TViewModel}"/> and <see cref="MvvmLayoutComponentBase{TViewModel}"/>
+    /// create a ViewModel registered as <see cref="Microsoft.Extensions.DependencyInjection.ServiceLifetime.Transient"/> from its
+    /// registration, own it, and dispose it with the View. Its constructor dependencies are still resolved from the View's service
+    /// provider, so scoped and singleton services remain shared. Scoped and singleton ViewModels are unaffected, as is
+    /// <see cref="MvvmOwningComponentBase{TViewModel}"/>, whose service scope already disposes its ViewModel.
+    /// </para>
+    /// <para>
+    /// On .NET 9 and later a View owns its ViewModel only while it renders interactively. During static server-side rendering
+    /// and prerendering the request scope ends with the response, so the container owns the ViewModel and disposes it before
+    /// its scoped dependencies. When <see cref="ServicesExtension.AddMvvm"/> is called more than once, this setting from the
+    /// first call applies. A View also checks the resolved <see cref="Microsoft.Extensions.Options.IOptions{TOptions}"/> value,
+    /// so options registered another way, through a factory or after <see cref="ServicesExtension.AddMvvm"/>, can disable
+    /// ownership but not enable it.
+    /// </para>
+    /// <para>
+    /// When disabled, transient ViewModels are resolved from and owned by the container, as in earlier versions.
+    /// </para>
+    /// <para><b>Default:</b> <c>true</c> (enabled)</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// builder.Services.AddMvvm(options =>
+    /// {
+    ///     options.DisposeTransientViewModels = false; // Restore container-owned transient ViewModels
+    /// });
+    /// </code>
+    /// </example>
+    public bool DisposeTransientViewModels { get; set; } = true;
+
+    /// <summary>
     /// Gets the assemblies containing the view models registered for the application.
     /// </summary>
     internal ICollection<Assembly> ViewModelAssemblies

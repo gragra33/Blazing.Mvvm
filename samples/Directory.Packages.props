@@ -6,4 +6,45 @@
   </PropertyGroup>
 
   <Import Project="$(SrcRoot)Directory.Packages.props" />
+
+  <!--
+    The samples run on the latest servicing release of each ASP.NET Core version, which carries the security fixes for
+    Microsoft.AspNetCore.Components.WebAssembly.Server. The group moves together because several of its packages depend on
+    one another at the same version. The library keeps the lower minimum versions in src/Directory.Packages.props,
+    so its package does not force consumers onto a newer ASP.NET Core version.
+
+    The conditions are on the ItemGroups, which MSBuild evaluates after TargetFramework is set, including in projects
+    that set a single TargetFramework.
+  -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0' or $(TargetFramework.StartsWith('net8.0-'))">
+    <PackageVersion Update="Microsoft.AspNetCore.Components.Web" Version="8.0.34" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.Authorization" Version="8.0.34" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.34" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.34" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.34" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="8.0.34" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net9.0'))">
+    <PackageVersion Update="Microsoft.AspNetCore.Components.Web" Version="9.0.23" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.Authorization" Version="9.0.23" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.23" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.23" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.23" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="9.0.23" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net10.0'))">
+    <PackageVersion Update="Microsoft.AspNetCore.Components.Web" Version="10.0.15" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.Authorization" Version="10.0.15" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.15" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.15" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.15" />
+    <PackageVersion Update="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.15" />
+    <!-- ASP.NET Core 10.0.15 requires these at 10.0.15, above the version src/Directory.Packages.props pins for every framework -->
+    <PackageVersion Update="Microsoft.Extensions.DependencyInjection" Version="10.0.15" />
+    <PackageVersion Update="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.15" />
+    <PackageVersion Update="Microsoft.Extensions.Logging" Version="10.0.15" />
+    <PackageVersion Update="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15" />
+  </ItemGroup>
 </Project>

@@ -1,0 +1,16 @@
+@page "/test022"
+@using Blazing.Mvvm.AnalyzerTest.ViewModels
+@using Blazing.Mvvm.Components
+
+<!-- BLAZMVVM0022: Implementing IAsyncDisposable on the page bypasses MvvmComponentBase disposal -->
+@inherits MvvmComponentBase<Test022ViewModel>
+@implements IAsyncDisposable
+
+<PageTitle>Test022 - View Disposal Bypass</PageTitle>
+
+<h1>BLAZMVVM0022: View Disposal Bypass</h1>
+<p>The page implements IAsyncDisposable itself, so the renderer calls only this DisposeAsync and never reaches the MvvmComponentBase cleanup</p>
+
+@code {
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+}

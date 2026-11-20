@@ -2,6 +2,7 @@ using Blazing.Mvvm.Components;
 using Blazing.Mvvm.Tests.Infrastructure.Fakes;
 using DependentAssemblyViewModels = Blazing.Mvvm.Tests.Assets.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Blazing.Mvvm.Tests.UnitTests;
 
@@ -27,6 +28,49 @@ public class ServicesExtensionTests
         // Assert
         sut.Contains(mvvmNavigationServiceDescriptor, ServiceDescriptorComparer.Comparer).ShouldBeTrue();
         sut.Contains(parameterResolverServiceDescriptor, ServiceDescriptorComparer.Comparer).ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// Tests that AddMvvm registers the transient ViewModel factory only when <see cref="LibraryConfiguration.DisposeTransientViewModels"/> is enabled.
+    /// </summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void GivenAddMvvm_WhenDisposeTransientViewModelsConfigured_ThenFactoryRegisteredOnlyWhenEnabled(bool isEnabled)
+    {
+        // Arrange
+        var sut = new ServiceCollection();
+
+        // Act
+        sut.AddMvvm(c => c.DisposeTransientViewModels = isEnabled);
+
+        // Assert
+        sut.Any(descriptor => descriptor.ServiceType == typeof(TransientViewModelFactory)).ShouldBe(isEnabled);
+    }
+
+    /// <summary>
+    /// Tests that a second AddMvvm follows the options the first call registered, so the factory and the resolved options agree.
+    /// </summary>
+    /// <param name="isFirstEnabled">The first call's <see cref="LibraryConfiguration.DisposeTransientViewModels"/>.</param>
+    /// <param name="isSecondEnabled">The second call's <see cref="LibraryConfiguration.DisposeTransientViewModels"/>.</param>
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public void GivenAddMvvmCalledTwice_WhenOptionsDiffer_ThenFactoryFollowsResolvedOptions(bool isFirstEnabled, bool isSecondEnabled)
+    {
+        // Arrange
+        var sut = new ServiceCollection();
+
+        // Act
+        sut.AddMvvm(c => c.DisposeTransientViewModels = isFirstEnabled);
+        sut.AddMvvm(c => c.DisposeTransientViewModels = isSecondEnabled);
+
+        // Assert
+        using var provider = sut.BuildServiceProvider();
+        provider.GetRequiredService<IOptions<LibraryConfiguration>>().Value.DisposeTransientViewModels.ShouldBe(isFirstEnabled);
+        sut.Any(descriptor => descriptor.ServiceType == typeof(TransientViewModelFactory)).ShouldBe(isFirstEnabled);
     }
 
     /// <summary>

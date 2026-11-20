@@ -25,5 +25,6 @@ The [Blazing.Mvvm.Analyzers](https://www.nuget.org/packages/Blazing.Mvvm.Analyze
 | [BLAZMVVM0019](BLAZMVVM0019.md) | CascadingParameter vs Inject | Info |
 | [BLAZMVVM0020](BLAZMVVM0020.md) | Route Parameter Binding | Warning |
 | [BLAZMVVM0021](BLAZMVVM0021.md) | EventCallback Two-Way Binding | Info / Warning |
+| [BLAZMVVM0022](BLAZMVVM0022.md) | View Disposal Bypass | Warning |
 
 For the generated API documentation of the analyzer and code-fix classes, see the [Blazing.Mvvm.Analyzers API reference](../../api-docs/blazing-mvvm-analyzers/Blazing.Mvvm.Analyzers.yml).

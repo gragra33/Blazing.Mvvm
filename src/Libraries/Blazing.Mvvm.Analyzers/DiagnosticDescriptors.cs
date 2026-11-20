@@ -265,4 +265,15 @@ public static class DiagnosticDescriptors
         description: new LocalizableResourceString(nameof(Resources.BLAZMVVM0021_TypeMismatch_Description), Resources.ResourceManager, typeof(Resources)),
         helpLinkUri: "https://gragra33.github.io/Blazing.Mvvm/site/analyzers/BLAZMVVM0021.html");
 #pragma warning restore RS2001
+
+    // BLAZMVVM0022: View Disposal Bypass Analyzer
+    public static readonly DiagnosticDescriptor ViewDisposalBypassed = new(
+        id: "BLAZMVVM0022",
+        title: new LocalizableResourceString(nameof(Resources.BLAZMVVM0022_Title), Resources.ResourceManager, typeof(Resources)),
+        messageFormat: new LocalizableResourceString(nameof(Resources.BLAZMVVM0022_MessageFormat), Resources.ResourceManager, typeof(Resources)),
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: new LocalizableResourceString(nameof(Resources.BLAZMVVM0022_Description), Resources.ResourceManager, typeof(Resources)),
+        helpLinkUri: "https://gragra33.github.io/Blazing.Mvvm/site/analyzers/BLAZMVVM0022.html");
 }
