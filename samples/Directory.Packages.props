@@ -13,8 +13,8 @@
     one another at the same version. The library keeps the lower minimum versions in src/Directory.Packages.props,
     so its package does not force consumers onto a newer ASP.NET Core version.
 
-    The conditions are on the items, as in src/Directory.Packages.props, because item conditions are evaluated after
-    TargetFramework is set, including in projects that set a single TargetFramework.
+    The conditions are on the ItemGroups, which MSBuild evaluates after TargetFramework is set, including in projects
+    that set a single TargetFramework.
   -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0' or $(TargetFramework.StartsWith('net8.0-'))">
     <PackageVersion Update="Microsoft.AspNetCore.Components.Web" Version="8.0.34" />
