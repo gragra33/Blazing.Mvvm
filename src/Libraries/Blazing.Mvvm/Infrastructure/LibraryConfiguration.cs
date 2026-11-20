@@ -68,7 +68,9 @@ public sealed class LibraryConfiguration
     /// On .NET 9 and later a View owns its ViewModel only while it renders interactively. During static server-side rendering
     /// and prerendering the request scope ends with the response, so the container owns the ViewModel and disposes it before
     /// its scoped dependencies. When <see cref="ServicesExtension.AddMvvm"/> is called more than once, this setting from the
-    /// first call applies.
+    /// first call applies. A View also checks the resolved <see cref="Microsoft.Extensions.Options.IOptions{TOptions}"/> value,
+    /// so options registered another way, through a factory or after <see cref="ServicesExtension.AddMvvm"/>, can disable
+    /// ownership but not enable it.
     /// </para>
     /// <para>
     /// When disabled, transient ViewModels are resolved from and owned by the container, as in earlier versions.

@@ -2,6 +2,7 @@
 using System.Reflection;
 using Blazing.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Blazing.Mvvm.Components;
 
@@ -61,8 +62,11 @@ internal static class ViewModelResolver
     public static TViewModel Resolve<TViewModel>(IView<TViewModel> view, IServiceProvider serviceProvider, bool canOwnViewModel, out bool isOwnedByView)
         where TViewModel : IViewModelBase
     {
+        // The resolved options are checked as well as the factory's registration, because registration cannot see the value of
+        // options registered through a factory, or of options registered after AddMvvm
         if (canOwnViewModel
             && serviceProvider.GetService<TransientViewModelFactory>() is { } factory
+            && serviceProvider.GetService<IOptions<LibraryConfiguration>>()?.Value.DisposeTransientViewModels != false
             && IsBaseDisposalReached(view.GetType())
             && factory.TryCreate(typeof(TViewModel), GetViewModelKey(view)?.Key, serviceProvider, out var viewModel))
         {

@@ -37,9 +37,10 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
     private TwoWayBindingHelper<TViewModel>? _bindingHelper;
 
     /// <summary>
-    /// Whether asynchronous disposal has started, so that a re-entrant or repeated call does nothing.
+    /// Whether disposal has started through either interface, so that lifecycle calls stop and a re-entrant or repeated
+    /// asynchronous call does nothing.
     /// </summary>
-    private bool _isDisposingAsync;
+    private bool _isReleasing;
 
     /// <summary>
     /// Whether <see cref="DisposeAsyncCore"/> is running, so that a direct call to <see cref="Dispose()"/> waits for the
@@ -57,9 +58,9 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
     /// </summary>
     /// <remarks>
     /// Both flags are needed, because <see cref="IsDisposed"/> stays <see langword="false"/> when a derived component
-    /// re-implements <see cref="IDisposable"/> without calling the base disposal.
+    /// re-implements <see cref="IDisposable"/>, or overrides <see cref="Dispose(bool)"/>, without calling the base disposal.
     /// </remarks>
-    private bool IsReleased => IsDisposed || _isDisposingAsync;
+    private bool IsReleased => IsDisposed || _isReleasing;
 
     /// <summary>
     /// Resolves parameters in the <c>View</c> and <c>ViewModel</c>.
@@ -117,6 +118,9 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
             return;
         }
 
+        // Stop lifecycle forwarding and new ownership even when a derived Dispose(bool) skips the base
+        _isReleasing = true;
+
         // A derived Dispose(bool) that skips the base would otherwise leave an owned ViewModel undisposed, as nothing else tracks it
         RunThenReleaseOwnedViewModel(() => Dispose(true));
         GC.SuppressFinalize(this);
@@ -140,7 +144,7 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
             return;
         }
 
-        _isDisposingAsync = true;
+        _isReleasing = true;
 
         // Detach an async-disposable ViewModel before any derived code runs, so it is disposed once, asynchronously
         var asyncDisposableViewModel = _ownedViewModel as IAsyncDisposable;
@@ -285,12 +289,25 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
     }
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// Not forwarded once disposal has started, which happens when the ViewModel's own after-render work causes the
+    /// component to be removed.
+    /// </remarks>
     protected override void OnAfterRender(bool firstRender)
-        => ViewModel.OnAfterRender(firstRender);
+    {
+        if (!IsReleased)
+        {
+            ViewModel.OnAfterRender(firstRender);
+        }
+    }
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// Not forwarded once disposal has started, which happens when <see cref="OnAfterRender(bool)"/> causes the component
+    /// to be removed.
+    /// </remarks>
     protected override Task OnAfterRenderAsync(bool firstRender)
-        => ViewModel.OnAfterRenderAsync(firstRender);
+        => IsReleased ? Task.CompletedTask : ViewModel.OnAfterRenderAsync(firstRender);
 
     /// <inheritdoc/>
     protected override void OnInitialized()
@@ -331,8 +348,16 @@ public abstract class MvvmLayoutComponentBase<TViewModel> : LayoutComponentBase,
         => IsReleased ? Task.CompletedTask : ViewModel.OnParametersSetAsync();
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// Once disposal has started no parameters are set, on the layout or on the ViewModel.
+    /// </remarks>
     public override Task SetParametersAsync(ParameterView parameters)
     {
+        if (IsReleased)
+        {
+            return base.SetParametersAsync(ParameterView.Empty);
+        }
+
         return ParameterResolver.SetParameters(this, ViewModel, parameters)
             ? base.SetParametersAsync(ParameterView.Empty)
             : base.SetParametersAsync(parameters);

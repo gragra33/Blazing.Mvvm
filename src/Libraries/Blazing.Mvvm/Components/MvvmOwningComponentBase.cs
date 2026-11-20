@@ -30,12 +30,12 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     /// Whether asynchronous disposal has started. The service scope, and with it the ViewModel, is disposed in
     /// <see cref="DisposeAsyncCore"/>, before <see cref="OwningComponentBase.IsDisposed"/> becomes <see langword="true"/>.
     /// </summary>
-    private bool _isDisposingAsync;
+    private bool _isReleasing;
 
     /// <summary>
     /// Gets a value indicating whether disposal has started, after which lifecycle calls are no longer forwarded to the ViewModel.
     /// </summary>
-    private bool IsReleased => IsDisposed || _isDisposingAsync;
+    private bool IsReleased => IsDisposed || _isReleasing;
 
     /// <summary>
     /// Gets or sets the parameter resolver used to set parameters on the View and ViewModel.
@@ -68,7 +68,7 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
             return;
         }
 
-        _isDisposingAsync = true;
+        _isReleasing = true;
 
         try
         {
@@ -88,17 +88,30 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     /// <summary>
     /// Invoked after the component has rendered.
     /// </summary>
+    /// <remarks>
+    /// Not forwarded once disposal has started, which happens when the ViewModel's own after-render work causes the
+    /// component to be removed.
+    /// </remarks>
     /// <param name="firstRender">True if this is the first time <see cref="OnAfterRender(bool)"/> is called; otherwise, false.</param>
     protected override void OnAfterRender(bool firstRender)
-        => ViewModel.OnAfterRender(firstRender);
+    {
+        if (!IsReleased)
+        {
+            ViewModel.OnAfterRender(firstRender);
+        }
+    }
 
     /// <summary>
     /// Asynchronously invoked after the component has rendered.
     /// </summary>
+    /// <remarks>
+    /// Not forwarded once disposal has started, which happens when <see cref="OnAfterRender(bool)"/> causes the component
+    /// to be removed.
+    /// </remarks>
     /// <param name="firstRender">True if this is the first time <see cref="OnAfterRenderAsync(bool)"/> is called; otherwise, false.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected override Task OnAfterRenderAsync(bool firstRender)
-        => ViewModel.OnAfterRenderAsync(firstRender);
+        => IsReleased ? Task.CompletedTask : ViewModel.OnAfterRenderAsync(firstRender);
 
     /// <summary>
     /// Initializes the component and subscribes to ViewModel property changes.
@@ -150,10 +163,18 @@ public abstract class MvvmOwningComponentBase<TViewModel> : OwningComponentBase,
     /// <summary>
     /// Sets parameters from the given <see cref="ParameterView"/> on both the View and its ViewModel using the <see cref="ParameterResolver"/>.
     /// </summary>
+    /// <remarks>
+    /// Once disposal has started no parameters are set, on the View or on the ViewModel.
+    /// </remarks>
     /// <param name="parameters">The parameters to set.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public override Task SetParametersAsync(ParameterView parameters)
     {
+        if (IsReleased)
+        {
+            return base.SetParametersAsync(ParameterView.Empty);
+        }
+
         return ParameterResolver.SetParameters(this, ViewModel, parameters)
             ? base.SetParametersAsync(ParameterView.Empty)
             : base.SetParametersAsync(parameters);

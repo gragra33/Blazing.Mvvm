@@ -5,6 +5,7 @@ using Bunit;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Blazing.Mvvm.Tests.ComponentTests;
 
@@ -1190,6 +1191,277 @@ public class TransientViewModelDisposalTests : BunitContext
     }
 
     /// <summary>
+    /// Tests that a View disposed by its own ViewModel's <c>OnAfterRender</c>, which disposes that ViewModel at once, does not
+    /// forward the <c>OnAfterRenderAsync</c> call that follows to the disposed ViewModel.
+    /// </summary>
+    /// <remarks>
+    /// The renderer's after-render call is made directly, because a renderer whose display update completes synchronously,
+    /// as bUnit's does, re-renders a parent only after both after-render methods have run. The Server renderer completes it
+    /// later, so a parent removing the View in response runs between the two.
+    /// </remarks>
+    /// <param name="kind">Whether to render a View, a layout or an owning View.</param>
+    [Theory]
+    [InlineData(LifecycleComponentKind.View)]
+    [InlineData(LifecycleComponentKind.Layout)]
+    [InlineData(LifecycleComponentKind.OwningView)]
+    public async Task GivenViewModelDisposingItsViewDuringAfterRender_WhenAfterRenderCompletes_ThenDisposedViewModelGetsNoAfterRenderCalls(LifecycleComponentKind kind)
+    {
+        // Arrange
+        AddMvvm();
+        var signal = new AfterRenderSignal();
+        Services.AddSingleton(signal);
+        Services.AddTransient<AfterRenderLifecycleViewModel>();
+        IComponent component = kind switch
+        {
+            LifecycleComponentKind.Layout => Render<AfterRenderTestLayout>().Instance,
+            LifecycleComponentKind.OwningView => Render<AfterRenderTestOwningView>().Instance,
+            _ => Render<AfterRenderTestView>().Instance
+        };
+        var viewModel = signal.ViewModel.ShouldNotBeNull();
+        Task? disposal = null;
+        signal.OnAfterRender = () => disposal ??= ((IAsyncDisposable)component).DisposeAsync().AsTask();
+
+        // Act
+        await Renderer.Dispatcher.InvokeAsync(() => ((IHandleAfterRender)component).OnAfterRenderAsync());
+        await disposal.ShouldNotBeNull();
+
+        // Assert
+        viewModel.DisposeCount.ShouldBe(1, "the View must be disposed during its own after-render call, or the absence assertion below proves nothing");
+        viewModel.CallsAfterDisposal.ShouldBeEmpty();
+    }
+
+    /// <summary>
+    /// Tests that an after-render call reaching a component already disposed forwards neither after-render method to the
+    /// disposed ViewModel.
+    /// </summary>
+    /// <param name="kind">Whether to render a View, a layout or an owning View.</param>
+    [Theory]
+    [InlineData(LifecycleComponentKind.View)]
+    [InlineData(LifecycleComponentKind.Layout)]
+    [InlineData(LifecycleComponentKind.OwningView)]
+    public async Task GivenDisposedComponent_WhenAfterRenderCalled_ThenDisposedViewModelGetsNoAfterRenderCalls(LifecycleComponentKind kind)
+    {
+        // Arrange
+        AddMvvm();
+        var signal = new AfterRenderSignal();
+        Services.AddSingleton(signal);
+        Services.AddTransient<AfterRenderLifecycleViewModel>();
+        IComponent component = kind switch
+        {
+            LifecycleComponentKind.Layout => Render<AfterRenderTestLayout>().Instance,
+            LifecycleComponentKind.OwningView => Render<AfterRenderTestOwningView>().Instance,
+            _ => Render<AfterRenderTestView>().Instance
+        };
+        var viewModel = signal.ViewModel.ShouldNotBeNull();
+        await ((IAsyncDisposable)component).DisposeAsync();
+        viewModel.DisposeCount.ShouldBe(1);
+
+        // Act
+        await Renderer.Dispatcher.InvokeAsync(() => ((IHandleAfterRender)component).OnAfterRenderAsync());
+
+        // Assert
+        viewModel.CallsAfterDisposal.ShouldBeEmpty();
+    }
+
+    /// <summary>
+    /// Tests that once disposal has started, setting the component's parameters no longer writes View parameters to the disposed ViewModel.
+    /// </summary>
+    /// <param name="kind">Whether to render a View, a layout or an owning View.</param>
+    [Theory]
+    [InlineData(LifecycleComponentKind.View)]
+    [InlineData(LifecycleComponentKind.Layout)]
+    [InlineData(LifecycleComponentKind.OwningView)]
+    public async Task GivenDisposedComponent_WhenParametersSet_ThenDisposedViewModelGetsNoViewParameters(LifecycleComponentKind kind)
+    {
+        // Arrange
+        AddMvvm(parameterResolutionMode: ParameterResolutionMode.ViewModel);
+        var signal = new AfterRenderSignal();
+        Services.AddSingleton(signal);
+        Services.AddTransient<AfterRenderLifecycleViewModel>();
+        IComponent component = kind switch
+        {
+            LifecycleComponentKind.Layout => Render<AfterRenderTestLayout>().Instance,
+            LifecycleComponentKind.OwningView => Render<AfterRenderTestOwningView>().Instance,
+            _ => Render<AfterRenderTestView>().Instance
+        };
+        var viewModel = signal.ViewModel.ShouldNotBeNull();
+        await Renderer.Dispatcher.InvokeAsync(() => component.SetParametersAsync(TitleParameter("Before")));
+        viewModel.Title.ShouldBe("Before", "the resolver must write View parameters to the ViewModel, or the absence assertion below proves nothing");
+        await ((IAsyncDisposable)component).DisposeAsync();
+
+        // Act
+        await Renderer.Dispatcher.InvokeAsync(() => component.SetParametersAsync(TitleParameter("After")));
+
+        // Assert
+        viewModel.CallsAfterDisposal.ShouldBeEmpty();
+        viewModel.Title.ShouldBe("Before");
+    }
+
+    /// <summary>
+    /// The kind of component a lifecycle test renders.
+    /// </summary>
+    public enum LifecycleComponentKind
+    {
+        /// <summary>
+        /// A View deriving from <see cref="MvvmComponentBase{TViewModel}"/>.
+        /// </summary>
+        View,
+
+        /// <summary>
+        /// A layout deriving from <see cref="MvvmLayoutComponentBase{TViewModel}"/>.
+        /// </summary>
+        Layout,
+
+        /// <summary>
+        /// A View deriving from <see cref="MvvmOwningComponentBase{TViewModel}"/>.
+        /// </summary>
+        OwningView
+    }
+
+    /// <summary>
+    /// Tests that once a direct <c>Dispose()</c> has run on a component whose <c>Dispose(bool)</c> override skips the base class,
+    /// setting its parameters no longer reaches the disposed ViewModel.
+    /// </summary>
+    /// <param name="isLayout">Whether the component is a layout rather than a View.</param>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GivenDisposeBoolOverrideSkippingBase_WhenParametersSetAfterDirectDispose_ThenDisposedViewModelGetsNoLifecycleCalls(bool isLayout)
+    {
+        // Arrange
+        var component = RenderSkipBaseLifecycle(isLayout);
+        var viewModel = component.CurrentViewModel;
+        ((IDisposable)component).Dispose();
+        viewModel.DisposeCount.ShouldBe(1);
+
+        // Act
+        await Renderer.Dispatcher.InvokeAsync(() => ((IComponent)component).SetParametersAsync(ParameterView.Empty));
+
+        // Assert
+        viewModel.CallsAfterDisposal.ShouldBeEmpty();
+    }
+
+    /// <summary>
+    /// Tests that once a direct <c>Dispose()</c> has run on a component whose <c>Dispose(bool)</c> override skips the base class,
+    /// a ViewModel resolved after clearing the old one is left to the container.
+    /// </summary>
+    /// <param name="isLayout">Whether the component is a layout rather than a View.</param>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GivenDisposeBoolOverrideSkippingBase_WhenViewModelResolvedAfterDirectDispose_ThenOwnsNothingNew(bool isLayout)
+    {
+        // Arrange
+        var component = RenderSkipBaseLifecycle(isLayout);
+        var first = component.CurrentViewModel;
+        ((IDisposable)component).Dispose();
+
+        // Act
+        component.AssignViewModel(null!);
+        var second = component.CurrentViewModel;
+        await DisposeComponentsAsync();
+
+        // Assert
+        second.ShouldNotBeSameAs(first);
+        second.DisposeCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// Tests that once a direct <c>Dispose()</c> has run on a component whose <c>Dispose(bool)</c> override skips the base class,
+    /// the renderer's later asynchronous disposal does not run the cleanup again.
+    /// </summary>
+    /// <param name="isLayout">Whether the component is a layout rather than a View.</param>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GivenDisposeBoolOverrideSkippingBase_WhenRendererDisposesAfterDirectDispose_ThenAsyncCleanupNotRun(bool isLayout)
+    {
+        // Arrange
+        var component = RenderSkipBaseLifecycle(isLayout);
+        ((IDisposable)component).Dispose();
+
+        // Act
+        await DisposeComponentsAsync();
+
+        // Assert
+        component.CoreCallCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// Tests that a View leaves its transient ViewModel to the container whenever the resolved options disable ownership,
+    /// including when those options are registered through a factory or after <c>AddMvvm</c>.
+    /// </summary>
+    /// <param name="registration">How the options that disable ownership are registered.</param>
+    [Theory]
+    [InlineData(OptionsRegistration.FactoryBeforeAddMvvm)]
+    [InlineData(OptionsRegistration.InstanceAfterAddMvvm)]
+    [InlineData(OptionsRegistration.InstanceBeforeAddMvvm)]
+    public async Task GivenOptionDisabledByCustomRegistration_WhenViewDisposed_ThenTransientViewModelNotDisposed(OptionsRegistration registration)
+    {
+        // Arrange
+        var disabledOptions = Options.Create(new LibraryConfiguration { DisposeTransientViewModels = false });
+        switch (registration)
+        {
+            case OptionsRegistration.FactoryBeforeAddMvvm:
+                Services.AddSingleton<IOptions<LibraryConfiguration>>(_ => disabledOptions);
+                AddMvvm();
+                break;
+            case OptionsRegistration.InstanceAfterAddMvvm:
+                AddMvvm();
+                Services.AddSingleton(disabledOptions);
+                break;
+            case OptionsRegistration.InstanceBeforeAddMvvm:
+                Services.AddSingleton(disabledOptions);
+                AddMvvm();
+                break;
+        }
+
+        Services.AddTransient<IDisposalTrackingViewModel, DisposalTrackingViewModel>();
+        Services.GetRequiredService<IOptions<LibraryConfiguration>>().Value.DisposeTransientViewModels.ShouldBeFalse();
+        var viewModel = Render<DisposalTestView>().Instance.CurrentViewModel;
+
+        // Act
+        await DisposeComponentsAsync();
+
+        // Assert
+        viewModel.DisposeCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// How a test registers options that disable <see cref="LibraryConfiguration.DisposeTransientViewModels"/>.
+    /// </summary>
+    public enum OptionsRegistration
+    {
+        /// <summary>
+        /// A factory registration made before <c>AddMvvm</c>.
+        /// </summary>
+        FactoryBeforeAddMvvm,
+
+        /// <summary>
+        /// An instance registration made after <c>AddMvvm</c>.
+        /// </summary>
+        InstanceAfterAddMvvm,
+
+        /// <summary>
+        /// An instance registration made before <c>AddMvvm</c>.
+        /// </summary>
+        InstanceBeforeAddMvvm
+    }
+
+    /// <summary>
+    /// Registers the services a skip-base lifecycle component needs, then renders one.
+    /// </summary>
+    /// <param name="isLayout">Whether to render a layout rather than a View.</param>
+    /// <returns>The rendered component.</returns>
+    private ISkipBaseLifecycleComponent RenderSkipBaseLifecycle(bool isLayout)
+    {
+        AddMvvm();
+        Services.AddSingleton<AfterRenderSignal>();
+        Services.AddTransient<AfterRenderLifecycleViewModel>();
+        return isLayout ? Render<SkipBaseLifecycleTestLayout>().Instance : Render<SkipBaseLifecycleTestView>().Instance;
+    }
+
+    /// <summary>
     /// Lets continuations queued on the renderer's dispatcher run to completion.
     /// </summary>
     private async Task SettleRendererAsync()
@@ -1205,12 +1477,22 @@ public class TransientViewModelDisposalTests : BunitContext
     /// Registers the Blazing.Mvvm services without scanning any assembly for ViewModels.
     /// </summary>
     /// <param name="isDisposeTransientViewModelsEnabled">The value for <see cref="LibraryConfiguration.DisposeTransientViewModels"/>.</param>
-    private void AddMvvm(bool isDisposeTransientViewModelsEnabled = true)
+    /// <param name="parameterResolutionMode">The value for <see cref="LibraryConfiguration.ParameterResolutionMode"/>.</param>
+    private void AddMvvm(bool isDisposeTransientViewModelsEnabled = true, ParameterResolutionMode parameterResolutionMode = ParameterResolutionMode.None)
         => Services.AddMvvm(configuration =>
         {
             configuration.RegisterViewModelsFromAssemblyContaining<BunitContext>();
             configuration.DisposeTransientViewModels = isDisposeTransientViewModelsEnabled;
+            configuration.ParameterResolutionMode = parameterResolutionMode;
         });
+
+    /// <summary>
+    /// Creates a parameter set holding only the ViewModel's <c>Title</c> View parameter.
+    /// </summary>
+    /// <param name="title">The title to pass.</param>
+    /// <returns>The parameters.</returns>
+    private static ParameterView TitleParameter(string title)
+        => ParameterView.FromDictionary(new Dictionary<string, object?> { [nameof(AfterRenderLifecycleViewModel.Title)] = title });
 
     /// <summary>
     /// Renders a View or layout and returns it with its ViewModel.
@@ -1811,5 +2093,104 @@ public class TransientViewModelDisposalTests : BunitContext
 
         /// <inheritdoc/>
         public void DisposeUnmanaged() => Dispose(false);
+    }
+
+    /// <summary>
+    /// A View whose ViewModel can dispose it from <c>OnAfterRender</c>.
+    /// </summary>
+    public class AfterRenderTestView : MvvmComponentBase<AfterRenderLifecycleViewModel>;
+
+    /// <summary>
+    /// A layout whose ViewModel can dispose it from <c>OnAfterRender</c>.
+    /// </summary>
+    public class AfterRenderTestLayout : MvvmLayoutComponentBase<AfterRenderLifecycleViewModel>;
+
+    /// <summary>
+    /// An owning View whose ViewModel can dispose it from <c>OnAfterRender</c>.
+    /// </summary>
+    public class AfterRenderTestOwningView : MvvmOwningComponentBase<AfterRenderLifecycleViewModel>;
+
+    /// <summary>
+    /// A View or layout whose <c>Dispose(bool)</c> override skips the base class, and which counts its asynchronous cleanup.
+    /// </summary>
+    public interface ISkipBaseLifecycleComponent
+    {
+        /// <summary>
+        /// Gets the ViewModel the component currently holds.
+        /// </summary>
+        AfterRenderLifecycleViewModel CurrentViewModel { get; }
+
+        /// <summary>
+        /// Gets the number of times <c>DisposeAsyncCore</c> ran.
+        /// </summary>
+        int CoreCallCount { get; }
+
+        /// <summary>
+        /// Replaces the component's ViewModel through the setter.
+        /// </summary>
+        /// <param name="viewModel">The ViewModel to assign.</param>
+        void AssignViewModel(AfterRenderLifecycleViewModel viewModel);
+    }
+
+    /// <summary>
+    /// A View whose <c>Dispose(bool)</c> override does not call the base class.
+    /// </summary>
+    public class SkipBaseLifecycleTestView : MvvmComponentBase<AfterRenderLifecycleViewModel>, ISkipBaseLifecycleComponent
+    {
+        /// <inheritdoc/>
+        public AfterRenderLifecycleViewModel CurrentViewModel => ViewModel;
+
+        /// <inheritdoc/>
+        public int CoreCallCount { get; private set; }
+
+        /// <inheritdoc/>
+        public void AssignViewModel(AfterRenderLifecycleViewModel viewModel)
+            => ViewModel = viewModel;
+
+        /// <inheritdoc/>
+        protected override ValueTask DisposeAsyncCore()
+        {
+            CoreCallCount++;
+            return base.DisposeAsyncCore();
+        }
+
+        /// <summary>
+        /// Does nothing, so the base class cleanup never runs.
+        /// </summary>
+        /// <param name="disposing">Ignored.</param>
+        protected override void Dispose(bool disposing)
+        {
+        }
+    }
+
+    /// <summary>
+    /// A layout whose <c>Dispose(bool)</c> override does not call the base class.
+    /// </summary>
+    public class SkipBaseLifecycleTestLayout : MvvmLayoutComponentBase<AfterRenderLifecycleViewModel>, ISkipBaseLifecycleComponent
+    {
+        /// <inheritdoc/>
+        public AfterRenderLifecycleViewModel CurrentViewModel => ViewModel;
+
+        /// <inheritdoc/>
+        public int CoreCallCount { get; private set; }
+
+        /// <inheritdoc/>
+        public void AssignViewModel(AfterRenderLifecycleViewModel viewModel)
+            => ViewModel = viewModel;
+
+        /// <inheritdoc/>
+        protected override ValueTask DisposeAsyncCore()
+        {
+            CoreCallCount++;
+            return base.DisposeAsyncCore();
+        }
+
+        /// <summary>
+        /// Does nothing, so the base class cleanup never runs.
+        /// </summary>
+        /// <param name="disposing">Ignored.</param>
+        protected override void Dispose(bool disposing)
+        {
+        }
     }
 }

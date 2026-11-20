@@ -286,13 +286,80 @@ public class LifecycleRecordingViewModel : DisposalTrackingViewModel
         return Task.CompletedTask;
     }
 
-    private void Record(string lifecycleMethod)
+    /// <summary>
+    /// Records a call made after disposal and throws, as a released resource would.
+    /// </summary>
+    /// <param name="lifecycleMethod">The name of the member called.</param>
+    protected void Record(string lifecycleMethod)
     {
         if (DisposeCount > 0)
         {
             CallsAfterDisposal.Add(lifecycleMethod);
             throw new ObjectDisposedException(nameof(LifecycleRecordingViewModel));
         }
+    }
+}
+
+/// <summary>
+/// A shared signal through which a test reaches the <see cref="AfterRenderLifecycleViewModel"/> a View created, and reacts to
+/// its renders.
+/// </summary>
+public sealed class AfterRenderSignal
+{
+    /// <summary>
+    /// Gets or sets the most recently constructed ViewModel.
+    /// </summary>
+    public AfterRenderLifecycleViewModel? ViewModel { get; set; }
+
+    /// <summary>
+    /// Gets or sets the action the ViewModel invokes from <c>OnAfterRender</c>.
+    /// </summary>
+    public Action? OnAfterRender { get; set; }
+}
+
+/// <summary>
+/// A <see cref="LifecycleRecordingViewModel"/> whose initialization completes at once, and which invokes
+/// <see cref="AfterRenderSignal.OnAfterRender"/> from <c>OnAfterRender</c>, as a ViewModel telling its page that it has
+/// loaded does.
+/// </summary>
+public sealed class AfterRenderLifecycleViewModel : LifecycleRecordingViewModel
+{
+    private readonly AfterRenderSignal _signal;
+    private string? _title;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AfterRenderLifecycleViewModel"/> class.
+    /// </summary>
+    /// <param name="signal">The signal the ViewModel registers with and raises.</param>
+    public AfterRenderLifecycleViewModel(AfterRenderSignal signal)
+    {
+        _signal = signal;
+        signal.ViewModel = this;
+    }
+
+    /// <summary>
+    /// Gets or sets a View parameter, recording a write made after disposal.
+    /// </summary>
+    [ViewParameter]
+    public string? Title
+    {
+        get => _title;
+        set
+        {
+            Record(nameof(Title));
+            _title = value;
+        }
+    }
+
+    /// <inheritdoc/>
+    public override Task OnInitializedAsync()
+        => Task.CompletedTask;
+
+    /// <inheritdoc/>
+    public override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        _signal.OnAfterRender?.Invoke();
     }
 }
 
